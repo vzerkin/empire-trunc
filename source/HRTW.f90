@@ -1,5 +1,5 @@
 MODULE width_fluct
-    ! $Rev: 5402 $
+    ! $Rev: 5423 $
     ! $Author: mwherman $
     ! $Date: 2022-04-24 15:49:31 -0600 (Sun, 24 Apr 2022) $
     !
@@ -667,9 +667,9 @@ CONTAINS
             jmin = abs(XJLv(i,nnur) - xjc)
             jmax = XJLv(i,nnur) + xjc
             !         if(nejc==1) write(*,*)'jmin, jmax, xjc',jmin, jmax, xjc
-            kmin = int(abs(jmin - MAXj(nejc) + ssxj))        !minimum k=l+1
+            kmin = abs(jmin - MAXj(nejc) + ssxj)             !minimum k=l+1
             kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-            kmax = int(jmax - 1  + ssxj)                     !maximum k=l+1
+            kmax = jmax - 1  + ssxj                          !maximum k=l+1
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             !         if(nejc==1) write(*,*)'kmin, kmax ', kmin, kmax
             DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
@@ -732,9 +732,9 @@ CONTAINS
                     CALL TLLOC(nnur,nejc,eout,il,frde)              !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                     jmin = abs(XJLv(i,nnur) - xjc)
                     jmax = XJLv(i,nnur) + xjc
-                    kmin = int(jmin - MAXj(nejc) + ssxj)            !minimum k=l+1
+                    kmin = jmin - MAXj(nejc) + ssxj                 !minimum k=l+1
                     kmin = MAX(kmin,1)                              !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-                    kmax = int(jmax - 1  + ssxj)                    !maximum k=l+1
+                    kmax = jmax - 1  + ssxj                         !maximum k=l+1
                     kmax = MIN(ndlw, kmax)                          !ensure we are within dimensions
                     DO k = kmin, kmax                               !do loop over l in Tlj (note that real l is k-1)
                         ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)  !check parity (1 if conserved, 0 if violated)
@@ -841,7 +841,7 @@ CONTAINS
 
     !----------------------------------------------------------------------------------------------------
 
-    SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur)
+    SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur) ! cos sie rozpada
         !
         !********************************************************************
         !*                                                         class:PPu*
@@ -1063,7 +1063,7 @@ CONTAINS
             DO jr = 1, jmax     !do loop over populated (residual) spins
                 xjr = dble(jr) + HIS(nnuc)
                 lambmin = MAX(1,abs(jc - jr))
-                lambmax = int(xjc + xjr + 0.001)
+                lambmax = xjc + xjr + 0.001
                 lambmax = MIN(lambmax,maxmult)
                 IF(lambmin<=lambmax) THEN
                     scrtpos = 0.0D0
@@ -1111,8 +1111,8 @@ CONTAINS
         !
         ! do loop over discrete levels -----------------------------------
         DO i = 1, NLV(nnuc)
-            kmin = int(abs(xjc - XJLv(i,nnuc)) + 0.001)
-            kmax = int(xjc + XJLv(i,nnuc) + 0.001)
+            kmin = abs(xjc - XJLv(i,nnuc)) + 0.001
+            kmax = xjc + XJLv(i,nnuc) + 0.001
             lambmin = max0(1,kmin)
             lambmax = MIN(kmax,maxmult)
             IF(lambmin<=lambmax) THEN
@@ -2113,7 +2113,7 @@ CONTAINS
               nu_c = out%eef/2.D0                         ! calculated number of degrees of freedom nu
               a1 = out%t/nu_c/H_Sumtl                     ! calculate alpha
               IF(a1==0) CYCLE
-              dsum = dsum + outchnl(ic)%rho*nu_c*DLOG(1.0D0+a1*z)         ! outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
+              dsum = dsum + outchnl(ic)%rho*nu_c*DLOG(1.0D0+a1*z)         ! outchnl(ic)%rho*nu_c*DLOG(g1) logarithmic version
             END DO          !over channels
             a1 = sumg/20.0D0/H_Sumtl                      !calculate alpha for a cumulative gamma channel (nu=20 assumed)
             save_WFC1(i) = dsum + 20.d0*DLOG(1.0D0+a1*z)  !adding gammas logarithmic
@@ -2263,7 +2263,7 @@ CONTAINS
             ELSEIF(i==iou) THEN
                 w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
             ENDIF
-            PL_lmax(-out%kres) = 2.0*la
+            PL_lmax(-out%kres) = 2*la
             !  IF(out%kres > 0) THEN
             !     PLcont_lmax(out%kres) = la
             !  ELSEIF(out%kres < 0) THEN
