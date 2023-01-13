@@ -19,10 +19,10 @@ read file
 fi
 
 
-# RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
+# RECONSTRUCT INELASTIC, (N,P), (N,A), (N,T), (N,D), (N,3HE) REACTIONS WITH FIXUP
 
 cat >FIXUP.INP <<EOF
-12101011111001
+12111011111001
 $file.endf
 $file-tmp.endf
 S  4=+( 50, 91)
@@ -32,11 +32,10 @@ S105=+(700,749)
 S106=+(750,799)
 S107=+(800,849)
 
- 0.00000+00 0.00000+00          0          0${2}103
-
- 0.00000+00 0.00000+00          0          0${2}107
-
-
+ 0.000000+0 0.000000+0          0          0${2}103
+-2.446000+5-2.446000+5          0          0
+ 0.000000+0 0.000000+0          0          0${2}107
+ 7.551500+6 7.551500+6          0          0
 
 EOF
 
