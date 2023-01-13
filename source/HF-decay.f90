@@ -14,7 +14,7 @@ MODULE HFdecay
     INTEGER :: nejc, nnur, iang, nxsp, npsp, ia, iz, ncollx
     INTEGER :: kemin, kemax, jz, jn
 
-    REAL*8 :: cspg, step, checkprd, ares, zres, popleft, ftmp 
+    REAL*8 :: cspg, step, checkprd, ares, zres, popleft, ftmp
     REAL*8 :: sumfis, sumfism(NFMOD), xs_norm, csum
     
     REAL*8, external :: GET_DDXS
@@ -52,7 +52,7 @@ contains
 
         primeResidue = .false.
         if (nnuc == mt91 .or. nnuc == mt649 .or. &
-            nnuc == mt699 .or. nnuc == mt749 .or. nnuc == mt799 .or. &    ! UNCOMMENT to allow for d, t, He3 exclusive treatment
+            ! nnuc == mt699 .or. nnuc == mt749 .or. nnuc == mt799 .or. &
             nnuc == mt849) primeResidue = .true.
 
         if (nnuc == 1) call printCompoudHeader(nnuc)
@@ -130,13 +130,12 @@ contains
 
         
     subroutine HFdecayNucleus(nnuc)
-        implicit none
+        !! Hauser-Feshbach decay of nnuc nucleus
+
         integer,intent(in) :: nnuc
         integer :: ke, il, m, jcn, ipar, ip, izares, iloc
         real*8 xnl, spdif, spdiff, ded, suma, pope, xnor, fisxse
-        !-----
-        !-----Hauser-Feshbach nnuc nucleus decay
-        !-----      
+     
         popleft = 0.d0      
         !-----Turn on (KEMIN=1) or off (KEMIN=NEX(NNUC)) gamma cascade
         !-----in the first CN, it is preferred to use input parameter GCASC (0=OFF,1=ON)
@@ -256,7 +255,6 @@ contains
     end subroutine HFdecayNucleus
 
 
-
     subroutine printPrimeLevelsBeforeCascade (nnuc, totcorr)
         implicit none
         integer, intent(in) :: nnuc
@@ -370,7 +368,6 @@ contains
 
 
     subroutine printPrimeResiduesAfterCascade(nnuc)
-        implicit none
         integer,intent(in) :: nnuc
 
         integer :: il, nbr, ib, nbr_icc
@@ -455,7 +452,6 @@ contains
 
 
     subroutine printMultipleEmissionHeader(nnuc)
-        implicit none
         integer, intent(in) :: nnuc
 
         write (12, *)
@@ -488,12 +484,12 @@ contains
 
 
     subroutine primeExclusiveReactions(nnuc)
-        !---------------------------------------------------------------
-        !  Varius opreations and lot of printing related to treatment 
-        !  of prime emission channels (first emission of g, n, p, a, 
-        !  d, t and 3He) for the ENDF file. 
-        !---------------------------------------------------------------
-        implicit none
+        !!---------------------------------------------------------------
+        !!  Varius opreations and lot of printing related to treatment 
+        !!  of prime emission channels (first emission of g, n, p, a, 
+        !!  d, t and 3He) for the ENDF file. 
+        !!---------------------------------------------------------------
+
         integer,intent(in) :: nnuc
         character*9 :: cejectile
         real*8 :: dtmp, cmulg
@@ -782,8 +778,7 @@ contains
 
 
     subroutine printFission(nnuc)
- 
-        implicit none
+
         integer,intent(in) :: nnuc
         integer ::  m
     
@@ -805,7 +800,7 @@ contains
     end subroutine printFission
 
     subroutine printElasticAngDistr(nnurec,  nejcec)
-        implicit none
+
         integer,intent(in) :: nnurec
         integer,intent(in) :: nejcec
 
@@ -887,9 +882,7 @@ contains
 
     subroutine printInclusiveProductionXSec(nnuc)
 
-        implicit none
         integer,intent(in) :: nnuc
-
         real*8 :: ftmp_disc
     
         write (12, *)
@@ -922,7 +915,6 @@ contains
 
     subroutine widthFluctuation(nnuc)
 
-        implicit none
         integer, intent(in) ::  nnuc
         integer :: m
         
@@ -945,11 +937,9 @@ contains
         return
     end subroutine widthFluctuation
 
-
-
+    
     subroutine printIsomericCrossSections(nnuc)
 
-        implicit none
         integer, intent(in) :: nnuc
         integer its, ilv
         real*8 :: ftmp_gs
@@ -973,15 +963,12 @@ contains
     end subroutine printIsomericCrossSections
 
     subroutine integrateXSections(nnuc)
-        !---------------------------------------------------------
-        !  Calculates integrated cross sections for all ejectiles
-        !  emitted from the nucleus 'nnuc'. Also prints spectra 
-        !  by calling AUERST and prints energy-spin-parity dependent
-        !  population cross sections by calling 
-        !  printEnergySpinPoulations subroutine.
-        !---------------------------------------------------------
+        !!  Calculates integrated cross sections for all ejectiles
+        !!  emitted from the nucleus 'nnuc'. Also prints spectra 
+        !!  by calling AUERST and prints energy-spin-parity dependent
+        !!  population cross sections by calling 
+        !!  printEnergySpinPoulations subroutine.
     
-        implicit none
         integer, intent(in) :: nnuc
         integer :: i, j, izares, iloc
         real*8 :: poplev, poptot
@@ -1072,7 +1059,7 @@ contains
 
 
     subroutine printEnergySpinPoulations(nnur)
-        implicit none
+
         integer, intent(in) :: nnur
         integer :: i, j
         ia = INT(A(nnur))
@@ -1105,7 +1092,7 @@ contains
 
     subroutine printPrimaryGammas(nnuc)
  
-        integer, intent(in) :: nnuc   ! index of the nucleus (actually 1)
+        integer, intent(in) :: nnuc   !! index of the nucleus (actually 1)
         
         integer il
         cspg = 0.d0
@@ -1278,10 +1265,9 @@ contains
     end subroutine writeElastic
 
     subroutine discLevelAngularDistr()
+        !! Sum angular distributions for discrete levels 
+
         implicit none
-        !
-        ! Sum angular distributions for discrete levels 
-        !
         integer :: il, na
         real*8 :: xs_cn
 
@@ -1315,11 +1301,7 @@ contains
 
 
     subroutine printCompoudHeader(nnuc)
-        !
-        !!        p r i n t N u c 1 H e a d e r
-        !
         !! Prints to 8 and 12 CN header and spin distribution of the capture state
-        ! 
 
         integer, intent(in) :: nnuc   ! index of the nucleus (actually 1) 
         integer :: i
@@ -1374,28 +1356,28 @@ contains
 
 
     subroutine getRecoil(Ke, Nnuc)
-        !cc
-        !cc   ********************************************************************
-        !cc   *                                                         class:ppu*
-        !cc   *                         RECOIL                                   *
-        !cc   *                                                                  *
-        !cc   *                                                                  *
-        !cc   *  Constructs recoil spectra:                                      *
-        !cc   *  Each excitation bin is given recoil spectrum, when a particle   *
-        !cc   *  is emitted its recoil velocity is vector added to the parent    *
-        !cc   *  recoil velocity and a resulting spectrum is summed upon daughter*
-        !cc   *  recoil spectrum corresponding to the populated energy bin in the*
-        !cc   *  daughter (kinematical normalization taken into account).        *
-        !cc   *  Daughter recoil spectra will be distributed between             *
-        !cc   *  adjacent bins (inversly proportional to the                     *
-        !cc   *  distance of the actual energy to the bin energy                 *
-        !cc   *  in order to conserve energy).                                   *
-        !cc   *  Requires that continuum spectra from each bin are stored on the *
-        !cc   *  AUSpec array and those to discrete levels on the REClev for each*
-        !cc   *  reaction mechanism considered in the calculations.              *
-        !cc   *                                                                  *
-        !cc   ********************************************************************
-        !cc
+        !!
+        !!   ********************************************************************
+        !!   *                                                         class:ppu*
+        !!   *                         RECOIL                                   *
+        !!   *                                                                  *
+        !!   *                                                                  *
+        !!   *  Constructs recoil spectra:                                      *
+        !!   *  Each excitation bin is given recoil spectrum, when a particle   *
+        !!   *  is emitted its recoil velocity is vector added to the parent    *
+        !!   *  recoil velocity and a resulting spectrum is summed upon daughter*
+        !!   *  recoil spectrum corresponding to the populated energy bin in the*
+        !!   *  daughter (kinematical normalization taken into account).        *
+        !!   *  Daughter recoil spectra will be distributed between             *
+        !!   *  adjacent bins (inversly proportional to the                     *
+        !!   *  distance of the actual energy to the bin energy                 *
+        !!   *  in order to conserve energy).                                   *
+        !!   *  Requires that continuum spectra from each bin are stored on the *
+        !!   *  AUSpec array and those to discrete levels on the REClev for each*
+        !!   *  reaction mechanism considered in the calculations.              *
+        !!   *                                                                  *
+        !!   ********************************************************************
+        !!
         INCLUDE 'dimension.h'
         INCLUDE 'global.h'
  
@@ -1526,21 +1508,14 @@ contains
     end subroutine getRecoil
 
     subroutine printRecoil(Nnuc, React) !,qout)
-        !-----
-        !-----Prints recoil spectrum of nnuc residue
-        !-----
-        implicit none
+        !! Prints recoil spectrum of nnuc residue
+
         INCLUDE 'dimension.h'
         INCLUDE 'global.h'
-        !
-        ! Dummy arguments
-        !
+ 
         INTEGER Nnuc
         CHARACTER*21 React
         !     DOUBLE PRECISION qout
-        !
-        ! Local variables
-        !
         !     DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,recorr,cmul,stmp
         DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, cmul, stmp
         DOUBLE PRECISION dtmp, sstmp
@@ -1677,21 +1652,14 @@ contains
     end subroutine printRecoil
 
     subroutine printBinaryRecoil(Nnuc, React) !,qout)
-        !-----
-        !-----Prints recoil spectrum of (n,n) or (n,p) residue
-        !-----
+        !! Prints recoil spectrum of (n,n) or (n,p) residue
+
         implicit none
         INCLUDE 'dimension.h'
         INCLUDE 'global.h'
-        !
-        ! Dummy arguments
-        !
+
         INTEGER Nnuc
         CHARACTER*21 React
-        !     DOUBLE PRECISION qout
-        !
-        ! Local variables
-        !
         INTEGER ie, ilast, ipart
         DOUBLE PRECISION csum, corr, xsdisc, ftmp, esum, recorr, cmul, stmp
 
