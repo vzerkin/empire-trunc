@@ -98,9 +98,18 @@ PROGRAM c4service
             WRITE(6,*) 'Delete the ',file(l1:l2)//inpc4,' file and rerun'
             STOP 'EXFOR entry mismatch'
          END IF
+         IF(sc%pt(1)%e > sc%pt(sc%ndat)%e) then
+            print *,"GOT IT UP SIDE DOWN"
+            CALL invert_section(sc)
+            print *,"invert done hopefully"
+            ! do i = 1, sc%ndat
+            !    print *, sc%pt(i)%e, sc%pt(i)%mt
+            ! end do
+            print *, "did the print whatever :)"
+         endif
          !  perform operations on the subsections: delete, multiply, addto, smooth, thin, crop, drill_hole 
          ! IF(action == 'p') CALL print_section(c4, k)
-         IF(action == 'd') CALL delete_section(c4, k)                    ! remove section
+         IF(action == 'd') CALL delete_section(c4, k)                    ! remove section k
          IF(action == 'm') CALL multiply_section(sc, k, y1, y2)          ! multiply xsc by y1 and uncert. by y2 (if y2=0 y2 set y1)
          IF(action == 'a') CALL addto_section(sc, k, y1, y2)             ! add y1 [b] to xsc and 
                                                                          ! square-add y2 [b] or [% if negative] to uncert.
@@ -157,6 +166,30 @@ CONTAINS
 
    !------------------------------------------------------------------------
 
+   subroutine invert_section(sc)
+      INTEGER*4 :: i
+      TYPE (c4_section), intent(inout) :: sc
+      ! TYPE (c4_section), POINTER :: scTemp
+      TYPE (c4_data_point) :: ptTemp
+
+      print *, "inverting order ", sc%ndat, " points" 
+      
+      ! allocate(scTemp%pt(sc%ndat)) 
+
+      ! print *, "allocated"
+
+      do i = 1, sc%ndat/2
+         ptTemp = sc%pt(sc%ndat-i+1)
+         sc%pt(sc%ndat-i+1) = sc%pt(i)
+         sc%pt(i) = ptTemp
+      enddo
+      print *,"inverted temp"
+      ! sc = scTemp
+      print *,"copied to sc, first energy", sc%pt(1)%e 
+
+   end subroutine invert_section
+
+
    SUBROUTINE crop_section(sc, k, y1, y2)
 
       !  Crops X4 section dropping points laying outside the y1 - y2 energy interval
@@ -164,7 +197,7 @@ CONTAINS
       IMPLICIT NONE
       INTEGER*4 i,k, n
       REAL*4 :: y1, y2 ! range of incident energies to preserve (in MeV)
-      TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
+      TYPE (c4_section), INTENT(inout) :: sc       ! C4 section to modify
       ! TYPE (c4_data_point), POINTER :: pt1, pt2
 
       WRITE(6,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
