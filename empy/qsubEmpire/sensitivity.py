@@ -181,16 +181,16 @@ def init(proj):
             # import parseFission
             # parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
             # Aug 2013 - don't allow varying these. Use relative fis pars
-            print "%s can't be varied - use relative parameters! Skipping" % name
+            print ("%s can't be varied - use relative parameters! Skipping" % name)
             continue
         
         if not (name in allowed or name in restricted or name in pfnsPar):
-            print "%s can't be varied. Skipping" % name
+            print ("%s can't be varied. Skipping" % name)
             continue
 
         # Checking if a non-zero valued option FISSPE exists input, otherwise skips PFNS parameters
         if (name in pfnsPar and pfnsval < 0.5):
-            print "No FISSPE option in input file. Skipping %s" % name
+            print ("No FISSPE option in input file. Skipping %s" % name)
             continue
         
         def isMatch(opt):
@@ -207,7 +207,7 @@ def init(proj):
         for opt in optvals[::-1]:
             if isMatch(opt):
                 # found a match between sensitivity and basic inputs
-                print "found match", name
+                print ("found match", name)
                 foundOpt = True
                 break
             optIdx -= 1
@@ -219,7 +219,7 @@ def init(proj):
         nameP, nameM = genNames(line,proj)
         
         if not foundOpt and name in restricted:
-            print "no default values for %s. Please supply in input"%name
+            print ("no default values for %s. Please supply in input"%name)
             continue    # go to next line of sensitivity input
         else:
             os.mkdir( nameP )
@@ -265,7 +265,7 @@ def init(proj):
                 tmp = readOption(en[1:]) 
                 if isMatch(tmp):
                     # this energy-dependant option should be varied:
-                    print "match in e-dep opts: %s" % name
+                    print ("match in e-dep opts: %s" % name)
                     orig = tmp[1]
                     plus.write('$'+template %
                         (name,orig*(1+val),i1,i2,i3,i4) )
@@ -294,7 +294,7 @@ def run(proj, mail=False):
         else:
             return True
 
-    print "Starting original input"
+    print ("Starting original input")
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
     orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), hold=True, mail=mail, jnm="cent_")
 
@@ -317,13 +317,13 @@ def run(proj, mail=False):
         jname = line.split()[0]
         tld = proj + "_orig/"
         
-        print "Starting", nameP
+        print ("Starting", nameP)
         if copyTLs(name):
             rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+", tldir=tld, jbid=orid)
         else:
             rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+")
 
-        print "Starting", nameM
+        print ("Starting", nameM)
         if copyTLs(name):
             rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-", tldir=tld, jbid=orid)
         else:
@@ -382,8 +382,8 @@ def analyze(proj):
         
         name, val, i1, i2, i3, i4 = tmp[:]
         if not (name in allowed or name in restricted or name in pfnsPar):
-            print "Parameter %s shouldn't be varied."%name\
-                    + " Will not include in sensitivity output."
+            print ("Parameter %s shouldn't be varied."%name\
+                    + " Will not include in sensitivity output.")
             continue
         val = float(val)
         i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
@@ -497,8 +497,8 @@ def pfns(proj):
         
         name, val, i1, i2, i3, i4 = tmp[:]
         if not (name in allowed or name in restricted or name in pfnsPar):
-            print "Parameter %s shouldn't be varied."%name\
-                    + " Will not include in sensitivity output."
+            print ("Parameter %s shouldn't be varied."%name\
+                    + " Will not include in sensitivity output.")
             continue
         val = float(val)
         i1,i2,i3,i4 = [int(a) for a in (i1,i2,i3,i4)]
@@ -571,7 +571,7 @@ no options: setup and run all parameters"""
 def main():
     opts, args = process_args()
     if len(args)<1: 
-        print "Please suppy a project name"
+        print ( "Please suppy a project name")
         return
     inputFile = args[0]
     proj = inputFile.split('.')[0]
