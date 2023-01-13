@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5357 $
+Ccc   * $Rev: 5420 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-05-10 04:47:24 +0200 (Di, 10 Mai 2022) $
+Ccc   * $Date: 2023-01-13 04:36:53 +0100 (Fr, 13 Jän 2023) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1837,7 +1837,7 @@ Ccc
       character*108 name_of_file
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=146)
+      parameter (ndreac=90, ndkeys=161)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1873,7 +1873,9 @@ C
      &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT',
      &  'PFNERE', 'SFACT' , 'MIXGDR', 'MIXGQR', 'MIXDMR', 'WEDNOR',
      &  'WEQNOR', 'WEMNOR', 'FISTGA', 'UOMPDS', 'FCCRED', 'FCORED',
-     &  'CELRED', 'CINRED' /
+     &  'CELRED', 'CINRED', 'FISAT1', 'FISAT2', 'FISAT3', 'FISVE1',
+     &  'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3', 'FISVF1',
+     &  'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3'/
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1902,7 +1904,9 @@ C
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'F'     , 'R'     , 'R'     , 'R'     , 'R'     ,
      &  'R'     , 'R'     , 'R'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'/
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     /
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1915,6 +1919,7 @@ C-----T - variation of the parameter allowed; the parameters
 C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
 C-----    TOTRED, FUSRED, ELARED ...
 ccc
+
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
