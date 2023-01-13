@@ -1,4 +1,4 @@
-ccc   * $Rev: 5397 $
+ccc   * $Rev: 5416 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -637,7 +637,7 @@ C-----------GAMMA EMISSION
          XN(0) = A(0) - Z(0)
          IZA(0) = INT(1000*Z(0) + A(0))
 
-         ENDF (0) = 1
+         ENDF(0) = 1
 
          ia = INT(A(0))
          iz = INT(Z(0))
@@ -1144,11 +1144,11 @@ C        Changing the incident input energy to plot LDs
          IF(DIRECT.LT.-0.1) DIRECT = 0 ! Restoring the default to zero
                                        ! if DIRECT not present in the input
          IF(DIRECT.GT.1.9 .and. KTRompcc.eq.0)
-     >      KTRompcc = KTRlom(NPRoject,NTArget)
+     &      KTRompcc = KTRlom(NPRoject,NTArget)
          IF(DIRECT.GT.1.9 .and. KTRompcc.ne.0)
-     >      KTRlom(NPRoject,NTArget) = KTRompcc
+     &      KTRlom(NPRoject,NTArget) = KTRompcc
          IF(DIRECT.EQ.0 .and. KTRlom(NPRoject,NTArget).ne.KTRlom(0,0))
-     >      KTRlom(0,0) = KTRlom(NPRoject,NTArget)
+     &      KTRlom(0,0) = KTRlom(NPRoject,NTArget)
 !
 !--------Set actual flags for exclusive spectra
 !
@@ -1159,19 +1159,38 @@ C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
 C        PAUSE
 C
-         IF(NENdf.EQ.0) THEN
-              ENDf  = 0
-              NEXclusive = 0
+         IF(NENdf.LE.0) THEN
+            ENDf  = 0
+            NEXclusive = 0
          ELSEIF(NENdf.GT.0) THEN
-!           Initially set non-exclusive spectra as inclusive
-            DO in = 0, NNUct
-               IF(ENDf(in).EQ.0) ENDF(in) = 2
+            ENDf(0) = 1
+            ENDf(1) = 1
+            ENDf(NTArget) = 1
+            ENDfp(NPRoject,NTArget) = 1
+            !  Making pure neutron and pure proton emissions exclusive
+            ztmp = Z(1)
+            DO in = 0, MIN(8,nemn)
+               atmp = A(1) - FLOAT(in)
+               izatmp = INT(1000*ztmp + atmp)
+               CALL WHERE(izatmp,nnuc,iloc)
+               IF(iloc.EQ.0) THEN
+                 ENDf (nnuc) = 1
+                 ENDfp(1,nnuc) = 1
+                 ENDfp(0,nnuc) = 1
+               ENDIF
             ENDDO
-            IF(NENdf.GE.1) THEN !Square of NENdf*NENdf nuclei in Z,N plane made exclusive
-               ENDf(0) = 1
-               ENDf(1) = 1
-               ENDf(NTArget) = 1
-                 ENDfp(NPRoject,NTArget) = 1
+            DO ip = 0, MIN(3,nemp)
+               atmp = A(1) - FLOAT(ip)
+               ztmp = Z(1) - FLOAT(ip)
+               izatmp = INT(1000*ztmp + atmp)
+               CALL WHERE(izatmp,nnuc,iloc)
+               IF(iloc.EQ.0) THEN
+                 ENDf (nnuc) = 1
+                 ENDfp(2,nnuc) = 1
+                 ENDfp(0,nnuc) = 1
+               ENDIF
+            ENDDO
+            IF(NENdf.GE.2) THEN ! Square of NENdf*NENdf nuclei in Z,N plane made exclusive. 
               DO in = 0, NENdf
                  DO ip = 0, NENdf
                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
@@ -1180,66 +1199,24 @@ C
                     izatmp = INT(1000*ztmp + atmp)
                     CALL WHERE(izatmp,nnuc,iloc)
                     IF(iloc.EQ.0) THEN
-                      ENDf (nnuc) = 1
-!                       if(in.eq.2 .and. ip.eq.2) THEN
-!                         ENDfp(3,nnuc) = 1  ! alphas
-!                         ENDfp(0,nnuc) = 1
-!                       endif
-C                      if(in.eq.2 .and. ip.eq.1) THEN
-C                        ENDfp(5,nnuc) = 1  ! triton
-C                        ENDfp(0,nnuc) = 1
-C                       endif
-C                      if(in.eq.1 .and. ip.eq.2) THEN
-C                        ENDfp(6,nnuc) = 1  ! He-3
-C                        ENDfp(0,nnuc) = 1
-C                      endif
+                       if(ENDf(nnuc).eq.-1.0) then
+                         ENDf(nnuc) = 0 ! set to 0 as requested inclusive in input
+                       else
+                         ENDf(nnuc) = 1 ! set to 1 since within the square
+                       endif
                     ENDIF
                  ENDDO
               ENDDO
-!              Making pure neutron and pure proton emissions exclusive
-               ztmp = Z(1)
-               DO in = 0, MIN(8,NENdf)
-                  atmp = A(1) - FLOAT(in)
-                  izatmp = INT(1000*ztmp + atmp)
-                  CALL WHERE(izatmp,nnuc,iloc)
-                  IF(iloc.EQ.0) THEN
-                    ENDf (nnuc) = 1
-                    ENDfp(1,nnuc) = 1
-                    ENDfp(0,nnuc) = 1
-                  ENDIF
-               ENDDO
-               DO ip = 0, MIN(3,NENdf)
-                  atmp = A(1) - FLOAT(ip)
-                  ztmp = Z(1) - FLOAT(ip)
-                  izatmp = INT(1000*ztmp + atmp)
-                  CALL WHERE(izatmp,nnuc,iloc)
-                  IF(iloc.EQ.0) THEN
-                    ENDf (nnuc) = 1
-                    ENDfp(2,nnuc) = 1
-                    ENDfp(0,nnuc) = 1
-                  ENDIF
-               ENDDO
             ENDIF
-C           write(*,*) 'After reassigments'
-C           DO in = 0, NNUct
-C             IF(in.le.11)
-C    &          write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),
-C    &                     ENDFp(0,in),ENDFp(1,in),ENDFp(2,in)
-C           ENDDO
-C           pause
-C
-C           Disabling all exclusive conversion to inclusive (testing)
-C           ENDfp = 1
-C
+
 C           Create list of exclusive nuclei
-C
             itmp = 0
             DO i = 1, NNUct
               iatmp = INT(a(i))
               iztmp = INT(z(i))
               izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
-              IF(ENDf(nnuc).EQ.0) ENDf(nnuc)=2
+              IF(ENDf(nnuc).EQ.0 .OR. ENDf(nnuc).EQ.-1) ENDf(nnuc) = 2
               IF(ENDf(nnuc).EQ.1) THEN
                 itmp = itmp + 1
                 INExc(nnuc) = itmp
@@ -2275,7 +2252,7 @@ C              in PCROSS at higher than 7-8 MeV
 C              However, a better long-term solution is needed
 C              as this is in contradiction with DEPart<>1
 C
-               IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
+!               IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
 C
             ENDIF
 
@@ -3695,7 +3672,7 @@ C
       CHARACTER*120 inline
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,
-     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j, i812, inpFile
+     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j, i812
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver, emp_def
@@ -3879,14 +3856,9 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'Discrete levels were taken from the RIPL-3+        '
       WRITE (12,*) 'library based on the 2015 version of ENSDF.        '
-
       irun = 0
-C
-C----- Start of reading input parameters
-C
-      inpFile = 5
   100 IF(irun.EQ.1) RETURN
-      READ (inpFile,'(A)',END=150,ERR=160) inline
+      READ (5,'(A)',END=150,ERR=160) inline
       itmp = len_trim(inline)
       IF (inline(1:1).EQ.'*' .OR. inline(1:1).EQ.'#' .OR.
      &    inline(1:1).EQ.'!' .OR. inline(1:1).EQ.'$') GOTO 100
@@ -3899,24 +3871,6 @@ C
         WRITE( 8,*)'***************************************************'
         GOTO 100  ! next line
       ENDIF
-
-
-      IF(inline(1:1).eq.'>') THEN
-         inpFile = 555
-         OPEN (inpFile,FILE = 'common.inp',STATUS = 'OLD') ! switch reading to the common.inp instead of standard input file *.inp
-         GOTO 100
-      ELSEIF(inline(1:1).eq.'<') THEN
-         if(inpFile .EQ. 5) then 
-            write( 8,*)'Improper use of "<" in optional input'
-            write( 8,*)'Must be used only at the endf of common.inp'
-            write( 8,*)'Disposition ignored' 
-            GOTO 100
-         endif
-         close (inpFile)
-         inpFile = 5
-         GOTO 100  ! return to the standard INPUT_SPEC
-      ENDIF
-
 
       ios = parse_line(inline(1:itmp),name,val,i1,i2,i3,i4)
       if(ios /= 0) goto 160
@@ -6542,10 +6496,10 @@ C-----
 C-----
          IF (name.EQ.'MSD   ') THEN
             MSD = val
-            IF (MSD.EQ.1) WRITE (8,
+            IF (MSD.GT.0) WRITE (8,
      &'('' MSD calculations with ORION+TRISTAN were selected'')
      &   ')
-            IF (MSD.EQ.1) WRITE (12,
+            IF (MSD.GT.0) WRITE (12,
      &'('' MSD calculations with ORION+TRISTAN were used'')')
             IF (MSD.EQ.2) WRITE (8,
      &         '('' including contribution to discrete levels'')')
@@ -6847,16 +6801,14 @@ C              Setting ENDF for all emission loops
                  WRITE (8,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (8,'(
-     &            '' Exclusive spectra available for residues distant'',
-     &            '' from CN up to '',I1,'' neut. or '',I1
-     &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
+     &            '' Exclusive spectra available for CN and '',/,
+     &            '' and nuclei populated only by n or only by p.'')')
                  WRITE (12,'('' ENDF formatting enabled'')')
                  WRITE (12,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (12,'(
-     &           '' Exclusive spectra available for residues distant'',/
-     &          ,''   from CN up to '',I1,'' neut. or '',I1
-     &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
+     &            '' Exclusive spectra available for CN and '',/,
+     &            '' and nuclei populated only by n or only by p.'')')
                      GOTO 100
                ENDIF
                IF(NENdf.EQ.0) THEN
@@ -6870,6 +6822,38 @@ C              Setting ENDF for all emission loops
             ENDIF
             GOTO 100
          ENDIF
+
+C-----
+         IF (name.EQ.'EXCLUS') THEN
+            izar = i1*1000 + i2
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     &           '('' WARNING: EXCLUSIVE STATUS NOT SET'')')
+               GOTO 100
+            ENDIF
+            IF(val.GT.0) THEN
+               ENDF(nnuc) = 1
+               WRITE (8,
+     &        '('' Nucleus '',I3,A2,'' set to exclusive '')')
+     &         i2, SYMb(nnuc)
+                  WRITE (12,
+     &        '('' Nucleus '',I3,A2,'' set to exclusive '')')
+     &         i2, SYMb(nnuc)
+            ELSE
+               ENDF(nnuc) = -1
+               WRITE (8,
+     &        '('' Nucleus '',I3,A2,'' set to inclusive '')')
+     &         i2, SYMb(nnuc)
+               WRITE (12,
+     &        '('' Nucleus '',I3,A2,'' set to inclusive '')')
+     &         i2, SYMb(nnuc)
+            ENDIF
+            GOTO 100
+         ENDIF
+
 C-----
          IF (name.EQ.'BNDG  ') THEN
             IF (i3.LE.0 .OR. i3.GT.NDEJC) THEN
@@ -6882,6 +6866,10 @@ C-----
                GOTO 100
             ENDIF
             izar = i1*1000 + i2
+            if(izar.eq.0) then  ! used to block emission of ejectiale i3 from all nuclei (e.g., val set to ZZ100.)
+               Q(i3,:) = val
+               go to 100
+            endif
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
                WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
