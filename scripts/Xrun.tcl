@@ -1,6 +1,6 @@
-# $Rev: 5414 $
+# $Rev: 5415 $
 # $Author: mwherman $
-# $Date: 2023-01-07 04:15:09 +0100 (Sa, 07 Jän 2023) $
+# $Date: 2023-01-13 03:55:49 +0100 (Fr, 13 Jän 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8891,9 +8891,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command { editFile $file-log1.fixup } -font {} -label {FIXUP-1 Log} 
-    $site_3_0.men70 add command \
-        -command { editFile $file-log2.fixup } -font {} -label {FIXUP-2 Log} 
+        -command { editFile $file-log.fixup } -font {} -label {FIXUP Log} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.linear } -font {} -label {LINEAR Log} 
     $site_3_0.men70 add command \
