@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5389 $
+Ccc   * $Rev: 5424 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-11-09 03:08:46 +0100 (Mi, 09 Nov 2022) $
+Ccc   * $Date: 2023-01-13 04:52:20 +0100 (Fr, 13 Jän 2023) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3127,10 +3127,10 @@ C
       INTEGER icsp, ie, il, irec, j, na, nexrt, next, istart
 
       IF (NEX(Nnuc).LT.1) THEN
-         WRITE (8,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
+         WRITE (8,*) ' HM! THERE MUST BE SOMETHING WRONG '
          WRITE (8,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
          WRITE (8,*) ' NUCLEUS NNUC=', Nnuc, ' NEX(NNUC)=', NEX(Nnuc)
-         WRITE (8,*) ' I HAD BETTER  S T O P'
+         WRITE (8,*) ' I BETTER  S T O P'
          STOP
       ENDIF
 
@@ -3472,7 +3472,17 @@ C           Deleting the corresponding angular distribution
             IF (ENDf(1).GT.0) CSEa(ie,na,Nejc) = 0.d0
          ENDDO
        ENDDO
-
+C      Deleting the corresponding XS from the continuum
+C      as it is moved to discrete spectra
+       IF(ENDF(1).GT.0) then
+          DO ie = istart, next
+             CSEmsd(ie,Nejc) = 0.d0
+C            Deleting the corresponding angular distribution
+             do na=1,NDAng 
+                CSEa(ie,na,Nejc) = 0.d0
+             enddo
+          ENDDO
+       ENDIF
       ELSE
 C
 C      Other channels (not the inelastic)
