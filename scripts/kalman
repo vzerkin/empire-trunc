@@ -2,11 +2,13 @@
 # Major script to run Kalman fitting. Sensitivity matrix must be already calculated: 
 # 1. create sensitivity input for the specific case (see the templete 'Default sesnitivity input'
 #    under Options pull-down menu in GUI)
-# 2. set KALMAN option in the normal input to 1.
-# 3. run runE sccript as usual (this might take several hours!)
-# 4. DON'T FORGET to set KALMAN option back to 0
-# 5. run this (kalman) script with the parameters listed below
-#    (if running from GUI set EXPDAT through 'Kalman options' in Options pull-down menu ) 
+# 2. set KALMAN option in the EMPIRE input to 1.
+# 3. run runE script as usual (this might take several hours!)
+# 4. DON'T FORGET: to set KALMAN option back to 0 and rerun calculations to restore ENDF formatted file 
+#    (or copy preserved version)
+# 5. run this (kalman) script with the parameters listed below.
+#    When running from GUI use 'Kalman options' in Options or Kalamn pull-down menus to control use of 
+#    experimental data, other parameters are set up automatically.  
 
 
 file=$1         # Empire input file stem (no extension) - required.
@@ -35,11 +37,11 @@ if [ ! -s ${file}.endf ]; then
 fi
 
 if [ -z $MT -o "$MT" = "0" ]; then
-   MT="1 2 3 4 16 17 18 102 103 107"
+   MT="1 2 3 4 16 17 18 102 103 105 106 107"
+   # MT="4 16 17 102 103 105 106 107"
 fi
 
 if [ -z $MAT -o "$MAT" = "0" ]; then
-   # MAT="1111"
    MAT=$($EMPIREDIR/util/mkendf/getmtn ${file}.endf)
 fi
 
@@ -97,8 +99,7 @@ else
 fi
 
 # clean up anything left around from a previous run
-
-rm -f fort.* $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
+rm -f fort.*  ENERGYANDINDEX.TMP
 
 # now loop through the kalman fitting, repeating the fit for each plotted
 # MT. Note that all the data in the C4 and and XSC file are fitted for each
@@ -106,6 +107,7 @@ rm -f fort.* $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
 
 for k in $MT; do
 
+    rm expxscplot.d
     echo "MT= ${k}"
     echo $file ${k} $MAT $EXPDAT $PFNS $EINC > INPUT.D
     rm -f KALMAN.INP
@@ -161,17 +163,17 @@ for k in $MT; do
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
     if [ "$EXPDAT" != 0 ]; then
-       if [ -s $file-expxsc.kal ]; then
-          echo "Existing file ${file}-expxsc.kal replacing C4 cross sections"
-	  cp $file-expxsc.kal fort.10
+       if [ -s $file-expXsc.kal ]; then
+          echo "Existing file ${file}-expXsc.kal replacing C4 cross sections"
+	  cp $file-expXsc.kal fort.10
        else
-	  cp fort.10 ${file}-expxsc.kal
+	  cp fort.10 ${file}-expXsc.kal
        fi
-       if [ -s $file-expcorr.kal ]; then
-          echo "Existing file ${file}-expcorr.kal replacing C4 xsec correlations"
-	  cp $file-expcorr.kal fort.12
+       if [ -s $file-expCorr.kal ]; then
+          echo "Existing file ${file}-expCorr.kal replacing C4 xsec correlations"
+	  cp $file-expCorr.kal fort.12
        else
-	  cp fort.12 ${file}-expcorr.kal
+	  cp fort.12 ${file}-expCorr.kal
        fi
     else
        echo " Experimental data not used. Removing data, err, & corr files"
@@ -182,10 +184,10 @@ for k in $MT; do
 
     # CORRELATIONS AMONG MODEL PARAMETERS
 
-    if [ ! -s ${file}-parcorr.kal ]; then
-       cp fort.52 ${file}-parcorr.kal
+    if [ ! -s ${file}-parCorr.kal ]; then
+       cp fort.52 ${file}-parCorr.kal
     else
-       cp ${file}-parcorr.kal fort.52
+       cp ${file}-parCorr.kal fort.52
     fi
 
     if [ "$EXPDAT" != 0 ]; then
@@ -199,10 +201,15 @@ for k in $MT; do
         else
             echo 'EDIT KALMAN INPUT, CLOSE EDITOR '
             echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
-            gvim KALMAN.INP
+         #   gvim KALMAN.INP
          #  on Mac use MacVim or any other editor
-         #   open -a MacVim KALMAN.INP
-         #   read go 
+            open -a MacVim KALMAN.INP
+            read go 
+            cp KALMAN.INP $file-inp.kal
+            echo 'EDIT PARAMETER UNCERTAINTIES, CLOSE EDITOR '
+            echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
+            open -a MacVim fort.52
+            read go 
         fi
     fi
 
@@ -216,12 +223,14 @@ for k in $MT; do
       exit 10
     fi
 
-    mv KALMAN.OUT $file-out.kal
-    mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
-    mv fort.14 $file-cov.kal
-    mv fort.15 $file-par.kal
+    
     cat fort.16 fort.32 > fort.48
  
+    # temporary TO BE DELETED!!!
+    echo "Kalman run done"
+    read a
+   #  exit
+
     echo  "Running kalend"
     if ! $EMPIREDIR/util/kalman/kalend < INPUT.D
     then
@@ -249,18 +258,20 @@ for k in $MT; do
     fi
 
     # Should consider a different name for these files in the pfns case, but which? 
-    mv corrplot.d $file-${k}-cov.gpd
-    mv xscplot.d  $file-${k}-xsc.gpd
+    #  mv corrplot.d $file-${k}-cov.gpd
+    #  mv xscplot.d  $file-${k}-xsc.gpd
 
-    rm expxscplot.d
+    mv KALMAN.OUT $file-out.kal
+    mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
+    mv fort.14 $file-cov.kal
+    mv fort.12 $file-expCorr.kal
+    mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
+    mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal.
+    #rm INPUT.D
+    rm ENERGYANDINDEX.TMP 2>/dev/null
+    #rm -f fort.{1*,50,75}
 
     echo 'COMPLETE ...'
-
 done
-
-rm INPUT.D
-rm KALMAN.INP
-rm -f fort.{1*,50,52,75}
-rm ENERGYANDINDEX.TMP 2>/dev/null
 
 exit
