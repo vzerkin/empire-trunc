@@ -1,18 +1,18 @@
-! Program KALEND call-tree:
-
-! ==> read_empire_xsc          ! read empire x-sections
-! ==> write_crs_file           ! create 'xscplot.d' file to plot requested MT
-!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
-!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
-! ==> write_cov_plotfile       ! write covariances to plot file
-! ==> write_endf               ! add covariances to ENDF file
-! ==> write_crs_file           ! create 'xscplot.d' file to plot requested MT
-!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
-!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
-! ==> write_cov_plotfile       ! write covariances to plot file
-! ==> write_endf               ! add covariances to ENDF file
-!     ==> endf_thr             ! find out reaction threshold
-!     ==> write_endf_covx      ! write covariances to endf file
+!! Program KALEND call-tree:
+!!
+!! ==> read_empire_xsc          ! read empire x-sections
+!! ==> write_crs_file           ! create 'xscplot.d' file to plot requested MT
+!!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
+!!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
+!! ==> write_cov_plotfile       ! write covariances to plot file
+!! ==> write_endf               ! add covariances to ENDF file
+!! ==> write_crs_file           ! create 'xscplot.d' file to plot requested MT
+!!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
+!!     ==> read_kalman_covar    ! read Kalman covarinces for specific MT1-MT2
+!! ==> write_cov_plotfile       ! write covariances to plot file
+!! ==> write_endf               ! add covariances to ENDF file
+!!     ==> endf_thr             ! find out reaction threshold
+!!     ==> write_endf_covx      ! write covariances to endf file
 
 program kalend
 
@@ -20,50 +20,55 @@ program kalend
 
     implicit none
 
-    integer*4 nnucd         ! # reactions in empire XSC file
-    integer*4 nenrg         ! # energies  in empire XSC file
-    integer*4 ken           ! # energies in kalman cov file
-    integer*4 nex           ! experimental data flag. =0,1,2.
-    integer*4 npfns         ! PFNS flag. If /= 0, running PFNS
-    integer*4 mt1           ! requested MT to create ENDF subsection and plot
-    integer*4 mt2           ! second MT for creating cross-reaction-correlated ENDF subsection
-    integer*4 mat1          ! requested MAT for ENDF file
+    integer*4 :: nnucd             !! # of reactions in empire .xsc file
+    integer*4 :: nenrg             !! # of energies  in empire .xsc file
+    integer*4 :: ken               !! # of energies in kalman .cov file
+    integer*4 :: nex               !! experimental data flag. = 0 none, 1 this one, 2 all.
+    integer*4 :: npfns             !! PFNS flag. If /= 0, running PFNS
+    integer*4 :: mt1               !! requested MT to create ENDF subsection and plot
+    integer*4 :: mt2               !! second MT for creating cross-reaction-correlated ENDF subsection
+    integer*4 :: mat1              !! requested MAT for ENDF file
+    integer*4 :: l1,l2             !! beginning, end of filename
+   
+    character*25 :: file           !! root filename w/o extension
+    character*25 :: originalFile   !! name of the Empire endf file
+    character*25 :: memFile        !! name to store a copy of the Empire endf file
+    character*25 :: kalFile        !! name of the endf file Kalend will write to    
+    character*12 :: rxc            !! string reporting status of read_kalman_covar
 
-    integer*4 l1,l2         ! beginning, end of filename
-    character file*25       ! filename w/o extension
-    character rxc*12
+    real*8, allocatable :: eg(:),sg(:,:)         !! energies & cross sections from empire .xsc file
+    real*8, allocatable :: x(:),y(:),w(:,:)      !! ener, crs, & covar from kalman
+    character*12, allocatable :: rxtn(:)         !! reaction names from empire .xcs file
+    logical :: writeRun = .false.
 
-    real*8, allocatable :: eg(:),sg(:,:)         ! energies & cross sections from empire XSC file
-    real*8, allocatable :: x(:),y(:),w(:,:)      ! ener, crs, & covar from kalman
-    character*12, allocatable :: rxtn(:)         ! reaction names from empire XSC file
-
-    integer*4, external :: rctn                  ! function returning reaction MT for a given string (e.g. 1 for 'Total')
+    integer*4, external :: rctn                  !! function returning reaction MT for a given string (e.g. 1 for 'Total')
     integer*4 :: i1, i2
+    integer*4 :: status
 
-    ! The below list of requested MTs may be adjusted according to the needs
-    !   integer*4, parameter :: nrs = 10
-    !   integer*4, parameter :: mt(nrs) = (/1,2,4,5,16,18,102,103,107,851/) ! MT selected for ENDF formating
-    integer*4, parameter :: nrs = 9
-    integer*4, parameter :: mt(nrs) = (/1,2,4,5,16,102,103,107,851/) ! MT selected for ENDF formating
+    ! The below list of requested MTs may be adjusted according to the needs 
+    integer*4, parameter :: nrs = 12             !! number of reactions (MTs)
+    integer*4, parameter :: mt(nrs) = (/1,2,4,5,16,17,22,102,103,106,107,112/) !! MT selected for ENDF formating
 
     type covkal
-       integer*4 mt1                       ! MT for the first reaction
-       integer*4 mt2                       ! MT for the second reaction
-       integer*4 :: ne1                    ! number of energy points in the first reaction
-       integer*4 :: ne2                    ! number of energy points in the second reaction
-       real*8, allocatable :: x1(:)        ! energies for the first raction
-       real*8, allocatable :: x2(:)        ! energies for the second raction
-       real*8, allocatable :: y1(:)        ! cross sections for the first raction
-       real*8, allocatable :: y2(:)        ! cross sections for the second raction
-       real*8, allocatable :: w(:,:)       ! relative covaraince matrix for the one or two reactions
+       integer*4 :: mt1                    !! MT for the first reaction
+       integer*4 :: mt2                    !! MT for the second reaction
+       integer*4 :: ne1                    !! number of energy points in the first reaction
+       integer*4 :: ne2                    !! number of energy points in the second reaction
+       real*8, allocatable :: x1(:)        !! energies for the first raction
+       real*8, allocatable :: x2(:)        !! energies for the second raction
+       real*8, allocatable :: y1(:)        !! cross sections for the first raction
+       real*8, allocatable :: y2(:)        !! cross sections for the second raction
+       real*8, allocatable :: w(:,:)       !! relative covaraince matrix for the one or two reactions
     endtype covkal
 
-    type(covkal) :: covk((nrs+1)*nrs/2)    ! derived structure to hold read-in covariances from KALMAN
+    type(covkal) :: covk((nrs+1)*nrs/2)    !! derived structure to hold read-in covariances from KALMAN
+    type (endf_file) :: endf               !! derived structure to hold read-in endf file from Empire
+    type (endf_mat), pointer :: mat        !! derived structure to hold mat section of endf
 
-    ! get filename, mat, mt, nex & npfns from stdin
-
+    ! Kalend input - filename, mt, mat, nex & npfns from stdin
     read(5,*) file, mt1, mat1, nex, npfns
     call strlen(file,l1,l2)
+    ! if(mt1 > 0) writeRun = .true.
 
     ! If mt1 = 0 a preselected set of MT numbers is used to create
     ! a full set of self-covarainces and cross-reaction-covariances
@@ -74,54 +79,54 @@ program kalend
     open(16,file='fort.16',status='OLD',action='READ')        ! open KALMAN produced file
 
     call read_empire_xsc                                      ! read empire cross sections
+    
+    originalFile = file(l1:l2)//'.endf'                       ! name of the Empire endf file
+    memFile = file(l1:l2)//'-memorize.endf'                   ! name to store a copy of above
+    kalFile = file(l1:l2)//'-kal.endf'                        ! name of the endf file Kalend will write to
+    call system('cp -r '//originalFile//' '//memFile)         ! copy original endf file to preserve it
 
-    if(mt1 > 0) then        ! single specific MT (old, diagonal-only version)
-        mt2 = mt1
-        ! call plot_all
-        write(*,*)' Old good route'
+    
+    if(mt1 > 0) then                ! single specific MT (old, diagonal-only version)
+        call read_endf_source       ! read EMPIRE endf file and create endf structure
+        mt2 = mt1                   ! no correlations for the time being
+        write(*,*)' Old good route, looking for MT=',mt1
         call write_crs_file
         call write_cov_plotfile     ! write covariances to plot file
-        call write_endf     ! add covariances to ENDF file
-    else        !full covariance matrix with reaction cross correlations
+        call write_endf             ! add covariances to ENDF file
+    else                            !full covariance matrix with cross-reaction correlations (eventually!)
         write(*,*) ' New scenic route'
-        call read_full_covar
-        do i1 = 3, 3 !nrs
+        do i1 = 1, nrs
+            call read_endf_source    ! read EMPIRE endf file and create endf structure
             mt1 = mt(i1)
-            do i2 = i1, i1+1 !nrs
-                mt2 = mt(i2)
-                if(mt1 == mt2) then
-                    call write_crs_file
-                    call write_cov_plotfile       ! write covariances to plot file
-                end if
-                call write_endf     ! add covariances to ENDF file
-            end do
+            mt2 = mt1
+            call write_crs_file
+            call write_cov_plotfile  ! write covariances to plot file
+            call write_endf          ! add covariances to ENDF file
         end do
     end if
 
     close(16)
 
-!   qins = put(mat%mf33,nf33)
-!   if(.not.qins) then
-!       write(6,*) ' Error inserting MF33, MT=',mt1
-!   endif
-!
-!   status = write_endf_file(file(l1:l2)//'-kal.endf',endf)
-!   if(status /= 0) then
-!       write(6,*) ' Error writing '//file(l1:l2)//'-kal.endf'
-!   endif
+    !   qins = put(mat%mf33,nf33)
+    !   if(.not.qins) then
+    !       write(6,*) ' Error inserting MF33, MT=',mt1
+    !   endif
+
+    !   status = write_endf_file(file(l1:l2)//'-kal.endf',endf)
+    !   if(status /= 0) then
+    !       write(6,*) ' Error writing '//file(l1:l2)//'-kal.endf'
+    !   endif
 
 contains
 
     !---------------------------------------------------------------------------------
 
     subroutine read_empire_xsc
+        !! Reads EMPIRE calculated cross section from the .xcs file.
 
-        implicit none
-
-        integer*4 i,j,ios
+        integer*4 :: i,j,ios
 
         ! open cross section file, either XSC or PFNS
-
         if(npfns == 0) then
             open(10,file=file(l1:l2)//'.xsc',status='OLD',iostat=ios)
         else
@@ -129,7 +134,6 @@ contains
         endif
 
         ! scan file once counting lines
-
         if(ios /= 0) then
             write(6,*) ' Error opening empire cross section file'
             stop 1
@@ -148,10 +152,8 @@ contains
         allocate(eg(nenrg),sg(nenrg,nnucd),rxtn(nnucd))
 
         rewind(10)
-
         read(10,*)
         read(10,'(12X,(3A12),(A10),(90A12))') (rxtn(i),i=1,nnucd)
-
         do i = 1,nenrg
             read(10,*) eg(i),(sg(i,j),j=1,nnucd)
         end do
@@ -164,17 +166,17 @@ contains
     !---------------------------------------------------------------------------------
 
     subroutine read_full_covar
+        !! Reads full covariance matrix calculated by previous KALMAN run 
+        !! (ACTUALLY - DOES NOTHING! See read_kalman_covar)
 
-        implicit none
-
-!         integer*4, intent(in) :: ix            ! MT or PFNS index
+        ! integer*4, intent(in) :: ix          ! MT or PFNS index
         integer*4 :: iz                        ! MT for the second reaction (cross-correlations)
 
-        logical*4 qfnd
-        integer*4 i,j,k,ios
-        character rxt*12, rxz*12
+        logical*4 :: qfnd
+        integer*4 :: i,j,k,ios
+        character*12 :: rxt, rxz
 
-        write(*,*) ' Got into read_full_covar'
+        write(*,*) ' Got into read_full_covar but this does nothing '
 
         k = 1
         rewind(16)
@@ -186,16 +188,14 @@ contains
     !---------------------------------------------------------------------------------
 
     character*12 function read_kalman_covar(ix,iz)
-
-
-        implicit none
+        !! Reads full covariance matrix calculated by previous KALMAN run.
 
         integer*4, intent(in) :: ix            ! MT or PFNS index
         integer*4, optional, intent(in) :: iz  ! MT for the second reaction (cross-correlations)
 
-        logical*4 qfnd
-        integer*4 i,j,k,ios
-        character rxt*12, rxz*12
+        logical*4 :: qfnd
+        integer*4 :: i,j,k,ios
+        character*12 :: rxt, rxz
 
         write(*,*) ' Got into read_kalman_covar'
 
@@ -205,7 +205,6 @@ contains
 
         do
             read(16,'(I5,43X,A12,A12)',iostat=ios) ken,rxt,rxz
-            write(*,*) ' ix, iz, ken, rxt, rxz ',ix,iz, ken, rctn(rxt), rctn(rxz)
             if(ios > 0) then
                 write(6,*)' Error occured reading Kalman covariance file:',ios
                 stop 1
@@ -215,11 +214,12 @@ contains
                 return
             endif
 
-            if(npfns == 0) then
-                qfnd = (ix == rctn(rxt) .and. iz == rctn(rxz))
-            else
-                qfnd = (ix == k)
-            endif
+            ! if(npfns == 0) then
+            !     qfnd = (ix == rctn(rxt) .and. iz == rctn(rxz))
+            ! else
+            !     qfnd = (ix == k)
+            ! endif
+            qfnd = (ix == rctn(rxt) .and. iz == rctn(rxz))   ! instead of above for cross-correlations
 
             if(qfnd) then
                 allocate(x(ken),y(ken),w(ken,ken))
@@ -245,23 +245,19 @@ contains
     !---------------------------------------------------------------------------------
 
     subroutine plot_all
+        !! Create 'allplot.d', which contains any of the standard MTs listed below
+        !! that are in the kalman covariance file. If they are not present they are
+        !! skipped. For PFNS, only the first NC channels are printed.
 
-        ! create 'allplot.d', which contains any of the standard MTs listed below
-        ! that are in the kalman covariance file. If they are not present they are
-        ! skipped. For PFNS, only the first NC channels are printed.
+        ! integer*4, parameter :: nc = 9
+        ! integer*4, parameter :: mt(nc) = (/1,2,4,5,16,18,102,103,107,851/)
+        ! integer*4, parameter :: mt(nc) = (/1,2,4,5,16,102,103,107,851/) ! MT selected for ENDF formating
 
-        implicit none
-
-        integer*4, parameter :: nc = 10
-        integer*4, parameter :: mt(nc) = (/1,2,4,5,16,18,102,103,107,851/)
-
-        integer*4 i,ix,k
-        character rxc*12
+        integer*4 :: i,ix,k
 
         open(26,file='allplot.d',status='UNKNOWN',action='write')
 
-        do i = 1,nc
-
+        do i = 1,nrs
             if(npfns == 0) then
                 ix = mt(i)
             else
@@ -277,7 +273,6 @@ contains
             end do
             WRITE(26,*) '             '
             WRITE(26,*) '             '
-
         end do
 
         close(26)
@@ -288,21 +283,18 @@ contains
     !---------------------------------------------------------------------------------
 
     subroutine write_crs_file
+        !! Calls read_kalman_covar function to read covariances from fort.16
+        !! Create the 'xscplot.d' file to plot only the requested MT1
+        !! or index for PFNS from temporary file.
 
-        ! create the 'xscplot.d' file to plot only the requested MT1
-        ! or index for PFNS from temporary file.
+        integer*4 :: i,ix, iz
+        real*8 :: xf
+        character*12 :: rxz
 
-        implicit none
-
-        integer*4 i,ix, iz
-        real*8 xf
-        character rxc*12, rxz*12
-
-        write(*,*) 'Got into write_crs_file'
-
+        
         ! look for index of requested MT1 in empire data
         ! read index from temp file for PFNS
-
+        
         if(npfns == 0) then
             ix = 1
             do while(ix <= nnucd)
@@ -314,11 +306,12 @@ contains
                 stop 1
             endif
             rxc = read_kalman_covar(mt1,mt2)
+            write(*,*) 'Got into write_crs_file MT1, MT2= ', mt1, mt2, rxc
         else
             open(70,file='ENERGYANDINDEX.TMP')
             read(70,'(4X,I3)') ix
             close(70)
-            rxc = read_kalman_covar(ix)
+            rxc = read_kalman_covar(ix) 
         endif
 
         if(nenrg /= ken) then
@@ -335,39 +328,36 @@ contains
         endif
 
         ! write pre-fit, post-fit file for gnuplot of MT1
-
-        open(25,file='xscplot.d',status='UNKNOWN',action='WRITE')
-        do i = 1,nenrg
-            write(25,'(4(1X,1PE12.5))') x(i),xf*y(i),eg(i),xf*sg(i,ix)
-        end do
-        close(25)
+        
+        if(mt1 == mt2)  then
+            open(25,file='xscplot.d',status='UNKNOWN',action='WRITE')
+            do i = 1,nenrg
+                write(25,'(4(1X,1PE12.5))') x(i),xf*y(i),eg(i),xf*sg(i,ix)
+            end do
+            close(25)
+        endif 
 
         return
     end subroutine write_crs_file
 
     !---------------------------------------------------------------------------------
 
-    ! Calls in subroutine WRITE_COV_PLOTFILE: 
-    ! => strlen (on line <339>)
     subroutine write_cov_plotfile
+        !! Write kalman covariances to files for plotting with gnuplot.
+        !! Write the cov matrix as given from kalman. Only convert to
+        !! correlation matrix for plotting, rather than covariance.
+        !!
+        !! Calls:  => strlen
 
-
-
-
-        ! write kalman covariances to files for plotting with gnuplot.
-        ! write the cov matrix as given from kalman. Only convert to
-        ! correlation matrix for plotting, rather than covariance.
-
-        implicit none
-
-        !        integer*4, parameter :: nn = 1    ! make bigger for fine-grained plots
-
-        integer*4 i,j,ist,ip,jp,m1,m2
-        real*8 xx,dei,dej
-        character chr3*3
+        ! integer*4, parameter :: nn = 1    ! make bigger for fine-grained plots
+        integer*4 :: i,j,ist,ip,m1,m2
+        real*8 :: xx,dei,dej
+        character*3 :: chr3
 
         ! dump covariances to local file.
         ! it appears units 0,17 appear historical - skip them
+
+        if (mt1 /= mt2) return
 
         write(*,*) 'Got into write_cov_plotfile'
 
@@ -441,44 +431,28 @@ contains
 
         return
 
-20      FORMAT(3(1X,1PE13.6))
+        20 FORMAT(3(1X,1PE13.6))
 
     end subroutine write_cov_plotfile
 
     !---------------------------------------------------------------------------------
 
-    ! Calls in subroutine WRITE_ENDF: 
-    ! => write_endf_covx (on line <552>)
-    subroutine write_endf
-
-
-        ! read in covariances from Kalman & convert to correlation matrix.
-        ! write these corr matrix to MF33 in ENDF file (if supplied) and
-        ! create covariance files for plotting with gnuplot.
-
-        implicit none
-
-        integer*4 i,j,k,iskip,iof,ne,status
-        real*8 xx,eth
-        real*8, allocatable :: e(:),d(:),s(:),v(:,:),c(:,:)
-
-        type (endf_file) endf
-        type (endf_mat), pointer :: mat
-
-        write(*,*) 'Got into write_endf'
+    subroutine read_endf_source
+        !! Read ENDF-6 formatted file  or specific MAT from the ENDF library 
+        !! to which covariances will be added.
 
         status = read_endf_file(file(l1:l2)//'.endf',endf)
         if(status /= 0) then
             write(6,*) ' Error reading '//file(l1:l2)//'.endf'
-            return
+            stop
         endif
         mat => endf%mat
         if(mat1 == 0) then
             ! use first mat in file
             if(.not.associated(mat)) then
                 write(6,*) 'ENDF file contains no materials'
-                return
-            endif
+                stop
+            endif 
         else
             ! find this MAT in ENDF file
             do while(associated(mat))
@@ -487,11 +461,26 @@ contains
             end do
             if(.not.associated(mat)) then
                 write(6,*) 'Specified MAT not found in ENDF file'
-                return
+                stop
             endif
         endif
+    end subroutine read_endf_source
+
+    !---------------------------------------------------------------------------------
+
+    subroutine write_endf
+        !! Read in covariances from Kalman & convert to correlation matrix.
+        !! Write these corr matrix to MF33 in ENDF file (if supplied) and
+        !! create covariance files for plotting with gnuplot.
+        !!
+        !! Calls : => write_endf_covx
+
+        integer*4 :: i, j, k, iskip, iof, ne, status
+        real*8 :: xx, eth, eth2
+        real*8, allocatable :: e(:), d(:), s(:), v(:,:), c(:,:)
 
         eth = endf_thr(mat,mt1)
+        eth2 = endf_thr(mat,mt2)
 
         ! get number of bins in MF33 covar matrix
 
@@ -500,7 +489,6 @@ contains
         else
             k = 1
         endif
-
         iskip = 0
         do i = 1,nenrg
             if(x(i) > eth) THEN
@@ -508,11 +496,10 @@ contains
                 exit
             endif
         end do
-
         ! if the cross section right above threshold is
         ! too small (< 1 microbarn), skip it.
 
-        if(y(iskip+1) < 1.D-03) iskip = iskip + 1
+        if(y(iskip+1) < 1.D-3) iskip = iskip + 1
 
         ! NOW THE NUMBER OF ENERGY POINTS, NE, IS NENRG+K-ISKIP
         ! K=1 FOR MT=1,102 ETC.
@@ -524,6 +511,7 @@ contains
         ! allocate our arrays
 
         allocate(e(ne),d(ne),s(ne),v(ne-1,ne-1),c(ne-1,ne-1))
+
 
         e = 0.D0
         s = 0.D0
@@ -583,36 +571,31 @@ contains
                 v(i,j) = v(i,j)/(s(i)*s(j))
             end do
         end do
-
-!        call write_endf_cov(endf, mat, ne, e, v)
+        !        call write_endf_cov(endf, mat, ne, e, v)
         call write_endf_covx(endf, mat, ne, e, v)
 
         deallocate(e,d,s,v,c)
 
         return
 
-20      FORMAT(3(1X,1PE13.6))
+        20      FORMAT(3(1X,1PE13.6))
 
     end subroutine write_endf
 
     !---------------------------------------------------------------------------------
 
     real*8 function endf_thr(mat,mt)
-
-        ! return energy threshold in MeV for specifed MT
-        ! parse ENDF material depending on MT
-
-        implicit none
+        !! Return energy threshold in MeV for specifed MT
+        !! parse ENDF material depending on MT.
 
         type (endf_mat), pointer :: mat
         integer*4, intent(in) :: mt
 
         integer*4 i,j
-        real*8 eth
+        real*8 :: eth
         type (mf_3), pointer :: mf3
         type (tab1), pointer :: tb
 
-        write(*,*) 'Got into endf_thr'
 
         if(.not.associated(mat)) then
             endf_thr = 0.D0
@@ -635,7 +618,7 @@ contains
         else
 
             ! find first non-zero cross section in MF3 for MT1
-
+            
             mf3 => mat%mf3
             do while(associated(mf3))
                 if(mf3%mt == mt1) exit
@@ -643,7 +626,7 @@ contains
             end do
             if(associated(mf3)) then
                 tb => mf3%tb
-                do i = 1,tb%nr
+                do i = 1,tb%np
                     if(tb%dat(i)%y > 0.D0) then
                         eth = tb%dat(i)%x
                         exit
@@ -665,10 +648,7 @@ contains
     !---------------------------------------------------------------------------------
 
     logical*4 function res(mt)
-
-        ! return .true. only for MT's that can have resonances
-
-        implicit none
+        !! Return .true. only for MT's that can have resonances
 
         integer*4, intent(in) :: mt
 
@@ -679,16 +659,10 @@ contains
 
     !---------------------------------------------------------------------------------
 
-    ! Calls in subroutine WRITE_ENDF_COV: 
-    ! => system (on line <719>)
     subroutine write_endf_cov(endf, mat, ne, en, cov)
-
-
-
-
-        ! append covariances to ENDF file
-
-        implicit none
+        !! Append covariances to ENDF file.
+        !!
+        !! Calls: => system 
 
         type (endf_file) endf                    ! current file
         type (endf_mat), pointer :: mat          ! current material
@@ -696,20 +670,16 @@ contains
         real*8, intent(in) :: en(ne)             ! energies
         real*8, intent(in) :: cov(ne-1,ne-1)     ! relative covariances
 
-        logical*4 qins
-        integer*4 status
+        logical*4 :: qins
+        integer*4 :: status
 
         type (mf_33), target :: nf33
         type (mf_33), pointer :: mf33
         type (mf33_sect), pointer :: sct
         type (ni_cov_sect), pointer :: ni
 
-
-
         if(mt1 > 900) return
         if(.not.associated(mat)) return
-
-        write(*,*) 'Got into write_endf_cov', mt1, mt2
 
         ! create our MF33 section
 
@@ -761,15 +731,13 @@ contains
 
         return
     end subroutine write_endf_cov
+    
     !---------------------------------------------------------------------------------
 
-    ! Calls in subroutine WRITE_ENDF_COVX: 
-    ! => system (on line <819>)
     subroutine write_endf_covx(endf, mat, ne, en, cov)
-
-        ! append covariances to ENDF file
-
-        implicit none
+        !! Append covariances to ENDF file (alternative to write_endf_cov)
+        !!
+        !! Calls : => system 
 
         type (endf_file) endf                    ! current file
         type (endf_mat), pointer :: mat          ! current material
@@ -778,38 +746,38 @@ contains
         real*8, intent(in) :: cov(ne-1,ne-1)     ! relative covariances
 
         logical*4 qins
-        integer*4 status
-        integer*4, save :: inl                   ! enumertes sections
+        ! integer*4 status
+        integer*4, save :: inl                   ! enumerates sections
+        integer*4 :: il                          ! enumerates reactions
 
         type (mf_33), target :: nf33
-        type (mf_33), pointer :: mf33
+        type (mf_33), save, pointer :: mf33
         type (mf33_sect), pointer :: sct
         type (ni_cov_sect), pointer :: ni
 
-        integer*4, parameter :: mt(7) = (/1,2,4,5,16,102,103/)
+        ! integer*4, parameter :: mt(nrs) = (/1,2,4,5,16,102,103,107/) ! MT selected for ENDF formating (defined already)
 
         if(mt1 > 900) return
         if(.not.associated(mat)) return
 
-
-        write(*,*) 'Got into write_endf_cov'
-
         ! create our MF33 section
 
-        nf33%mt  = mt(1)
+        ! create section header line data
+        nf33%mt  = mt1
         nf33%za  = mat%mf1%za
         nf33%awr = mat%mf1%awr
         nf33%mtl = 0
-        nf33%nl  = 1
+        nf33%nl  = 1 ! calculate here how many section i.e., nrs-current section position we need
 
-        do inl = 1,1
-            write(*,*) 'HERE inl=',inl
+        il = findloc(mt,mt1,1)
+        do inl = 1,nf33%nl  ! 1 implies a diagonal subsection for mt1, i.e. no reaction cross-correlations
+            write(*,*) 'inl =',inl
             allocate(nf33%sct(inl))
             sct => nf33%sct(inl)
             sct%mf1  = 0
             sct%lfs1 = 0
             sct%mat1  = 0
-            sct%mt1   = mt(inl)
+            sct%mt1   = mt(il+inl-1)
             sct%nc    = 0
             sct%ni    = 1 !inl   ! 1 ! total number of ni(inl)-type subsections
             allocate(sct%nis(1))
@@ -837,8 +805,6 @@ contains
             end if
         end do
 
-        write(*,*) 'DONE do loop'
-
         ! look in file to see what's already there.
         ! if a MT1 section found, remove it and replace it
         ! with the section we just created. Of course, this
@@ -846,19 +812,40 @@ contains
         ! ENDF evaluation, which may have an different energy
         ! range from the one we're replacing. For now, just
         ! stick in the MF33 for this MT in the ENDF file.
-
-        mf33 => pop(mat%mf33,mt1)
+        
+        ! mf33 => pop(mat%mf33,mt1)
+        print *, "putting cov for mt=", mt1
         qins = put(mat%mf33,nf33)
         if(.not.qins) then
             write(6,*) ' Error inserting MF33, MT=',mt1
         endif
-        call system('rm -r '//file(l1:l2)//'-kal.endf')
 
-        status = write_endf_file(file(l1:l2)//'-kal.endf',endf)
-        if(status /= 0) then
-            write(6,*) ' Error writing '//file(l1:l2)//'-kal.endf'
-        endif
+        ! if(mt1 == mt(nrs) .and. mt2 == mt(nrs) .or. writeRun) then
+            ! print *, "what's inside ", endf%mat%mf33%sct(1)%mt1
+            ! print *, "what's inside ", endf%mat%mf33%sct(2)%mt1
+            ! print *, "what's inside ", endf%mat%mf33%sct(3)%mt1
+            ! print *, "what's inside ", endf%mat%mf33%sct(4)%mt1
+            ! print *, "what's inside ", endf%mat%mf33%sct(5)%mt1
+            ! print *, "what's inside ", endf%mat%mf33%sct(6)%mt1
+            ! kalFile = file(l1:l2)//'-mt'//trim(str(mt1))//'-kal.endf'
+            call system('rm -r '//kalFile)
+            status = write_endf_file(kalFile,endf)
+            if(status /= 0) then
+                write(6,*) ' Error writing ', kalFile
+            endif
+            call system('mv '//kalFile//' '//originalFile)
+        ! endif
+
         return
     end subroutine write_endf_covx
+
+    character(len=20) function str(k)
+        !! Convert an integer to string.
+
+        integer, intent(in) :: k
+        write (str, *) k
+        str = adjustl(str)
+
+    end function str
 
 end program kalend
