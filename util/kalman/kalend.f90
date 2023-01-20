@@ -489,6 +489,7 @@ contains
         else
             k = 1
         endif
+        k = 1 ! let's try to start with the first point
         iskip = 0
         do i = 1,nenrg
             if(x(i) > eth) THEN
@@ -503,7 +504,7 @@ contains
 
         ! NOW THE NUMBER OF ENERGY POINTS, NE, IS NENRG+K-ISKIP
         ! K=1 FOR MT=1,102 ETC.
-        ! K=2 FOR MT=16,17 ETC.
+        ! K=2 FOR MT=16,17 ETC.  !actually we do not need 1.0E-11 for (n,2n),...
 
         iof = k - iskip
         ne = nenrg + iof
@@ -518,7 +519,7 @@ contains
         d = 0.D0
         v = 0.D0
         c = 0.D0
-
+        ! HERE next one may be a source of problem: 
         e(1) = 1.D-11
         if(k == 2) then
             ! for threshold reactions, add point at threshold energy
@@ -595,7 +596,6 @@ contains
         real*8 :: eth
         type (mf_3), pointer :: mf3
         type (tab1), pointer :: tb
-
 
         if(.not.associated(mat)) then
             endf_thr = 0.D0
