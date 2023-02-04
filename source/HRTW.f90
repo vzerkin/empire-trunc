@@ -1,5 +1,5 @@
 MODULE width_fluct
-    ! $Rev: 5423 $
+    ! $Rev: 5433 $
     ! $Author: mwherman $
     ! $Date: 2022-04-24 15:49:31 -0600 (Sun, 24 Apr 2022) $
     !
@@ -292,8 +292,8 @@ CONTAINS
         REAL*8 d0c, sigma_
         REAL*8 sumin_s, sumtt_s
 
-        TYPE (channel), POINTER :: out
-        TYPE (fusion),  POINTER :: in
+        TYPE (channel), POINTER :: out !! pointer to the outgoing channel
+        TYPE (fusion),  POINTER :: in  !! pointer to the incoming (fusion) channel
 
         IF (AEJc(0).EQ.0.0D0) THEN
             WRITE(8,*) 'WARNING:  Width fluctuation correction for neutron reactions only.'
@@ -667,9 +667,9 @@ CONTAINS
             jmin = abs(XJLv(i,nnur) - xjc)
             jmax = XJLv(i,nnur) + xjc
             !         if(nejc==1) write(*,*)'jmin, jmax, xjc',jmin, jmax, xjc
-            kmin = abs(jmin - MAXj(nejc) + ssxj)             !minimum k=l+1
+            kmin = int(abs(jmin - MAXj(nejc) + ssxj))        !minimum k=l+1
             kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-            kmax = jmax - 1  + ssxj                          !maximum k=l+1
+            kmax = int(jmax - 1  + ssxj)                     !maximum k=l+1
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             !         if(nejc==1) write(*,*)'kmin, kmax ', kmin, kmax
             DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
@@ -732,9 +732,9 @@ CONTAINS
                     CALL TLLOC(nnur,nejc,eout,il,frde)              !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                     jmin = abs(XJLv(i,nnur) - xjc)
                     jmax = XJLv(i,nnur) + xjc
-                    kmin = jmin - MAXj(nejc) + ssxj                 !minimum k=l+1
+                    kmin = int(jmin - MAXj(nejc) + ssxj)            !minimum k=l+1
                     kmin = MAX(kmin,1)                              !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-                    kmax = jmax - 1  + ssxj                         !maximum k=l+1
+                    kmax = int(jmax - 1  + ssxj)                    !maximum k=l+1
                     kmax = MIN(ndlw, kmax)                          !ensure we are within dimensions
                     DO k = kmin, kmax                               !do loop over l in Tlj (note that real l is k-1)
                         ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)  !check parity (1 if conserved, 0 if violated)
@@ -841,7 +841,7 @@ CONTAINS
 
     !----------------------------------------------------------------------------------------------------
 
-    SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur) ! cos sie rozpada
+    SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur)
         !
         !********************************************************************
         !*                                                         class:PPu*
