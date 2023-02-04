@@ -1,35 +1,35 @@
 subroutine ROGCC(Nnuc,Cf,Asaf)
-   !CC
-   !CC   *****************************************************************
-   !CC   *                                                      CLASS:PPU*
-   !CC   *                         R O G C C                             *
-   !CC   *                                                               *
-   !CC   *                                                               *
-   !CC   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES *
-   !CC   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON WITH COLLECTIVE *
-   !CC   * ENHANCENENT FCTORS AND USING EGSM SYSTEMATICS FOR LD PARAMETER*
-   !CC   * AT NEUTRON BINDING ENERGY.                                    *
-   !CC   *                                                               *
-   !CC   * INPUT:                                                        *
-   !CC   *  NNUC - index of the nucleus                                  *
-   !CC   *  CF   - 1. for the saddle point, 0. otherwise                 *
-   !CC   *  Asaf - controls a-parameter at a saddle point                *
-   !CC   *       - IF Asaf.GE.0 it corresponds to the gamma-param.       *
-   !CC   *         in the Ignatyuk formula (Asaf=0 selects               *
-   !CC   *         asymptotic value for a)                               *
-   !CC   *       - IF Asaf.lt.0 asymptotic value of a-parameter          *
-   !CC   *         times ABS(Asaf) is taken for at the saddle point      *
-   !CC   *  BF controls shape of the nucleus                             *
-   !CC   *     BF=0. stands for the saddle point                         *
-   !CC   *     BF=1. stands for the oblate   yrast state                 *
-   !CC   *     BF=2. stands for the prolate  yrast state                 *
-   !CC   *     BF=3. stands for the triaxial yrast state                 *
-   !CC   *  SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)           *
-   !CC   *                                                               *
-   !CC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
-   !CC   *                                                               *
-   !CC   *****************************************************************
-   !CC      
+   !! 
+   !!c    *****************************************************************
+   !!c    *                                                      CLASS:PPU*
+   !!c    *                         R O G C C                             *
+   !!c    *                                                               *
+   !!c    *                                                               *
+   !!c    * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES *
+   !!c    * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON WITH COLLECTIVE *
+   !!c    * ENHANCENENT FCTORS AND USING EGSM SYSTEMATICS FOR LD PARAMETER*
+   !!c    * AT NEUTRON BINDING ENERGY.                                    *
+   !!c    *                                                               *
+   !!c    * INPUT:                                                        *
+   !!c    *  NNUC - index of the nucleus                                  *
+   !!c    *  CF   - 1. for the saddle point, 0. otherwise                 *
+   !!c    *  Asaf - controls a-parameter at a saddle point                *
+   !!c    *       - IF Asaf.GE.0 it corresponds to the gamma-param.       *
+   !!c    *         in the Ignatyuk formula (Asaf=0 selects               *
+   !!c    *         asymptotic value for a)                               *
+   !!c    *       - IF Asaf.lt.0 asymptotic value of a-parameter          *
+   !!c    *         times ABS(Asaf) is taken for at the saddle point      *
+   !!c    *  BF controls shape of the nucleus                             *
+   !!c    *     BF=0. stands for the saddle point                         *
+   !!c    *     BF=1. stands for the oblate   yrast state                 *
+   !!c    *     BF=2. stands for the prolate  yrast state                 *
+   !!c    *     BF=3. stands for the triaxial yrast state                 *
+   !!c    *  SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)           *
+   !!c    *                                                               *
+   !!c    * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
+   !!c    *                                                               *
+   !!c    *****************************************************************
+   !!       
 
    implicit none
 
@@ -39,80 +39,80 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    !
    ! Dummy arguments
    !
-   integer*4, intent(in) :: Nnuc          ! nucleus index
-   real*8,intent(in) :: Asaf              ! controls a-parameter at a saddle point 
-   real*8,intent(in) :: Cf                ! 1. for the saddle point, 0. otherwise
+   integer*4, intent(in) :: Nnuc          !! nucleus index
+   real*8,intent(in) :: Asaf              !! controls a-parameter at a saddle point 
+   real*8,intent(in) :: Cf                !! 1. for the saddle point, 0. otherwise
    !
    ! common variables
    !
-   real*8 :: A2                           ! EPS deformation including damped static and dynamical deformation
-   real*8 :: A23                          ! A**(2/3)
-   real*8 :: AP1                          ! parameter in the Ignatyuk 'a' systematics 
-   real*8 :: AP2                          ! parameter in the Ignatyuk 'a' systematics
-   real*8 :: GAMma                        ! parameter in the Ignatyuk 'a' systematics 
-   real*8 :: BF                           ! controls shape of the nucleus (see above)
-   real*8 :: DEL                          ! pairing shift (neutrons plus protons)
-   real*8 :: DELp                         ! pairing shift for single gas (systematics)
-   real*8 :: Scutf = 0.146                ! spin cut-off factor (0.146 is recommended)
-   integer*4 :: NLWst                     ! number of partial waves up to stability against fission
+   real*8 :: A2                           !! EPS deformation including damped static and dynamical deformation
+   real*8 :: A23                          !! A**(2/3)
+   real*8 :: AP1                          !! parameter in the Ignatyuk 'a' systematics 
+   real*8 :: AP2                          !! parameter in the Ignatyuk 'a' systematics
+   real*8 :: GAMma                        !! parameter in the Ignatyuk 'a' systematics 
+   real*8 :: BF                           !! controls shape of the nucleus (see above)
+   real*8 :: DEL                          !! pairing shift (neutrons plus protons)
+   real*8 :: DELp                         !! pairing shift for single gas (systematics)
+   real*8 :: Scutf = 0.146                !! spin cut-off factor (0.146 is recommended)
+   integer*4 :: NLWst                     !! number of partial waves up to stability against fission
    common /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
-   real*8 :: TCRt                         ! critical temerature
-   real*8 :: ECOnd                        ! condenstaion energy
-   real*8 :: ACRt                         ! level density parameter at critical energy (temporary value in iteration LIKELY NOT NEEDED)
-   real*8 :: UCRt                         ! critical energy
-   real*8 :: DETcrt                       ! determinant at critical energy
-   real*8 :: SCR                          ! entropy at critical energy 
-   real*8 :: ACR                          ! level density parameter at critical energy
-   real*8 :: ATIl                         ! asymptotic value of LD parameter 'a' 
+   real*8 :: TCRt                         !! critical temerature
+   real*8 :: ECOnd                        !! condenstaion energy
+   real*8 :: ACRt                         !! level density parameter at critical energy (temporary value LIKELY NOT NEEDED)
+   real*8 :: UCRt                         !! critical energy
+   real*8 :: DETcrt                       !! determinant at critical energy
+   real*8 :: SCR                          !! entropy at critical energy 
+   real*8 :: ACR                          !! level density parameter at critical energy
+   real*8 :: ATIl                         !! asymptotic value of LD parameter 'a' 
    common /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
-   real*8 :: am                           ! level density parameter 'a' 
-   real*8 :: ux                           ! matching energy between CT and Fermi-gas level densities
-   real*8 :: eo                           ! Eo enrgy shift in CT formula 
-   real*8 :: Tct                          ! temperature in constant temperature model
+   real*8 :: am                           !! level density parameter 'a' 
+   real*8 :: ux                           !! matching energy between CT and Fermi-gas level densities
+   real*8 :: eo                           !! Eo enrgy shift in CT formula 
+   real*8 :: Tct                          !! temperature in constant temperature model
    common /CT/ am,ux,eo,Tct
    !
    ! Local variables
    !
-   integer*4, PARAMETER :: nde = 200      ! number of exc. energies in the Fermi-gas table for matching CT
-   real*8 :: FSHELL                       ! energy dependence of the LD 'a' parameter due to shell (function)
-   real*8 :: mompar                       ! moment of inertia with respect to the symmetry axis
-   real*8 :: momort                       ! moment of inertia with respect to the orthogonal to the symmetry axis
-   real*8 :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
-   real*8 :: T                            ! nuclear temperature (not constant temperature)
-   real*8 :: ratio(1:2) = 0.5             ! parity ratio
-   real*8 :: eMatch = 0.0D0               ! upper energy boundary for CT  
-   real*8 :: ro_u = 0.0D0                 ! level density at the low-energy side of the matching point ??? 
-   real*8 :: ro_j = 0.0D0                 ! spin/parity dependent level density at the low-energy side of the matching point ???
-   real*8 :: sig2                         ! squared spin cut-off 
-   real*8 :: sig2h = 0.0D0                ! squared spin cut-off calculated from Fermi-gas at Ux
-   real*8 :: sig2l = 0.0D0                ! squared spin cut-off calculated from discrete levels
-   real*8 :: e                            ! excitation energy
-   real*8 :: u                            ! excitation energy  
-   real*8 :: fde = 20.0D0/nde             ! energy step in Fermi-gas LD for matching CT LD
-   real*8 :: roFG(0:nde)= 0.0D0           ! total Fermi-gas LD for matching CT LD 
-   ! real*8 :: deriv1, deriv2               ! derivatives of Fermi-gas level densities at two excitation energies
-   real*8 :: eps                          ! tolerance when comparing two matching quantities
-   real*8 :: El                           ! energy of the lowest discrete level used in a cumulative-number of levels fit
-   real*8 :: Eu                           ! energy of the highest discrete level used in a cumulative-number of levels fit
-   real*8 :: stab                         ! stability limit versus fission
-   real*8 :: cigor                        ! ratio of the longest axis to the shortest one
-   real*8 :: xj                           ! running value of spin
-   ! real*8 :: a1, b1, c1                   ! auxiliary variables
-   ! real*8 :: enorm                        ! probbably USELES 
-   real*8 :: roUx                         ! FG total level densities at the Ux matching point (= UCRt)
-   integer*4 :: Nl                        ! number of the lowest discrete level used in a cumulative-number of levels fit
-   integer*4 :: Nu                        ! number of the highest discrete level used in a cumulative-number of levels fit
-   integer*4 :: ia                        ! nucleus mass number (A)
-   integer*4 :: in                        ! number of neutrons
-   integer*4 :: iz                        ! number of protons
-   integer*4 :: i, ig, j, iux             ! running indices
+   integer*4, PARAMETER :: nde = 200      !! number of exc. energies in the Fermi-gas table for matching CT
+   real*8 :: FSHELL                       !! energy dependence of the LD 'a' parameter due to shell (function)
+   real*8 :: mompar                       !! moment of inertia with respect to the symmetry axis
+   real*8 :: momort                       !! moment of inertia with respect to the orthogonal to the symmetry axis
+   real*8 :: seff2                        !! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
+   real*8 :: T                            !! nuclear temperature (not constant temperature)
+   real*8 :: ratio(1:2) = 0.5             !! parity ratio
+   real*8 :: eMatch = 0.0D0               !! upper energy boundary for CT  
+   real*8 :: ro_u = 0.0D0                 !! level density at the low-energy side of the matching point ??? 
+   real*8 :: ro_j = 0.0D0                 !! spin/parity dependent level density at the low-energy side of the matching point ???
+   real*8 :: sig2                         !! squared spin cut-off 
+   real*8 :: sig2h = 0.0D0                !! squared spin cut-off calculated from Fermi-gas at Ux
+   real*8 :: sig2l = 0.0D0                !! squared spin cut-off calculated from discrete levels
+   real*8 :: e                            !! excitation energy
+   real*8 :: u                            !! excitation energy  
+   real*8 :: fde = 20.0D0/nde             !! energy step in Fermi-gas LD for matching CT LD
+   real*8 :: roFG(0:nde)= 0.0D0           !! total Fermi-gas LD for matching CT LD 
+   ! real*8 :: deriv1, deriv2               !! derivatives of Fermi-gas level densities at two excitation energies
+   real*8 :: eps                          !! tolerance when comparing two matching quantities
+   real*8 :: El                           !! energy of the lowest discrete level used in a cumulative-number of levels fit
+   real*8 :: Eu                           !! energy of the highest discrete level used in a cumulative-number of levels fit
+   real*8 :: stab                         !! stability limit versus fission
+   real*8 :: cigor                        !! ratio of the longest axis to the shortest one
+   real*8 :: xj                           !! running value of spin
+   ! real*8 :: a1, b1, c1                   !! auxiliary variables
+   ! real*8 :: enorm                        !! probbably USELES 
+   real*8 :: roUx                         !! FG total level densities at the Ux matching point (= UCRt)
+   integer*4 :: Nl                        !! number of the lowest discrete level used in a cumulative-number of levels fit
+   integer*4 :: Nu                        !! number of the highest discrete level used in a cumulative-number of levels fit
+   integer*4 :: ia                        !! nucleus mass number (A)
+   integer*4 :: in                        !! number of neutrons
+   integer*4 :: iz                        !! number of protons
+   integer*4 :: i, ig, j, iux             !! running indices
 
-   real*8 :: ro_fermi                     ! funtion - Fermi Gas total level densities
-   real*8 :: ro_ct                        ! funtion - Constant temperature total level densities
-   real*8 :: j_fermi                      ! funtion - Fermi Gas level density spin/parity distribution
-   real*8 :: BSQ                          ! funtion - calculates Igor factor to increse 'a' due to increased surface
+   real*8 :: ro_fermi                     !! funtion - Fermi Gas total level densities
+   real*8 :: ro_ct                        !! funtion - Constant temperature total level densities
+   real*8 :: j_fermi                      !! funtion - Fermi Gas level density spin/parity distribution
+   real*8 :: BSQ                          !! funtion - calculates Igor factor to increse 'a' due to increased surface
 
    if (Cf.NE.0.0D0) then
       BF = 0.0D0        ! normal level densities
@@ -325,20 +325,19 @@ end subroutine ROGCC
 
 
 
-real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
-
+real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2
+   !!c   *********************************************************************
+   !!c   *                                                         class:ppu *
+   !!c   *                     R O _ F E R M I                               *
+   !!c   *                                                                   *
+   !!c   *  Calculates total Fermi-gas level (not state!) densities using    *
+   !!c   *  Ignatyuk approach. Collective enhancement effects are taken into *
+   !!c   *  account including their energy fade-out.                         *
+   !!c   *                                                                   *
+   !!c   *  BF=0. saddle point         (rot. perpend. to symm.)              *
+   !!c   *********************************************************************
+   !!c
    implicit none
-   !cc   *********************************************************************
-   !cc   *                                                         class:ppu *
-   !cc   *                     R O _ F E R M I                               *
-   !cc   *                                                                   *
-   !cc   *  Calculates total Fermi-gas level (not state!) densities using    *
-   !cc   *  Ignatyuk approach. Collective enhancement effects are taken into *
-   !cc   *  account including their energy fade-out.                         *
-   !cc   *                                                                   *
-   !cc   *  BF=0. saddle point         (rot. perpend. to symm.)              *
-   !cc   *********************************************************************
-   !cc
 
    real*8, intent(in)  :: Anuc
    real*8, intent(in)  :: E
@@ -347,7 +346,7 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
    real*8, intent(out) :: T
    real*8, intent(in)  :: Bf
    real*8, intent(in)  :: A2
-   real*8, intent(in)  :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
+   real*8, intent(in)  :: seff2                        !! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
 
    !
    ! Local variables
@@ -376,20 +375,19 @@ end function ro_fermi
 
 
 real*8 function j_fermi(J, seff2)
-   
    implicit none
-   !cc   *********************************************************************
-   !cc   *                                                         class:ppu *
-   !cc   *                     j _ f e r m i                                 *
-   !cc   *                                                                   *
-   !cc   *  Spin distribution for Fermi-gas level densities. Sum of both     *
-   !cc   *  parities.                                                        *
-   !cc   *                                                                   *
-   !cc   *********************************************************************
+   !!c   *********************************************************************
+   !!c   *                                                         class:ppu *
+   !!c   *                     j _ f e r m i                                 *
+   !!c   *                                                                   *
+   !!c   *  Spin distribution for Fermi-gas level densities. Sum of both     *
+   !!c   *  parities.                                                        *
+   !!c   *                                                                   *
+   !!c   *********************************************************************
    
-   real*8, intent(in) :: J                            ! spin (might be signed when parity is included) 
-   real*8, intent(in) :: seff2                        ! mompar**0.333D0*momort**0.6666D0*t (equivalent to \sigma^2)
-   ! real*8, intent(in) :: parityRatio                  ! ratio of + (or -) parity to total level densities
+   real*8, intent(in) :: J                            !! spin (might be signed when parity is included) 
+   real*8, intent(in) :: seff2                        !! mompar**0.333D0*momort**0.6666D0*t (equivalent to \sigma^2)
+   ! real*8, intent(in) :: parityRatio                  !! ratio of + (or -) parity to total level densities
 
       ! j_fermi = (1.d0/(2.d0*sqrt(2.d0*pi)))*(2.d0*J + 1.d0)/seff2 **1.5*EXP(-(J+0.5)**2/(2.d0*seff2))
       j_fermi = ((2.d0*J + 1.d0)/(2*seff2))*EXP(-(J+0.5)**2/(2.d0*seff2))
@@ -398,20 +396,19 @@ real*8 function j_fermi(J, seff2)
 end function j_fermi
 
 real*8 function ro_ct(E, Tct, eo)
-   
    implicit none
-   !cc   *********************************************************************
-   !cc   *                                                         class:ppu *
-   !cc   *                     r o _ c t                                     *
-   !cc   *                                                                   *
-   !cc   *  Total level densities unsing constant temperature  model.        *
-   !cc   *                                                                   *
-   !cc   *                                                                   *
-   !cc   *********************************************************************
+   !!c   *********************************************************************
+   !!c   *                                                         class:ppu *
+   !!c   *                     r o _ c t                                     *
+   !!c   *                                                                   *
+   !!c   *  Total level densities unsing constant temperature  model.        *
+   !!c   *                                                                   *
+   !!c   *                                                                   *
+   !!c   *********************************************************************
    
-   real*8, intent(in) :: E                ! excitation energy
-   real*8 :: Tct                          ! temerature in constant temperature model
-   real*8 :: eo                           ! Eo in constant temperature model
+   real*8, intent(in) :: E                !! excitation energy
+   real*8 :: Tct                          !! temerature in constant temperature model
+   real*8 :: eo                           !! Eo in constant temperature model
 
    ro_ct = exp((E-eo)/Tct)/Tct
 
