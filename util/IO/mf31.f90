@@ -13,14 +13,14 @@ module ENDF_MF31_IO
     public
 
     type MF31_sect
-        integer mf1                   ! mf of 2nd E-dep crs
-        integer lfs1                  ! final excited state of 2nd E-dep crs
-        integer mat1                  ! MAT for 2nd E-dep crs
-        integer mt1                   ! MT for 2nd E-dep crs
-        integer nc                    ! # of NC-type sub-sections
-        integer ni                    ! # of NI-type sub-sections
-        type (nc_cov_sect), pointer :: ncs(:)    ! NC sections
-        type (ni_cov_sect), pointer :: nis(:)    ! NI sections
+        integer mf1                   !! mf of 2nd E-dep crs
+        integer lfs1                  !! final excited state of 2nd E-dep crs
+        integer mat1                  !! MAT for 2nd E-dep crs
+        integer mt1                   !! MT for 2nd E-dep crs
+        integer nc                    !! # of NC-type sub-sections
+        integer ni                    !! # of NI-type sub-sections
+        type (nc_cov_sect), pointer :: ncs(:)    !! NC sections
+        type (ni_cov_sect), pointer :: nis(:)    !! NI sections
     end type
 
     type MF_31
@@ -28,9 +28,9 @@ module ENDF_MF31_IO
         integer mt
         real za
         real awr
-        integer mtl                   ! MT for lumped covar (851-870)
-        integer nl                    ! number of sections (with same MT)
-        type (MF31_sect), pointer :: sct(:)    ! sections (nl)
+        integer mtl                   !! MT for lumped covar (851-870)
+        integer nl                    !! number of sections (with same MT)
+        type (MF31_sect), pointer :: sct(:)    !! sections (nl)
     end type
 
 !------------------------------------------------------------------------------

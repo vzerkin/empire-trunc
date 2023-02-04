@@ -12,21 +12,21 @@ module ENDF_MF9_IO
     public
 
     type mf9_fnl_st
-        real qm                        ! mass-difference Q value (eV)
-        real qi                        ! reaction Q value for state specified in subsection (eV)
-        integer izap                   ! ZA of product nucleus
-        integer lfs                    ! level number of nuclide produced in reaction
-        type (tab1) mlt                ! multiplicities for FS. E=x, Y=y
+        real qm                        !! mass-difference Q value (eV)
+        real qi                        !! reaction Q value for state specified in subsection (eV)
+        integer izap                   !! ZA of product nucleus
+        integer lfs                    !! level number of nuclide produced in reaction
+        type (tab1) mlt                !! multiplicities for FS. E=x, Y=y
     end type
 
     type MF_9
-        type (mf_9), pointer :: next   ! next section
-        integer mt                     ! MT
-        real za                        ! ZA for material
-        real awr                       ! AWR for material
-        integer lis                    ! level # of target
-        integer ns                     ! # of final states specified
-        type(mf9_fnl_st), pointer :: fst(:)    ! final states
+        type (mf_9), pointer :: next   !! next section
+        integer mt                     !! MT
+        real za                        !! ZA for material
+        real awr                       !! AWR for material
+        integer lis                    !! level # of target
+        integer ns                     !! # of final states specified
+        type(mf9_fnl_st), pointer :: fst(:)    !! final states
     end type
 
 !------------------------------------------------------------------------------

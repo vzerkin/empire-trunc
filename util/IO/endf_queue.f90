@@ -27,29 +27,29 @@ module endf_queue
 
     implicit none
 
-    ! This module provides generic routines to locate, remove and insert
-    ! an MF/MT section to/from a linked list of sections.
+    !! This module provides generic routines to locate, remove and insert
+    !! an MF/MT section to/from a linked list of sections.
 
-    ! To remove or "pop" a section, use the 'pop' function specifying the
-    ! head of the list along with the MT number to find & remove. If it's
-    ! found in the list then pop removes the section and returns a
-    ! pointer to that section.
+    !! To remove or "pop" a section, use the 'pop' function specifying the
+    !! head of the list along with the MT number to find & remove. If it's
+    !! found in the list then pop removes the section and returns a
+    !! pointer to that section.
 
-    ! To insert, use the 'put' function, specifying the head of the list
-    ! and the section to insert. If a section is found in the list with
-    ! the same MT as the one to be inserted, put does not insert the
-    ! section and returns false. If there is not already a section with
-    ! the same MT as the one to be inserted, then put inserts the section
-    ! into the list and put returns true.
+    !! To insert, use the 'put' function, specifying the head of the list
+    !! and the section to insert. If a section is found in the list with
+    !! the same MT as the one to be inserted, put does not insert the
+    !! section and returns false. If there is not already a section with
+    !! the same MT as the one to be inserted, then put inserts the section
+    !! into the list and put returns true.
 
-    ! To locate a section with a given MT in a list, use 'find'. Here the
-    ! head of the list is provided along with the MT number to locate. If
-    ! a section with the specified MT is found, find returns a pointer
-    ! to that section; if not, it returns a pointer to null.
+    !! To locate a section with a given MT in a list, use 'find'. Here the
+    !! head of the list is provided along with the MT number to locate. If
+    !! a section with the specified MT is found, find returns a pointer
+    !! to that section; if not, it returns a pointer to null.
 
-    ! this is yet another example of where an abstract section class
-    ! would have come in quite handy. In Fortran95 we have to repeat
-    ! these basic functions over & over for every MF type....
+    !! this is yet another example of where an abstract section class
+    !! would have come in quite handy. In Fortran95 we have to repeat
+    !! these basic functions over & over for every MF type....
 
     private
 

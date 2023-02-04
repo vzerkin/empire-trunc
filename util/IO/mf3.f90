@@ -13,13 +13,13 @@ module ENDF_MF3_IO
 
     type MF_3
         type (MF_3), pointer :: next
-        integer mt                   ! MT reaction
-        real za                      ! ZA
-        real awr                     ! AWR
-        real qm                      ! mass-diff Q-value
-        real qi                      ! Q-value for lowest E state in MT = QM - E_excited_state
-        integer lr                   ! "complex" breakup flag
-        type (tab1) tb               ! table of values
+        integer mt                   !! MT reaction
+        real za                      !! ZA
+        real awr                     !! AWR
+        real qm                      !! mass-diff Q-value
+        real qi                      !! Q-value for lowest E state in MT = QM - E_excited_state
+        integer lr                   !! "complex" breakup flag
+        type (tab1) tb               !! table of values
     end type
 
     contains

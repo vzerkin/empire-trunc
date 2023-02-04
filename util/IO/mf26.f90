@@ -15,67 +15,67 @@ module ENDF_MF26_IO
 
     type mf26_law1_eprm
         real e2
-        real, pointer :: b(:)              ! angle parameters (na)
+        real, pointer :: b(:)              !! angle parameters (na)
     end type
 
     type mf26_law1_list
-        real e1                            ! incident energy
-        integer nd                         ! # outgoing discreet energies
-        integer na                         ! # angular params
-        integer nep                        ! # secondary energies
-        type (mf26_law1_eprm), pointer :: prm(:)    ! energy bin parameters (nep)
+        real e1                            !! incident energy
+        integer nd                         !! # outgoing discreet energies
+        integer na                         !! # angular params
+        integer nep                        !! # secondary energies
+        type (mf26_law1_eprm), pointer :: prm(:)    !! energy bin parameters (nep)
     end type
 
     type mf26_law1
-        integer lang                       ! ang rep flag
-        integer lep                        ! interpolation scheme for 2nd E
-        integer nr                         ! tab2 interpolation for primary
-        integer ne                         ! # primary energies
-        type (int_pair), pointer :: itp(:) ! interpolation tables
-        type (mf26_law1_list), pointer :: ll(:)     ! primaries
+        integer lang                       !! ang rep flag
+        integer lep                        !! interpolation scheme for 2nd E
+        integer nr                         !! tab2 interpolation for primary
+        integer ne                         !! # primary energies
+        type (int_pair), pointer :: itp(:) !! interpolation tables
+        type (mf26_law1_list), pointer :: ll(:)     !! primaries
     end type
 
     !---------------------  LAW 2  ---------------------------------------------
 
     type mf26_law2_list
-                real e1                    ! incident energy
-        integer lang                       ! ang rep flag
-        integer nl                         ! highest order L or # cosines
-        real, pointer :: a(:)              ! parameters (nw
+                real e1                    !! incident energy
+        integer lang                       !! ang rep flag
+        integer nl                         !! highest order L or # cosines
+        real, pointer :: a(:)              !! parameters (nw
     end type
 
     type mf26_law2
-        integer nr                         ! tab2 interpolation for primary
-        integer ne                         ! # primary energies
-        type (int_pair), pointer :: itp(:) ! interpolation tables
-        type (mf26_law2_list), pointer :: ll(:)    ! primaries
+        integer nr                         !! tab2 interpolation for primary
+        integer ne                         !! # primary energies
+        type (int_pair), pointer :: itp(:) !! interpolation tables
+        type (mf26_law2_list), pointer :: ll(:)    !! primaries
     end type
 
     !---------------------  LAW 8  ---------------------------------------------
 
     type mf26_law8
-        type (tab1) etab                   ! energy transfer table. x=Eint, y=ET
+        type (tab1) etab                   !! energy transfer table. x=Eint, y=ET
     end type
 
     !---------------------   products  ---------------------------------------------
 
     type mf26_product
-        real zap                           ! product ZA
-        real awi                           ! mass of incoming projectile in neutron masses
-        integer law                        ! law type
-        type (tab1) ytb                    ! yield table
+        real zap                           !! product ZA
+        real awi                           !! mass of incoming projectile in neutron masses
+        integer law                        !! law type
+        type (tab1) ytb                    !! yield table
         type (mf26_law1), pointer :: law1
         type (mf26_law2), pointer :: law2
         type (mf26_law8), pointer :: law8
     end type
 
     type MF_26
-        type (mf_26), pointer :: next      ! next section
-        integer mt                         ! MT
-        real za                            ! ZA for material
-        real awr                           ! AWR for material
-        integer nk                         ! # reaction product subsections
-        type (mf26_product), pointer :: prd(:)    ! product sub-section (photons or electrons only)
+        type (mf_26), pointer :: next      !! next section
+        integer mt                         !! MT
+        real za                            !! ZA for material
+        real awr                           !! AWR for material
+        integer nk                         !! # reaction product subsections
+        type (mf26_product), pointer :: prd(:)    !! product sub-section (photons or electrons only)
     end type
 
     !---------------------  private ---------------------------------------------

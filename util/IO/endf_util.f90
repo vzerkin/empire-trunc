@@ -6,10 +6,10 @@ module endf_util
 
     private
 
-    integer*4 :: ip = 2                  ! current data index used by terpa
-    integer*4 :: ir = 1                  ! current interpolation scheme index
-    real*8 :: tbax                       ! little beyond end of TAB1 to let in
-    type (tab1), pointer :: tb           ! TAB1 to be interpolated in terpa
+    integer*4 :: ip = 2                  !! current data index used by terpa
+    integer*4 :: ir = 1                  !! current interpolation scheme index
+    real*8 :: tbax                       !! little beyond end of TAB1 to let in
+    type (tab1), pointer :: tb           !! TAB1 to be interpolated in terpa
 
     interface intrp
         module procedure terpa

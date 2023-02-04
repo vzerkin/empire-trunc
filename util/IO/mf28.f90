@@ -12,27 +12,27 @@ module ENDF_MF28_IO
     public
 
     type mf28_trans
-        real subj                     ! secondary sub-shell designator
-        real subk                     ! tertiary sub-shell designator
-        real etr                      ! energy of transition (eV)
-        real ftr                      ! fractional prob of transition
+        real subj                     !! secondary sub-shell designator
+        real subk                     !! tertiary sub-shell designator
+        real etr                      !! energy of transition (eV)
+        real ftr                      !! fractional prob of transition
     end type
 
     type mf28_subshell
-        real subi                     ! sub-shell designator
-        integer ntr                   ! # transitions
-        real ebi                      ! binding energy
-        real eln                      ! # electrons in sub-shell
-        type (mf28_trans), pointer :: trn(:)     ! transitions (ntr)
+        real subi                     !! sub-shell designator
+        integer ntr                   !! # transitions
+        real ebi                      !! binding energy
+        real eln                      !! # electrons in sub-shell
+        type (mf28_trans), pointer :: trn(:)     !! transitions (ntr)
     end type
 
     type MF_28
-        type (mf_28), pointer :: next ! next section
-        integer mt                    ! MT
-        real za                       ! ZA for material
-        real awr                      ! AWR for material
-        integer nss                   ! # sub-shells
-        type (mf28_subshell), pointer ::  shl(:)   ! sub-shells (nss)
+        type (mf_28), pointer :: next !! next section
+        integer mt                    !! MT
+        real za                       !! ZA for material
+        real awr                      !! AWR for material
+        integer nss                   !! # sub-shells
+        type (mf28_subshell), pointer ::  shl(:)   !! sub-shells (nss)
     end type
 
 !---------------------------------------------------------------------------------------------

@@ -12,13 +12,13 @@ module ENDF_MF23_IO
     public
 
     type MF_23
-        type (mf_23), pointer :: next      ! next section
-        integer mt                         ! MT
-        real za                            ! ZA for material
-        real awr                           ! AWR for material
-        real epe                           ! subshell binding energy (eV)
-        real efl                           ! fluorescence yield
-        type (tab1) ctab                   ! Cross section table x=E, y=crs (b)
+        type (mf_23), pointer :: next      !! next section
+        integer mt                         !! MT
+        real za                            !! ZA for material
+        real awr                           !! AWR for material
+        real epe                           !! subshell binding energy (eV)
+        real efl                           !! fluorescence yield
+        type (tab1) ctab                   !! Cross section table x=E, y=crs (b)
     end type
 
 !---------------------------------------------------------------------------------------------

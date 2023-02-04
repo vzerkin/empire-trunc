@@ -2,42 +2,42 @@ module c4_io
 
    implicit none
 
-   integer*4, parameter, private :: maxsec = 10000    ! maximum # data sections in C4 file
+   integer*4, parameter, private :: maxsec = 10000    !! maximum # data sections in C4 file
 
-   integer*4 :: c4_unit = 20                          ! fortran i/o unit, defaults to 20, but user may change
-   integer*4 :: c4_temp = 21                          ! fortran i/o unit, to be used as temporary for filtering
+   integer*4 :: c4_unit = 20                          !! fortran i/o unit, defaults to 20, but user may change
+   integer*4 :: c4_temp = 21                          !! fortran i/o unit, to be used as temporary for filtering
 
    private write_point, wrl, assign_section
 
    type c4_data_point
       sequence
-      integer*4 mf                                   ! MF number
-      integer*4 mt                                   ! MT number
-      real*8 e                                       ! proj energy (eV)
-      real*8 de                                      ! proj energy unc
-      real*8 x                                       ! cross section (see C4 dictionary)
-      real*8 dx                                      ! cross section unc
-      real*8 cos                                     ! cos(theta)
-      real*8 dcos                                    ! cos(theta) unc
-      real*8 dat7                                    ! defined by fid field
-      real*8 dat8                                    ! defined by fid field
-      character*3 fid                                ! identification flag for dat7 & dat8.
-      character*1 x4stat                             ! EXFOR status flag
-      character*1 cm                                 ! center-of-mass flag (C=cm,blank=lab)
-      character*1 pmeta                              ! product meta-stable flag (M=metastable)
-      character*2 dum                                ! kill alignment woes
+      integer*4 mf                                   !! MF number
+      integer*4 mt                                   !! MT number
+      real*8 e                                       !! proj energy (eV)
+      real*8 de                                      !! proj energy unc
+      real*8 x                                       !! cross section (see C4 dictionary)
+      real*8 dx                                      !! cross section unc
+      real*8 cos                                     !! cos(theta)
+      real*8 dcos                                    !! cos(theta) unc
+      real*8 dat7                                    !! defined by fid field
+      real*8 dat8                                    !! defined by fid field
+      character*3 fid                                !! identification flag for dat7 & dat8.
+      character*1 x4stat                             !! EXFOR status flag
+      character*1 cm                                 !! center-of-mass flag (C=cm,blank=lab)
+      character*1 pmeta                              !! product meta-stable flag (M=metastable)
+      character*2 dum                                !! kill alignment woes
    end type
 
    type c4_section
-      integer*4 pza                                  ! projectile ZA (1000*Z+A)
-      integer*4 tza                                  ! target ZA (1000*Z+A)
-      character*1 tmeta                              ! target meta-stable flag (M=metastable)
-      character*25 ref                               ! reference (first author, year)
-      character*5 ent                                ! EXFOR entry number
-      character*3 sub                                ! EXFOR sub-entry number
-      character*1 mdf                                ! multi-dimensional data flag
-      integer*4 ndat                                 ! number of data points in section
-      type (c4_data_point), pointer :: pt(:)         ! data points
+      integer*4 pza                                  !! projectile ZA (1000*Z+A)
+      integer*4 tza                                  !! target ZA (1000*Z+A)
+      character*1 tmeta                              !! target meta-stable flag (M=metastable)
+      character*25 ref                               !! reference (first author, year)
+      character*5 ent                                !! EXFOR entry number
+      character*3 sub                                !! EXFOR sub-entry number
+      character*1 mdf                                !! multi-dimensional data flag
+      integer*4 ndat                                 !! number of data points in section
+      type (c4_data_point), pointer :: pt(:)         !! data points
    end type
 
    type c4_file
@@ -59,13 +59,13 @@ contains
 
       implicit none
 
-      character*(*), intent(in) :: cfil      ! C4 file to read in
-      character*(100) :: commandLine         ! comandline to copy temporary c4 file onto originalone
-      REAL*4, intent(in), optional :: Eminr  ! lower energy limit on exp data read in
-      REAL*4, intent(in), optional :: Emaxr  ! upper energy limit on exp data read in
-      REAL*4, intent(in), optional :: Xminr  ! lower cross section limit on exp data read in
-      REAL*4 :: Emin, Emax, Xmin             ! equivalents of those three above used actualy in calculations
-      REAL*4 :: e, de, x, dx                 ! energies and cross sections (with uncertainties) read from the cfil 
+      character*(*), intent(in) :: cfil      !! C4 file to read in
+      character*(100) :: commandLine         !! comandline to copy temporary c4 file onto originalone
+      REAL*4, intent(in), optional :: Eminr  !! lower energy limit on exp data read in
+      REAL*4, intent(in), optional :: Emaxr  !! upper energy limit on exp data read in
+      REAL*4, intent(in), optional :: Xminr  !! lower cross section limit on exp data read in
+      REAL*4 :: Emin, Emax, Xmin             !! equivalents of those three above used actualy in calculations
+      REAL*4 :: e, de, x, dx                 !! energies and cross sections (with uncertainties) read from the cfil 
       type (c4_file) c4
       type (c4_section), pointer :: sc
       type (c4_data_point), pointer :: pt

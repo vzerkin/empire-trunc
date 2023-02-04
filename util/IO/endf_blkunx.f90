@@ -2,27 +2,27 @@ module endf_line_io
 
     implicit none
 
-    ! author: Sam Hoblit, NNDC, BNL
-    ! provide basic line-based I/O for ENDF files.
-    ! this module is responsible for opening & closing
-    ! the ENDF file and reading and writing lines
-    ! to/from the file. This I/O may be done various
-    ! ways - this version uses unix block-mode I/O and
-    ! buffers the ENDF lines for more efficient I/O.
+    !! author: Sam Hoblit, NNDC, BNL
+    !! provide basic line-based I/O for ENDF files.
+    !! this module is responsible for opening & closing
+    !! the ENDF file and reading and writing lines
+    !! to/from the file. This I/O may be done various
+    !! ways - this version uses unix block-mode I/O and
+    !! buffers the ENDF lines for more efficient I/O.
 
     private
 
-    integer*4, parameter :: nrc = 4096*4    ! number of endf_records in a block
+    integer*4, parameter :: nrc = 4096*4    !! number of endf_records in a block
 
-    character*1, parameter :: LF = char(10) ! line feed
-    character*1, parameter :: CR = char(13) ! carriage return
+    character*1, parameter :: LF = char(10) !! line feed
+    character*1, parameter :: CR = char(13) !! carriage return
 
-    integer*4 :: handl                      ! file handle
-    integer*4 :: numrec                     ! # records in input file
-    integer*4 :: curek                      ! "current" record in buffer
-    integer*4 :: mode                       ! input record format: 1=LF, 2=CRLF, 3=CR. always output LF.
-    integer*4 :: recsiz                     ! number of bytes in endf records (including LF,CR)
-    logical*4 :: qlins                      ! true if writing line numbers in (76:80)
+    integer*4 :: handl                      !! file handle
+    integer*4 :: numrec                     !! # records in input file
+    integer*4 :: curek                      !! "current" record in buffer
+    integer*4 :: mode                       !! input record format: 1=LF, 2=CRLF, 3=CR. always output LF.
+    integer*4 :: recsiz                     !! number of bytes in endf records (including LF,CR)
+    logical*4 :: qlins                      !! true if writing line numbers in (76:80)
 
     ! fortran pointers require specific targets.
     ! choose buffer layout depending on record length
@@ -42,23 +42,23 @@ module endf_line_io
 
 ! -----------  Public interface ---------------------------------------------
 
-    character*75, public, pointer :: endline                ! current line in file
-    integer*4, public :: filin = 0                          ! current line number in file
-    integer*4, public :: lnum = 0                           ! output ENDF line number in cols (76:80)
-    logical*4, public :: q_open = .false.                   ! true when file open
-    logical*4, public :: q_write = .false.                  ! true if writing output; false for input
+    character*75, public, pointer :: endline                !! current line in file
+    integer*4, public :: filin = 0                          !! current line number in file
+    integer*4, public :: lnum = 0                           !! output ENDF line number in cols (76:80)
+    logical*4, public :: q_open = .false.                   !! true when file open
+    logical*4, public :: q_write = .false.                  !! true if writing output; false for input
 
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
 
     ! for error reporting
 
-    integer*4, public, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
-    integer*4, public, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
-    integer*4, public, parameter :: file_bad_read  = -3000000   ! status code for bad number of read bytes
-    integer*4, public, parameter :: file_bad_write = -4000000   ! status code for bad number of read bytes
-    integer*4, public, parameter :: file_not_open  = -5000000   ! status when read/write to closed file
-    integer*4, public :: file_bytes_requested    ! Number of bytes requeseted for read/write
-    integer*4, public :: file_bytes_receieved    ! Number of bytes recieved for read/write
+    integer*4, public, parameter :: file_bad_form  = -1000000   !! status code for file with unsupported format
+    integer*4, public, parameter :: file_not_fixed = -2000000   !! status code for file with non-fixed length records
+    integer*4, public, parameter :: file_bad_read  = -3000000   !! status code for bad number of read bytes
+    integer*4, public, parameter :: file_bad_write = -4000000   !! status code for bad number of read bytes
+    integer*4, public, parameter :: file_not_open  = -5000000   !! status when read/write to closed file
+    integer*4, public :: file_bytes_requested    !! Number of bytes requeseted for read/write
+    integer*4, public :: file_bytes_receieved    !! Number of bytes recieved for read/write
 
 !------------------------------------------------------------------------------
     contains
@@ -68,11 +68,11 @@ module endf_line_io
 
     implicit none
 
-    character*(*), intent(in) :: endfile    ! endf file name
-    integer*4, intent(inout) :: nlin        ! # lines in file (only use for size of existing file)
-    logical*4, intent(in) :: qwrt           ! set true when creating new file (writing)
-    integer*4, intent(in) :: iover          ! set /= 0 to overwrite existing output file
-    logical*4, intent(in) :: qlin           ! set true to add line numbers (76:80) to output records
+    character*(*), intent(in) :: endfile    !! endf file name
+    integer*4, intent(inout) :: nlin        !! # lines in file (only use for size of existing file)
+    logical*4, intent(in) :: qwrt           !! set true when creating new file (writing)
+    integer*4, intent(in) :: iover          !! set /= 0 to overwrite existing output file
+    logical*4, intent(in) :: qlin           !! set true to add line numbers (76:80) to output records
 
     logical*4 qok
     integer*4 i,status,fbyts,numred

@@ -12,21 +12,21 @@ module ENDF_MF10_IO
     public
 
     type mf10_fnl_st
-        real qm                         ! mass-difference Q value (eV)
-        real qi                         ! reaction Q value for state specified in subsection (eV)
-        integer izap                    ! ZA of product nucleus
-        integer lfs                     ! level number of nuclide produced in reaction
-        type (tab1) crs                 ! cross sections for FS. E=x, sigma=y
+        real qm                         !! mass-difference Q value (eV)
+        real qi                         !! reaction Q value for state specified in subsection (eV)
+        integer izap                    !! ZA of product nucleus
+        integer lfs                     !! level number of nuclide produced in reaction
+        type (tab1) crs                 !! cross sections for FS. E=x, sigma=y
     end type
 
     type MF_10
-        type (mf_10), pointer :: next   ! next section
-        integer mt                      ! MT
-        real za                         ! ZA for material
-        real awr                        ! AWR for material
-        integer lis                     ! level # of target
-        integer ns                      ! # of final states specified
-        type(mf10_fnl_st), pointer :: fst(:)    ! final states
+        type (mf_10), pointer :: next   !! next section
+        integer mt                      !! MT
+        real za                         !! ZA for material
+        real awr                        !! AWR for material
+        integer lis                     !! level # of target
+        integer ns                      !! # of final states specified
+        type(mf10_fnl_st), pointer :: fst(:)    !! final states
     end type
 
 !---------------------------------------------------------------------------------------------

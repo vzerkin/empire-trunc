@@ -12,34 +12,34 @@ module ENDF_MF5_IO
     public
 
     type mf5_tb2
-        real e                                  ! incident E
-        type (tab1) tb1                         ! outgoing dist table (E', g dist). See manual
+        real e                                  !! incident E
+        type (tab1) tb1                         !! outgoing dist table (E', g dist). See manual
     end type
 
     type mf5_subsect
-        integer lf                              ! flag for E dist law
-        real u                                  ! upper E limit for 2nd particle
-        real efl                                ! constant in E-dep fission spec, LF=12
-        real efh                                ! constant in E-dep fission spec, LF=12
-        type (tab1) p                           ! frac part of crs in kth bin
-        integer nr                              ! # interp ranges, LF=1
-        integer ne                              ! # E ranges, LF=1
-        type (int_pair), pointer :: itp(:)      ! interpolation tables (nr), LF=1
-        type (mf5_tb2), pointer :: tb2(:)       ! secondary dist tables for each incident E (ne), LF=1
-        type (tab1), pointer :: tht             ! eff temp of 2nd E dist, LF=5,7,9
-        type (tab1), pointer :: g               ! partial E dist, LF=5
-        type (tab1), pointer :: b               ! param for E-dep Watt spec, LF=11
-        type (tab1), pointer :: a               ! param for E-dep Watt spec, LF=11
-        type (tab1), pointer :: tm              ! max temp of E-dep fission spec, LF=12
+        integer lf                              !! flag for E dist law
+        real u                                  !! upper E limit for 2nd particle
+        real efl                                !! constant in E-dep fission spec, LF=12
+        real efh                                !! constant in E-dep fission spec, LF=12
+        type (tab1) p                           !! frac part of crs in kth bin
+        integer nr                              !! # interp ranges, LF=1
+        integer ne                              !! # E ranges, LF=1
+        type (int_pair), pointer :: itp(:)      !! interpolation tables (nr), LF=1
+        type (mf5_tb2), pointer :: tb2(:)       !! secondary dist tables for each incident E (ne), LF=1
+        type (tab1), pointer :: tht             !! eff temp of 2nd E dist, LF=5,7,9
+        type (tab1), pointer :: g               !! partial E dist, LF=5
+        type (tab1), pointer :: b               !! param for E-dep Watt spec, LF=11
+        type (tab1), pointer :: a               !! param for E-dep Watt spec, LF=11
+        type (tab1), pointer :: tm              !! max temp of E-dep fission spec, LF=12
     end type
 
     type MF_5
-        type (mf_5), pointer :: next            ! next section
-        integer mt                              ! MT
-        real za                                 ! ZA for material
-        real awr                                ! AWR for material
-        integer nk                              ! # part E dists
-        type (mf5_subsect), pointer :: sct(:)   ! sub-sections
+        type (mf_5), pointer :: next            !! next section
+        integer mt                              !! MT
+        real za                                 !! ZA for material
+        real awr                                !! AWR for material
+        integer nk                              !! # part E dists
+        type (mf5_subsect), pointer :: sct(:)   !! sub-sections
     end type
 
 !------------------------------------------------------------------------------

@@ -12,39 +12,39 @@ module ENDF_MF12_IO
     public
 
     type mf12_photon
-        real eg                        ! photon (LP=0,1) or binding (LP=2) energy (eV)
-        real es                        ! energy of level from which photon originates
-        integer lp                     ! primary flag
-        integer lf                     ! dist law # (1 or 2)
-        type (tab1) yld                ! yields (multiplicities) for photon. E=x, Y=y
+        real eg                        !! photon (LP=0,1) or binding (LP=2) energy (eV)
+        real es                        !! energy of level from which photon originates
+        integer lp                     !! primary flag
+        integer lf                     !! dist law # (1 or 2)
+        type (tab1) yld                !! yields (multiplicities) for photon. E=x, Y=y
     end type
 
     type mf12_tran_prob
         sequence
-        real es                        ! energy of level
-        real tp                        ! prob of direct transition
-        real gp                        ! prob of photon trans (only if lg=2)
+        real es                        !! energy of level
+        real tp                        !! prob of direct transition
+        real gp                        !! prob of photon trans (only if lg=2)
     end type
 
     type mf12_prob_array
-        integer lg                     ! case flag. 1=simple, 2=complex
-        integer lp                     ! 
-        integer nt                     ! # transitions
-        real esp                       ! energy of present state (es(ns))
-        type (mf12_tran_prob), pointer :: tpb(:)    ! trans probabilities
+        integer lg                     !! case flag. 1=simple, 2=complex
+        integer lp                     !! 
+        integer nt                     !! # transitions
+        real esp                       !! energy of present state (es(ns))
+        type (mf12_tran_prob), pointer :: tpb(:)    !! trans probabilities
     end type
 
     type MF_12
-        type (mf_12), pointer :: next  ! next section
-        integer mt                     ! MT
-        real za                        ! ZA for material
-        real awr                       ! AWR for material
-        integer lo                     ! type flag. 1=multiplicities, 2=trans prob
-        integer nk                     ! # discrete photons incl continuum
-        integer ns                     ! # discrete levels below current one
-        type (tab1), pointer :: tyld   ! total yield
-        type (mf12_photon), pointer :: gam(:)     ! discrete photons
-        type (mf12_prob_array), pointer :: par    ! transition probability
+        type (mf_12), pointer :: next  !! next section
+        integer mt                     !! MT
+        real za                        !! ZA for material
+        real awr                       !! AWR for material
+        integer lo                     !! type flag. 1=multiplicities, 2=trans prob
+        integer nk                     !! # discrete photons incl continuum
+        integer ns                     !! # discrete levels below current one
+        type (tab1), pointer :: tyld   !! total yield
+        type (mf12_photon), pointer :: gam(:)     !! discrete photons
+        type (mf12_prob_array), pointer :: par    !! transition probability
     end type
 
 !---------------------------------------------------------------------------------------------

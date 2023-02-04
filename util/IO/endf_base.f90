@@ -32,10 +32,10 @@ module ENDF_IOLIB
     end type
 
     type tab1
-        integer nr                             ! # NR interpolation ranges
-        integer np                             ! # points
-        type (int_pair),  pointer :: itp(:)    ! interpolation tables
-        type (real_pair), pointer :: dat(:)    ! data values
+        integer nr                             !! # NR interpolation ranges
+        integer np                             !! # points
+        type (int_pair),  pointer :: itp(:)    !! interpolation tables
+        type (real_pair), pointer :: dat(:)    !! data values
     end type
 
     ! define generic interfaces for reads & gets

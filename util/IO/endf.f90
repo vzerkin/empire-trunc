@@ -1,38 +1,38 @@
 module ENDF_IO
 
-    ! author: Sam Hoblit, NNDC, BNL
-    ! this module provides the interface for I/O to ENDF files.
-    ! Here, the basic I/O for all MF files are collected and
-    ! the endf_mat and endf_file data types are defined.
-    ! As all arrays are dynamically allocated there are
-    ! no preset limits on any arrays - any number of materials
-    ! may be in an endf file which may contain any allowed
-    ! combination of MF/MTs. Once a file is read in the endf_file 
-    ! data type contains all the information contained in the 
-    ! entire file and is available for further processing and/or
-    ! writing out to a new ENDF file.
-    !
-    ! the main public interface to the ENDF IO package are the 3 routines
-    ! in this module: read_endf_file, write_endf_file, and del_endf.
-    !
-    ! read_endf_file accepts an ENDF filename to read in, the endf
-    ! structure to store the data into, and an optional argument MAT,
-    ! where, if specified, indicates that only the material with the
-    ! specified MAT number is read into the endf structure.
-    !
-    ! write_endf_file accepts an output filename and an endf data type
-    ! which contains the ENDF data to write out to the file. The MF1
-    ! directory information is re-generated based on the input endf structure.
-    !
-    ! del_endf is provided to release all allocated data in an endf data
-    ! type. After calling this routine the endf structure has been "deflated"
-    ! and is ready for further use, if needed.
-    !
-    ! all 3 routines are functions that return an integer*4 status value.
-    ! a value of 0 indicated success. A positive number should contain
-    ! the MAT, MF and MT where the problem occurred, coded as to contain
-    ! 100000*MAT + 1000*MF + MT. If the file was not open or other errors
-    ! occurred, then the return value can be -1.
+    !! author: Sam Hoblit, NNDC, BNL
+    !! this module provides the interface for I/O to ENDF files.
+    !! Here, the basic I/O for all MF files are collected and
+    !! the endf_mat and endf_file data types are defined.
+    !! As all arrays are dynamically allocated there are
+    !! no preset limits on any arrays - any number of materials
+    !! may be in an endf file which may contain any allowed
+    !! combination of MF/MTs. Once a file is read in the endf_file 
+    !! data type contains all the information contained in the 
+    !! entire file and is available for further processing and/or
+    !! writing out to a new ENDF file.
+    !!
+    !! the main public interface to the ENDF IO package are the 3 routines
+    !! in this module: read_endf_file, write_endf_file, and del_endf.
+    !!
+    !! read_endf_file accepts an ENDF filename to read in, the endf
+    !! structure to store the data into, and an optional argument MAT,
+    !! where, if specified, indicates that only the material with the
+    !! specified MAT number is read into the endf structure.
+    !!
+    !! write_endf_file accepts an output filename and an endf data type
+    !! which contains the ENDF data to write out to the file. The MF1
+    !! directory information is re-generated based on the input endf structure.
+    !!
+    !! del_endf is provided to release all allocated data in an endf data
+    !! type. After calling this routine the endf structure has been "deflated"
+    !! and is ready for further use, if needed.
+    !!
+    !! all 3 routines are functions that return an integer*4 status value.
+    !! a value of 0 indicated success. A positive number should contain
+    !! the MAT, MF and MT where the problem occurred, coded as to contain
+    !! 100000*MAT + 1000*MF + MT. If the file was not open or other errors
+    !! occurred, then the return value can be -1.
 
     use endf_iolib
     use endf_cov_io
@@ -66,7 +66,7 @@ module ENDF_IO
 
     public
 
-    character*75, parameter, private :: hdlin = ' $Rev:: 5387     $  $Date:: 2022-10-18#$                             1 0  0'
+    character*75, parameter, private :: hdlin = ' $Rev:: 5435     $  $Date:: 2023-02-04#$                             1 0  0'
 
     type endf_mat
         integer mat
@@ -98,8 +98,8 @@ module ENDF_IO
     end type
 
     type endf_file
-        character*75 hdline                    ! header line (line 0)
-        type (endf_mat), pointer :: mat        ! materials
+        character*75 hdline                    !! header line (line 0)
+        type (endf_mat), pointer :: mat        !! materials
     end type
 
     ! define generic interfaces for read/write MF routines
@@ -214,11 +214,11 @@ module ENDF_IO
 
     ! local variables to store input/control parameters
 
-    integer*4, private :: ihdr = 0                 ! controls disposition of 'header' or TPID line
-    integer*4, private :: nfil                     ! # characters in endfil string
-    character*500, private :: endfil               ! ENDF file to read/write
-    logical*4, private :: reqmf(40)                ! flags of requested MF files to read in
-    type (endf_file), pointer, private :: endf     ! pointer to user's ENDF data type
+    integer*4, private :: ihdr = 0                 !! controls disposition of 'header' or TPID line
+    integer*4, private :: nfil                     !! # characters in endfil string
+    character*500, private :: endfil               !! ENDF file to read/write
+    logical*4, private :: reqmf(40)                !! flags of requested MF files to read in
+    type (endf_file), pointer, private :: endf     !! pointer to user's ENDF data type
 
     ! hide these routines from end user
 
@@ -249,10 +249,10 @@ module ENDF_IO
 
     implicit none
 
-    character*(*), intent(in), target :: filename      ! ENDF file to read
-    type (endf_file), intent(out), target :: usend     ! endf output structure
-    integer*4, intent(in), optional :: mat             ! mat # to read in
-    logical*4, intent(in), optional :: rkmf(40)        ! MF's to read in, .true. => read
+    character*(*), intent(in), target :: filename      !! ENDF file to read
+    type (endf_file), intent(out), target :: usend     !! endf output structure
+    integer*4, intent(in), optional :: mat             !! mat # to read in
+    logical*4, intent(in), optional :: rkmf(40)        !! MF's to read in, .true. => read
 
     integer*4 stat,inmat
 
@@ -1210,8 +1210,8 @@ module ENDF_IO
 
     implicit none
 
-    logical*4, intent(in) :: q_overwrite   ! file overwrite flag.
-                                           ! if true, allow overwriting existing file
+    logical*4, intent(in) :: q_overwrite   !! file overwrite flag.
+                                           !! if true, allow overwriting existing file
 
     integer*4 tlc
     type (endf_mat), pointer :: mx

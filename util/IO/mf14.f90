@@ -12,42 +12,42 @@ module ENDF_MF14_IO
     public
 
     type mf14_isotropic_dist
-        real eg                        ! photon energy (eV)
-        real es                        ! energy of level from which photon originates
+        real eg                        !! photon energy (eV)
+        real es                        !! energy of level from which photon originates
     end type
 
     type mf14_legendre_dist
-        real e                         ! neutron energy
-        integer nl                     ! # Legendre coefs
-        real, pointer :: a(:)          ! Legendre coefs (a(0)==1)
-    end type
+        real e                         !! neutron energy
+        integer nl                     !! # Legendre coefs
+        real, pointer :: a(:)          !! Legendre coefs (a(0)==1)
+    end type!
 
     type mf14_tabular_dist
-        real e                         ! neutron energy
-        type (tab1) mut                ! x=cos(theta)=mu, y=prob at mu
+        real e                         !! neutron energy
+        type (tab1) mut                !! x=cos(theta)=mu, y=prob at mu
     end type
 
     type mf14_anisotropic_dist
-        real eg                        ! photon energy (eV)
-        real es                        ! energy of level from which photon originates
-        integer nr                     ! # interpolation regions
-        type (int_pair), pointer :: inb(:)   ! indident E interpolation table
-        integer ne                     ! # incident neutron energies
-        type (mf14_legendre_dist), pointer :: leg(:)   ! Legendre coefs
-        type (mf14_tabular_dist), pointer :: tab(:)    ! tables
+        real eg                        !! photon energy (eV)
+        real es                        !! energy of level from which photon originates
+        integer nr                     !! # interpolation regions
+        type (int_pair), pointer :: inb(:)   !! indident E interpolation table
+        integer ne                     !! # incident neutron energies
+        type (mf14_legendre_dist), pointer :: leg(:)   !! Legendre coefs
+        type (mf14_tabular_dist), pointer :: tab(:)    !! tables
     end type
 
     type MF_14
-        type (mf_14), pointer :: next  ! next section
-        integer mt                     ! MT
-        real za                        ! ZA for material
-        real awr                       ! AWR for material
-        integer li                     ! isotropic flag
-        integer ltt                    ! rep flag: 1=Legendre coef, 2=tabular
-        integer nk                     ! # discreet photons incl continuum
-        integer ni                     ! # isotropic ang dists given
-        type (mf14_isotropic_dist), pointer :: isg(:)      ! iostropic photons (ni)
-        type (mf14_anisotropic_dist), pointer :: aig(:)    ! aniostropic photons (nk-ni)
+        type (mf_14), pointer :: next  !! next section
+        integer mt                     !! MT
+        real za                        !! ZA for material
+        real awr                       !! AWR for material
+        integer li                     !! isotropic flag
+        integer ltt                    !! rep flag: 1=Legendre coef, 2=tabular
+        integer nk                     !! # discreet photons incl continuum
+        integer ni                     !! # isotropic ang dists given
+        type (mf14_isotropic_dist), pointer :: isg(:)      !! iostropic photons (ni)
+        type (mf14_anisotropic_dist), pointer :: aig(:)    !! aniostropic photons (nk-ni)
     end type
 
 !---------------------------------------------------------------------------------------------

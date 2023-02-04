@@ -13,19 +13,19 @@ module ENDF_MF34_IO
     public
 
     type MF34_subsect
-        integer l                       ! legendre coef for this MT
-        integer l1                      ! legendre coef for MT1
-        integer lct                     ! ref frame flag
-        integer ni                      ! # list records
-        type (ni_cov_sect), pointer :: lst(:)      ! covariance list
+        integer l                       !! legendre coef for this MT
+        integer l1                      !! legendre coef for MT1
+        integer lct                     !! ref frame flag
+        integer ni                      !! # list records
+        type (ni_cov_sect), pointer :: lst(:)      !! covariance list
     end type
 
     type MF34_sect
-        integer mat1                    ! MAT for 2nd E-dep crs
-        integer mt1                     ! MT for 2nd E-dep crs
-        integer nl                      ! # Legendre coefs given for MT
-        integer nl1                     ! # Legendre coefs for MT1
-        type (MF34_subsect), pointer :: ssc(:,:)   ! sub-sections (nl,nl1)
+        integer mat1                    !! MAT for 2nd E-dep crs
+        integer mt1                     !! MT for 2nd E-dep crs
+        integer nl                      !! # Legendre coefs given for MT
+        integer nl1                     !! # Legendre coefs for MT1
+        type (MF34_subsect), pointer :: ssc(:,:)   !! sub-sections (nl,nl1)
     end type
 
     type MF_34
@@ -33,9 +33,9 @@ module ENDF_MF34_IO
         integer mt
         real za
         real awr
-        integer ltt                     ! representation flag (1,2 or 3)
-        integer nmt1                    ! number of sub-sections with MT1 .ge. MT
-        type (MF34_sect), pointer :: sct(:)        ! sections (nmt1)
+        integer ltt                     !! representation flag (1,2 or 3)
+        integer nmt1                    !! number of sub-sections with MT1 .ge. MT
+        type (MF34_sect), pointer :: sct(:)        !! sections (nmt1)
     end type
 
     private read_mf34_ni, write_mf34_ni

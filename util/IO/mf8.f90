@@ -16,21 +16,21 @@ module ENDF_MF8_IO
 
     type mf8_branch
         sequence
-        real hl                           ! half-life (sec)
-        real rtyp                         ! decay type
-        real zan                          ! ZA of next nuclide in chain
-        real br                           ! branching ratio for ZAN & level
-        real end                          ! endpoint energy of particle produced
-        real ct                           ! chain terminator (see ENDF manual)
+        real hl                           !! half-life (sec)
+        real rtyp                         !! decay type
+        real zan                          !! ZA of next nuclide in chain
+        real br                           !! branching ratio for ZAN & level
+        real end                          !! endpoint energy of particle produced
+        real ct                           !! chain terminator (see ENDF manual)
     end type
 
     type mf8_nucprod
-        real zap                          ! ZA of nuclide produced
-        real elfs                         ! energy of state produced (eV)
-        integer lmf                       ! MF where multiplicity is found
-        integer lfs                       ! level number state formed
-        integer nd                        ! # branches into which nuclide decays
-        type (mf8_branch), pointer :: br(:)    ! branches (nd)
+        real zap                          !! ZA of nuclide produced
+        real elfs                         !! energy of state produced (eV)
+        integer lmf                       !! MF where multiplicity is found
+        integer lfs                       !! level number state formed
+        integer nd                        !! # branches into which nuclide decays
+        type (mf8_branch), pointer :: br(:)    !! branches (nd)
     end type
 
 
@@ -47,22 +47,22 @@ module ENDF_MF8_IO
 
     type mf8_fp_yield_data
         sequence
-        real zafp                         ! ZA for fission product
-        real fps                          ! state # for fission product
-        real y                            ! MT454: yi=yield for FP prior to decay; MT459 yc=cumulative yield
-        real dy                           ! uncert in yi or yc
+        real zafp                         !! ZA for fission product
+        real fps                          !! state # for fission product
+        real y                            !! MT454: yi=yield for FP prior to decay; MT459 yc=cumulative yield
+        real dy                           !! uncert in yi or yc
     end type
 
     type mf8_fp_epoint
-        real e                            ! incident energy (eV)
-        integer itp                       ! interpolation table
-        integer nfp                       ! # product nuclide states
-        type (mf8_fp_yield_data), pointer :: c(:)  ! yield data (nfp)
+        real e                            !! incident energy (eV)
+        integer itp                       !! interpolation table
+        integer nfp                       !! # product nuclide states
+        type (mf8_fp_yield_data), pointer :: c(:)  !! yield data (nfp)
     end type
 
     type mf8_fp_yield
-        integer le                        ! # incident energies specified
-        type (mf8_fp_epoint), pointer :: ep(:)     ! yields at le energies
+        integer le                        !! # incident energies specified
+        type (mf8_fp_epoint), pointer :: ep(:)     !! yields at le energies
     end type
 
     ! ------------------------ radioactive decay data ----------------------------
@@ -70,92 +70,92 @@ module ENDF_MF8_IO
 
     type mf8_decay_discrete_spectrum
         sequence
-        integer nt                        ! # items specifed (either all 12 or just first 6)
-        integer dum                       ! dummy for alignment
-        real er                           ! ave decay energy of radiation produced
-        real der                          ! unc in er
-        real rtyp                         ! decay mode
-        real type                         ! type of trans for e capture
-        real ri                           ! intensity of rad produced
-        real dri                          ! unc in ri
-        real ris                          ! internal pair form coef
-        real dris                         ! unc in ris
-        real ricc                         ! total internal conversion coeff
-        real dricc                        ! unc in ricc
-        real rick                         ! k-shell int conv coef
-        real drick                        ! unc in rick
-        real ricl                         ! l-shell int conv coef
-        real dricl                        ! unc in ricl
+        integer nt                        !! # items specifed (either all 12 or just first 6)
+        integer dum                       !! dummy for alignment
+        real er                           !! ave decay energy of radiation produced
+        real der                          !! unc in er
+        real rtyp                         !! decay mode
+        real type                         !! type of trans for e capture
+        real ri                           !! intensity of rad produced
+        real dri                          !! unc in ri
+        real ris                          !! internal pair form coef
+        real dris                         !! unc in ris
+        real ricc                         !! total internal conversion coeff
+        real dricc                        !! unc in ricc
+        real rick                         !! k-shell int conv coef
+        real drick                        !! unc in rick
+        real ricl                         !! l-shell int conv coef
+        real dricl                        !! unc in ricl
     end type
 
     type mf8_decay_continuous_spectrum
-        real rtyp                         ! decay mode
-        integer lcov                      ! flag for covariance data(0=no, 1=yes)
-        type (tab1) rp                    ! spectrum of cont component of radiation (prob/eV)
+        real rtyp                         !! decay mode
+        integer lcov                      !! flag for covariance data(0=no, 1=yes)
+        type (tab1) rp                    !! spectrum of cont component of radiation (prob/eV)
     end type
 
     type mf8_decay_covar_spectrum
-        integer lb                        ! flag
-        integer npp                       ! # pairs
-        type (real_pair), pointer :: ef(:)    ! E,F pairs
+        integer lb                        !! flag
+        integer npp                       !! # pairs
+        type (real_pair), pointer :: ef(:)    !! E,F pairs
     end type
 
     type mf8_decay_spec_data
         sequence
-        real fd                           ! discrete spectrum norm factor
-        real dfd                          ! unc in fd
-        real erave                        ! ave decay energy of radiation produced
-        real derave                       ! unc in erave
-        real fc                           ! continuum spectrum norm factor
-        real dfc                          ! unc in fc
+        real fd                           !! discrete spectrum norm factor
+        real dfd                          !! unc in fd
+        real erave                        !! ave decay energy of radiation produced
+        real derave                       !! unc in erave
+        real fc                           !! continuum spectrum norm factor
+        real dfc                          !! unc in fc
     end type
 
     type mf8_decay_spectum
-        real styp                         ! decay radiation type
-        integer lcon                      ! continuum spectrum flag
-        integer ner                       ! # discrete energies given
-        type (mf8_decay_spec_data) dat    ! norm factors & energies
-        type (mf8_decay_discrete_spectrum), pointer :: dsc(:)   ! discrete spectra data (ner)
-        type (mf8_decay_continuous_spectrum), pointer :: con    ! continuum spectra data
-        type (mf8_decay_covar_spectrum), pointer :: cov         ! spectra covariance data
+        real styp                         !! decay radiation type
+        integer lcon                      !! continuum spectrum flag
+        integer ner                       !! # discrete energies given
+        type (mf8_decay_spec_data) dat    !! norm factors & energies
+        type (mf8_decay_discrete_spectrum), pointer :: dsc(:)   !! discrete spectra data (ner)
+        type (mf8_decay_continuous_spectrum), pointer :: con    !! continuum spectra data
+        type (mf8_decay_covar_spectrum), pointer :: cov         !! spectra covariance data
     end type
 
     type mf8_decay_mode
         sequence
-        real rtyp                         ! decay mode
-        real rfs                          ! isomeric state flag for daughter nuclide
-        real q                            ! total decay energy available
-        real dq                           ! unc in q
-        real br                           ! frac of decay of nuclide in state LIS into this decay mode
-        real dbr                          ! unc in dbr
+        real rtyp                         !! decay mode
+        real rfs                          !! isomeric state flag for daughter nuclide
+        real q                            !! total decay energy available
+        real dq                           !! unc in q
+        real br                           !! frac of decay of nuclide in state LIS into this decay mode
+        real dbr                          !! unc in dbr
     end type
 
     type mf8_decay_data
-        integer lis                       ! state of original nuclide
-        integer liso                      ! isomeric state #
-        integer nst                       ! stability flag
-        integer nsp                       ! total # of radiation types with spectral info given
-        real t12                          ! half-life
-        real dt12                         ! error
-        integer nc                        ! # decay energies (3 or 17)
-        type (real_pair), pointer :: ex(:)  ! decay energies (ex & dex)
-        real spi                          ! spin of state lis
-        real par                          ! parity of state lis
-        integer ndk                       ! # decay modes
-        type (mf8_decay_mode), pointer :: dcm(:)      ! decay modes (ndk)
-        type (mf8_decay_spectum), pointer :: spt(:)   ! decay specta (nsp)
+        integer lis                       !! state of original nuclide
+        integer liso                      !! isomeric state #
+        integer nst                       !! stability flag
+        integer nsp                       !! total # of radiation types with spectral info given
+        real t12                          !! half-life
+        real dt12                         !! error
+        integer nc                        !! # decay energies (3 or 17)
+        type (real_pair), pointer :: ex(:)  !! decay energies (ex & dex)
+        real spi                          !! spin of state lis
+        real par                          !! parity of state lis
+        integer ndk                       !! # decay modes
+        type (mf8_decay_mode), pointer :: dcm(:)      !! decay modes (ndk)
+        type (mf8_decay_spectum), pointer :: spt(:)   !! decay specta (nsp)
     end type
 
     ! ----------------------------- MF8 ------------------------------------------
 
     type MF_8
-        type (mf_8), pointer :: next            ! next section
-        integer mt                              ! MT
-        real za                                 ! ZA for material
-        real awr                                ! AWR for material
-        type(mf8_nuclide),    pointer :: ncl    ! radioactive nuclide prod
-        type(mf8_fp_yield),   pointer :: fpy    ! fission product yeilds
-        type(mf8_decay_data), pointer :: rdd    ! radioactive decay data
+        type (mf_8), pointer :: next            !! next section
+        integer mt                              !! MT
+        real za                                 !! ZA for material
+        real awr                                !! AWR for material
+        type(mf8_nuclide),    pointer :: ncl    !! radioactive nuclide prod
+        type(mf8_fp_yield),   pointer :: fpy    !! fission product yeilds
+        type(mf8_decay_data), pointer :: rdd    !! radioactive decay data
     end type
 
     !---------------------  private ---------------------------------------------

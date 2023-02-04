@@ -12,21 +12,21 @@ module ENDF_MF13_IO
     public
 
     type mf13_photon
-        real eg                            ! photon energy (eV)
-        real es                            ! energy of level from which photon originates
-        integer lp                         ! primary flag
-        integer lf                         ! dist law # (1 or 2)
-        type (tab1) crs                    ! cross sections
+        real eg                            !! photon energy (eV)
+        real es                            !! energy of level from which photon originates
+        integer lp                         !! primary flag
+        integer lf                         !! dist law # (1 or 2)
+        type (tab1) crs                    !! cross sections
     end type
 
     type MF_13
-        type (mf_13), pointer :: next      ! next section
-        integer mt                         ! MT
-        real za                            ! ZA for material
-        real awr                           ! AWR for material
-        integer nk                         ! # discreet photons incl continuum
-        type (tab1), pointer :: tyld             ! total cross section
-        type (mf13_photon), pointer :: gam(:)    ! discrete photon cross sections (nk)
+        type (mf_13), pointer :: next      !! next section
+        integer mt                         !! MT
+        real za                            !! ZA for material
+        real awr                           !! AWR for material
+        integer nk                         !! # discreet photons incl continuum
+        type (tab1), pointer :: tyld             !! total cross section
+        type (mf13_photon), pointer :: gam(:)    !! discrete photon cross sections (nk)
     end type
 
 !---------------------------------------------------------------------------------------------

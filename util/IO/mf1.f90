@@ -14,120 +14,120 @@ module ENDF_MF1_IO
     !~~~~~~~~~~~~~~~~~~~~~~~  MT451  Descriptive Data & Directory ~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_sect_list
-        integer mf                                ! section MF
-        integer mt                                ! section MT
-        integer nc                                ! # lines in section
-        integer mod                               ! modification number for section.
+        integer mf                                !! section MF
+        integer mt                                !! section MT
+        integer nc                                !! # lines in section
+        integer mod                               !! modification number for section.
     end type
 
     type MF1_451
-        integer lrp                               ! flag indicating file2. 0=no,1=yes,2=yes, but don't use
-        integer lfi                               ! flag for fission: 0=no, 1=yes.
-        integer nlib                              ! library identifier
-        integer nmod                              ! modification number
-        real elis                                 ! energy of target relative to zero for GS.
-        real sta                                  ! flag for stable. zero=stable, 1.0=unstable.
-        integer lis                               ! state number of target, lis=0 -> GS.
-        integer liso                              ! isomeric state number
-        integer nfor                              ! format number (6).
-        real awi                                  ! projectile mass in neutron masses
-        real emax                                 ! max E in library
-        integer lrel                              ! library release number
-        integer nsub                              ! sub-library number
-        integer nver                              ! library version number
-        real temp                                 ! temp for Doppler broadened evals.
-        integer ldrv                              ! special derived material flag. 0=primary
-	integer mat                               ! MAT number from comment record 3, chars 32:35. should = MAT
-        integer irev                              ! revision number from comment record 3, chars 54:56
-        integer mfor                              ! format number from comment record 5, char 12. should = nfor
-        integer nwd                               ! number of records of descriptive text
-        integer nxc                               ! number of records in directory
-        character*11 zsymam                       ! char rep of material
-        character*11 alab                         ! lab name
-        character*10 edate                        ! eval date
-        character*33 auth                         ! authors
-        character*20 ref                          ! primary reference for eval
-        character*10 ddate                        ! orig distribution date
-        character*10 rdate                        ! date & number of last revision.
-        character*8 endate                        ! NNDC master file entry date.
-        character*17 libtyp                       ! library type & version (eg, 'ENDF/B-VII.1')
-        character*61 sublib                       ! sub-library identifier, (eg, 'INCIDENT NEUTRON DATA')
-        character*66, pointer :: cmnt(:)          ! lines of ascii comments (nwd)
-        type (MF1_sect_list), pointer :: dir(:)   ! "directory" of sections (nxc)
+        integer lrp                               !! flag indicating file2. 0=no,1=yes,2=yes, but don't use
+        integer lfi                               !! flag for fission: 0=no, 1=yes.
+        integer nlib                              !! library identifier
+        integer nmod                              !! modification number
+        real elis                                 !! energy of target relative to zero for GS.
+        real sta                                  !! flag for stable. zero=stable, 1.0=unstable.
+        integer lis                               !! state number of target, lis=0 -> GS.
+        integer liso                              !! isomeric state number
+        integer nfor                              !! format number (6).
+        real awi                                  !! projectile mass in neutron masses
+        real emax                                 !! max E in library
+        integer lrel                              !! library release number
+        integer nsub                              !! sub-library number
+        integer nver                              !! library version number
+        real temp                                 !! temp for Doppler broadened evals.
+        integer ldrv                              !! special derived material flag. 0=primary
+        integer mat                               !! MAT number from comment record 3, chars 32:35. should = MAT
+        integer irev                              !! revision number from comment record 3, chars 54:56
+        integer mfor                              !! format number from comment record 5, char 12. should = nfor
+        integer nwd                               !! number of records of descriptive text
+        integer nxc                               !! number of records in directory
+        character*11 zsymam                       !! char rep of material
+        character*11 alab                         !! lab name
+        character*10 edate                        !! eval date
+        character*33 auth                         !! authors
+        character*20 ref                          !! primary reference for eval
+        character*10 ddate                        !! orig distribution date
+        character*10 rdate                        !! date & number of last revision.
+        character*8 endate                        !! NNDC master file entry date.
+        character*17 libtyp                       !! library type & version (eg, 'ENDF/B-VII.1')
+        character*61 sublib                       !! sub-library identifier, (eg, 'INCIDENT NEUTRON DATA')
+        character*66, pointer :: cmnt(:)          !! lines of ascii comments (nwd)
+        type (MF1_sect_list), pointer :: dir(:)   !! "directory" of sections (nxc)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~ MT452  nubar = # neutrons/fission ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_452
-        integer lnu                               ! flag for poly or table
-        integer nc                                ! number of terms in poly
-        real, pointer :: c(:)                     ! coefs of polynomial
-        type (tab1), pointer :: tb                ! table of values
+        integer lnu                               !! flag for poly or table
+        integer nc                                !! number of terms in poly
+        real, pointer :: c(:)                     !! coefs of polynomial
+        type (tab1), pointer :: tb                !! table of values
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~  MT455 Delayed neutron data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type tab2_455_lamb                            ! E-dep lamda family. Families are not interpolated.
-        integer nr                                ! # NR interpolation ranges in E
-        integer ne                                ! # energy points
-        type (int_pair),  pointer :: itp(:)       ! E interpolation tables (NR)
-        real, pointer :: e(:)                     ! interpolation energies dim (NE)
-        type (real_pair), pointer :: dgc(:,:)     ! delay group const. x=lamba, y=alpha dim (NE,NFF)
+    type tab2_455_lamb                            !! E-dep lamda family. Families are not interpolated.
+        integer nr                                !! # NR interpolation ranges in E
+        integer ne                                !! # energy points
+        type (int_pair),  pointer :: itp(:)       !! E interpolation tables (NR)
+        real, pointer :: e(:)                     !! interpolation energies dim (NE)
+        type (real_pair), pointer :: dgc(:,:)     !! delay group const. x=lamba, y=alpha dim (NE,NFF)
     end type
 
     type MF1_455
-        integer lnu                               ! flag for represenation: 1=poly, 2=table
-        integer ldg                               ! flag for E-dep:0=indep, 1=dep
-        integer nc                                ! number of terms in poly for nubar
-        real, pointer :: c(:)                     ! coefs of polynomial for nubar
-        type (tab1), pointer :: tb                ! table of values for nubar
-        integer nff                               ! number of precursor families for lambda
-        real, pointer :: lambda(:)                ! E-independent lambda for nff families
-        type (tab2_455_lamb), pointer :: lb       ! E-dependent families 
+        integer lnu                               !! flag for represenation: 1=poly, 2=table
+        integer ldg                               !! flag for E-dep:0=indep, 1=dep
+        integer nc                                !! number of terms in poly for nubar
+        real, pointer :: c(:)                     !! coefs of polynomial for nubar
+        type (tab1), pointer :: tb                !! table of values for nubar
+        integer nff                               !! number of precursor families for lambda
+        real, pointer :: lambda(:)                !! E-independent lambda for nff families
+        type (tab2_455_lamb), pointer :: lb       !! E-dependent families 
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~ MT458  Components of energy release from fission ~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_458_terms
         sequence
-        real efr                                  ! KE of fission products
-        real defr                                 ! unc in efr
-        real enp                                  ! KE of prompt fission neutrons
-        real denp                                 ! unc in enp
-        real end                                  ! KE of delayed fission neutrons
-        real dend                                 ! unc in end
-        real egp                                  ! total E released in prompt gammas
-        real degp                                 ! unc in egp
-        real egd                                  ! total E released in delayed gammas
-        real degd                                 ! inc in egd
-        real eb                                   ! energy released by betas
-        real deb                                  ! unc in eb
-        real enu                                  ! energy released by neutrinos
-        real denu                                 ! unc in enu
-        real er                                   ! total E less neutrinos = ET - ENU. =pseudo Q-value in MF3/MT18
-        real der                                  ! unc in der
-        real et                                   ! sum of all partial energies
-        real det                                  ! unc in et
+        real efr                                  !! KE of fission products
+        real defr                                 !! unc in efr
+        real enp                                  !! KE of prompt fission neutrons
+        real denp                                 !! unc in enp
+        real end                                  !! KE of delayed fission neutrons
+        real dend                                 !! unc in end
+        real egp                                  !! total E released in prompt gammas
+        real degp                                 !! unc in egp
+        real egd                                  !! total E released in delayed gammas
+        real degd                                 !! inc in egd
+        real eb                                   !! energy released by betas
+        real deb                                  !! unc in eb
+        real enu                                  !! energy released by neutrinos
+        real denu                                 !! unc in enu
+        real er                                   !! total E less neutrinos = ET - ENU. =pseudo Q-value in MF3/MT18
+        real der                                  !! unc in der
+        real et                                   !! sum of all partial energies
+        real det                                  !! unc in et
     end type
 
     type MF1_458
-        integer nply                             ! max poly order. starts at 0
-        integer lfc                              ! flag for tabulated fission energy release
-        integer nfc                              ! number of fission components given as tables
-        type (MF1_458_terms), pointer :: cmp(:)
-        type (integer), pointer :: ldrv(:)       ! flag if ith fission energy release component is derived (nfc)
-        type (tab1), pointer :: eifc(:)          ! ith fission energy release component (nfc)
+        integer nply                             !! max poly order. starts at 0
+        integer lfc                              !! flag for tabulated fission energy release
+        integer nfc                              !! number of fission components given as tables
+        type (MF1_458_terms), pointer :: cmp(:)  !!
+        type (integer), pointer :: ldrv(:)       !! flag if ith fission energy release component is derived (nfc)
+        type (tab1), pointer :: eifc(:)          !! ith fission energy release component (nfc)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~  MT460  Delayed Photon Data  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_460
-        integer lo                               ! rep flag: 1=discreet, 2=continuous
-        integer ng                               ! # of photons (gammas)
-        real, pointer :: e(:)                    ! energy of ith photon (ng)
-        type (tab1), pointer :: phot(:)          ! time dep of ith photon multiplicity (ng)
-        integer nnf                              ! number of precursor families
-        real, pointer :: lambda(:)               ! decay constants (nnf)
+        integer lo                               !! rep flag: 1=discreet, 2=continuous
+        integer ng                               !! # of photons (gammas)
+        real, pointer :: e(:)                    !! energy of ith photon (ng)
+        type (tab1), pointer :: phot(:)          !! time dep of ith photon multiplicity (ng)
+        integer nnf                              !! number of precursor families
+        real, pointer :: lambda(:)               !! decay constants (nnf)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MF1 data type ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

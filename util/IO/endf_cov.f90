@@ -12,38 +12,38 @@ module ENDF_COV_IO
     public
 
     type nc_cov_sect
-        real e1                               ! lower energy limit
-        real e2                               ! upper energy limit
-        integer lty                           ! cov method (0-4)
-        integer nci                           ! number of pairs of values (LTY=0)
-        integer nei                           ! number of energies where standard was used (LTY>0)
-        integer mats                          ! MAT of the standards cross section (LTY>0)
-        integer mts                           ! MT of the stadards cross section (LTY>0)
-        integer mfs                           ! MF (MFS) of standards  (LTY>0)
-        integer lfss                          ! LFLS of the stanards crs. ==0 unless MFS=10 (LTY>0)
-        type (real_pair), pointer :: pt(:)    ! pairs of data points
+        real e1                               !! lower energy limit
+        real e2                               !! upper energy limit
+        integer lty                           !! cov method (0-4)
+        integer nci                           !! number of pairs of values (LTY=0)
+        integer nei                           !! number of energies where standard was used (LTY>0)
+        integer mats                          !! MAT of the standards cross section (LTY>0)
+        integer mts                           !! MT of the stadards cross section (LTY>0)
+        integer mfs                           !! MF (MFS) of standards  (LTY>0)
+        integer lfss                          !! LFLS of the stanards crs. ==0 unless MFS=10 (LTY>0)
+        type (real_pair), pointer :: pt(:)    !! pairs of data points
     end type
 
     type ni_cov_sect
-        integer lb                            ! LB type (-1:9 defined)
-        integer lt                            ! LB=3,4: size of 2nd array. For MF32 long-range corr: LT=IDP res id#
-        integer ls                            ! LB=5,6: flag for symm matrix (0=asymm, 1=sym)
-        integer nt                            ! number of data items
-        integer ne                            ! = # energies NE,      LB=5,7.
-                                              ! = # data pairs NP,    LB=-1:4,8,9
-                                              ! = # row energies NER, LB=6.
-        type (real_pair), pointer :: kl(:)    ! uncert, LB=-1:4,8,9
-        type (real_pair), pointer :: ll(:)    ! LB=3,4
-        real, pointer :: e(:)                 ! LB=5,7; LB=6 => ER
-        real, pointer :: ec(:)                ! LB=6
-        real, pointer :: cov(:,:)             ! LB=5,6,7
+        integer lb                            !! LB type (-1:9 defined)
+        integer lt                            !! LB=3,4: size of 2nd array. For MF32 long-range corr: LT=IDP res id#
+        integer ls                            !! LB=5,6: flag for symm matrix (0=asymm, 1=sym)
+        integer nt                            !! number of data items
+        integer ne                            !! = # energies NE,      LB=5,7.
+                                              !! = # data pairs NP,    LB=-1:4,8,9
+                                              !! = # row energies NER, LB=6.
+        type (real_pair), pointer :: kl(:)    !! uncert, LB=-1:4,8,9
+        type (real_pair), pointer :: ll(:)    !! LB=3,4
+        real, pointer :: e(:)                 !! LB=5,7; LB=6 => ER
+        real, pointer :: ec(:)                !! LB=6
+        real, pointer :: cov(:,:)             !! LB=5,6,7
     end type
 
     type compact_cov_sect
-        integer ndigit                        ! # digits in compressed integers
-        integer nnn                           ! # res params in matrix
-        integer nm                            ! # lines of INTG records
-        real, pointer :: cov(:,:)             ! covariance matrix (nnn,nnn)
+        integer ndigit                        !! # digits in compressed integers
+        integer nnn                           !! # res params in matrix
+        integer nm                            !! # lines of INTG records
+        real, pointer :: cov(:,:)             !! covariance matrix (nnn,nnn)
     end type
 
     ! ----------------- private data -------------------------------------

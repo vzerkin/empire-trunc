@@ -12,52 +12,52 @@ module ENDF_MF7_IO
     public
 
     type mf7_coh_elas
-        integer nr                              ! # NR E-interpolation ranges
-        type (int_pair),  pointer :: ine(:)     ! E-interp tables (nr)
-        integer np                              ! # Bragg-edge energies
-        real, pointer :: e(:)                   ! Bragg energies (np)
-        integer lt                              ! # temps
-        integer, pointer :: li(:)               ! temp interpolation (lt) btw i & (i-1) bins
-        real, pointer :: t(:)                   ! temps (K) (0:lt)
-        real, pointer :: s(:,:)                 ! Bragg edges (np,0:lt)
+        integer nr                              !! # NR E-interpolation ranges
+        type (int_pair),  pointer :: ine(:)     !! E-interp tables (nr)
+        integer np                              !! # Bragg-edge energies
+        real, pointer :: e(:)                   !! Bragg energies (np)
+        integer lt                              !! # temps
+        integer, pointer :: li(:)               !! temp interpolation (lt) btw i & (i-1) bins
+        real, pointer :: t(:)                   !! temps (K) (0:lt)
+        real, pointer :: s(:,:)                 !! Bragg edges (np,0:lt)
     end type
 
     type mf7_incoh_elas
-        real sb                                 ! bound cross section (b)
-        type (tab1) W                           ! Debye-Waller integrals
+        real sb                                 !! bound cross section (b)
+        type (tab1) W                           !! Debye-Waller integrals
     end type
 
     type mf7_incoh_inelas
-        integer lat                             ! temp flag:0=actual temp, 1=zero253 eV
-        integer lasym                           ! symmetry flag:0=symm, 1=asymm
-        integer lln                             ! flag of form of S:0=direct,1=ln(s)
-        integer ni                              ! # items in b list
-        integer ns                              ! # non-principal scat atom types
-        real, pointer :: b(:)                   ! list of constants (ni)
-        integer nrb                             ! # beta interpolation ranges
-        type (int_pair), pointer :: inb(:)      ! beta interpolation table (nrb)
-        integer nb                              ! # beta values
-        real, pointer :: beta(:)                ! beta values (nb)
-        integer lt                              ! # temp values
-        integer, pointer :: li(:)               ! temp interpolation (lt) btw i & (i-1) bins
-        real, pointer :: temp(:)                ! temperature values (lt)
-        integer nra                             ! # alpha interpolation ranges
-        type (int_pair), pointer :: ina(:)      ! alpha interpolation table (nra)
-        integer np                              ! # alpha values
-        real, pointer :: alpha(:)               ! alpha values (np)
-        real, pointer :: s(:,:,:)               ! neutron scat law, (np,nb,lt)
-        type (tab1), pointer :: tef(:)          ! table for Teff0
+        integer lat                             !! temp flag:0=actual temp, 1=zero253 eV
+        integer lasym                           !! symmetry flag:0=symm, 1=asymm
+        integer lln                             !! flag of form of S:0=direct,1=ln(s)
+        integer ni                              !! # items in b list
+        integer ns                              !! # non-principal scat atom types
+        real, pointer :: b(:)                   !! list of constants (ni)
+        integer nrb                             !! # beta interpolation ranges
+        type (int_pair), pointer :: inb(:)      !! beta interpolation table (nrb)
+        integer nb                              !! # beta values
+        real, pointer :: beta(:)                !! beta values (nb)
+        integer lt                              !! # temp values
+        integer, pointer :: li(:)               !! temp interpolation (lt) btw i & (i-1) bins
+        real, pointer :: temp(:)                !! temperature values (lt)
+        integer nra                             !! # alpha interpolation ranges
+        type (int_pair), pointer :: ina(:)      !! alpha interpolation table (nra)
+        integer np                              !! # alpha values
+        real, pointer :: alpha(:)               !! alpha values (np)
+        real, pointer :: s(:,:,:)               !! neutron scat law, (np,nb,lt)
+        type (tab1), pointer :: tef(:)          !! table for Teff0
     end type
 
     type MF_7
-        type (mf_7), pointer :: next            ! next section
-        integer mt                              ! MT
-        real za                                 ! ZA for material
-        real awr                                ! AWR for material
-        integer lthr                            ! coherent flag for MT=2; 0 for MT=4
-        type(mf7_coh_elas),     pointer :: cel  ! coherent elastic scattering, MT=2
-        type(mf7_incoh_elas),   pointer :: iel  ! incoherent elastic scattering, MT=2
-        type(mf7_incoh_inelas), pointer :: iin  ! incoherent inelastic scattering, MT=4
+        type (mf_7), pointer :: next            !! next section
+        integer mt                              !! MT
+        real za                                 !! ZA for material
+        real awr                                !! AWR for material
+        integer lthr                            !! coherent flag for MT=2; 0 for MT=4
+        type(mf7_coh_elas),     pointer :: cel  !! coherent elastic scattering, MT=2
+        type(mf7_incoh_elas),   pointer :: iel  !! incoherent elastic scattering, MT=2
+        type(mf7_incoh_inelas), pointer :: iin  !! incoherent inelastic scattering, MT=4
     end type
 
     !---------------------  private ---------------------------------------------

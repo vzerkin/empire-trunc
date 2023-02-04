@@ -12,12 +12,12 @@ module ENDF_MF27_IO
     public
 
     type MF_27
-        type (mf_27), pointer :: next      ! next section
-        integer mt                         ! MT
-        real za                            ! ZA for material
-        real awr                           ! AWR for material
-        real z                             ! Z in form factor
-        type (tab1) ftab                   ! form factor table x=E, y=crs (b)
+        type (mf_27), pointer :: next      !! next section
+        integer mt                         !! MT
+        real za                            !! ZA for material
+        real awr                           !! AWR for material
+        real z                             !! Z in form factor
+        type (tab1) ftab                   !! form factor table x=E, y=crs (b)
     end type
 
 !---------------------------------------------------------------------------------------------

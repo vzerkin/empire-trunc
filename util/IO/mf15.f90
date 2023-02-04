@@ -12,26 +12,26 @@ module ENDF_MF15_IO
     public
 
     type mf15_tabular_dist
-        real e                         ! neutron energy
-        type (tab1) gtb                ! prob table
+        real e                         !! neutron energy
+        type (tab1) gtb                !! prob table
     end type
 
     type mf15_dist
-        integer lf                     ! dist law (only 15?)
-        type (tab1) ptb                ! prob table
-        integer nr                     ! # interp ranges
-        integer ne                     ! # incident E 
-        type (int_pair), pointer :: inb(:)             ! incident E interpolation table
-        type (mf15_tabular_dist), pointer :: gtb(:)    ! g distributions (ne)
+        integer lf                     !! dist law (only 15?)
+        type (tab1) ptb                !! prob table
+        integer nr                     !! # interp ranges
+        integer ne                     !! # incident E 
+        type (int_pair), pointer :: inb(:)             !! incident E interpolation table
+        type (mf15_tabular_dist), pointer :: gtb(:)    !! g distributions (ne)
     end type
 
     type MF_15
-        type (mf_15), pointer :: next  ! next section
-        integer mt                     ! MT
-        real za                        ! ZA for material
-        real awr                       ! AWR for material
-        integer nc                     ! # partial distributions
-        type (mf15_dist), pointer :: dst(:)       ! distribution
+        type (mf_15), pointer :: next  !! next section
+        integer mt                     !! MT
+        real za                        !! ZA for material
+        real awr                       !! AWR for material
+        integer nc                     !! # partial distributions
+        type (mf15_dist), pointer :: dst(:)       !! distribution
     end type
 
 !---------------------------------------------------------------------------------------------

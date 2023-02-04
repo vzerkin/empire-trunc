@@ -2,38 +2,38 @@ module endf_line_io
 
     implicit none
 
-    ! author: Sam Hoblit, NNDC, BNL
-    ! provide basic line-based I/O for ENDF files.
-    ! this module is responsible for opening & closing
-    ! the ENDF file and reading and writing lines
-    ! to/from the file. This I/O may be done various
-    ! ways - this version uses simple fortran I/O.
+    !! author: Sam Hoblit, NNDC, BNL
+    !! provide basic line-based I/O for ENDF files.
+    !! this module is responsible for opening & closing
+    !! the ENDF file and reading and writing lines
+    !! to/from the file. This I/O may be done various
+    !! ways - this version uses simple fortran I/O.
 
     private
 
-    integer*4, parameter :: lun = 20        ! fortran logical unit number
-    integer*4 :: recsiz                     ! record length
-    logical*4 :: qlins                      ! true if input or output has line numbers in (76:80)
-    character*80, target :: filine          ! full current line
+    integer*4, parameter :: lun = 20        !! fortran logical unit number
+    integer*4 :: recsiz                     !! record length
+    logical*4 :: qlins                      !! true if input or output has line numbers in (76:80)
+    character*80, target :: filine          !! full current line
 
     ! -----------  Public interface ------------------------------------------
 
-    character*75, public, pointer :: endline                ! current line in file
-    integer*4, public :: filin = 0                          ! current line number in file
-    integer*4, public :: lnum = 0                           ! output ENDF line number in cols (76:80)
-    logical*4, public :: q_open = .false.                   ! true when file open
-    logical*4, public :: q_write = .false.                  ! true if writing output; false for input
+    character*75, public, pointer :: endline                !! current line in file
+    integer*4, public :: filin = 0                          !! current line number in file
+    integer*4, public :: lnum = 0                           !! output ENDF line number in cols (76:80)
+    logical*4, public :: q_open = .false.                   !! true when file open
+    logical*4, public :: q_write = .false.                  !! true if writing output; false for input
 
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
 
     ! for error reporting
 
-    integer*4, public, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
-    integer*4, public, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
-    integer*4, public, parameter :: file_bad_read  = -3000000   ! status code for bad number of read bytes
-    integer*4, public, parameter :: file_bad_write = -4000000   ! status code for bad number of read bytes
-    integer*4, public :: file_bytes_requested    ! Number of bytes requeseted for read/write
-    integer*4, public :: file_bytes_receieved    ! Number of bytes recieved for read/write
+    integer*4, public, parameter :: file_bad_form  = -1000000   !! status code for file with unsupported format
+    integer*4, public, parameter :: file_not_fixed = -2000000   !! status code for file with non-fixed length records
+    integer*4, public, parameter :: file_bad_read  = -3000000   !! status code for bad number of read bytes
+    integer*4, public, parameter :: file_bad_write = -4000000   !! status code for bad number of read bytes
+    integer*4, public :: file_bytes_requested    !! Number of bytes requeseted for read/write
+    integer*4, public :: file_bytes_receieved    !! Number of bytes recieved for read/write
 
 !------------------------------------------------------------------------------
     contains
@@ -45,11 +45,11 @@ module endf_line_io
 
     implicit none
 
-    character*(*), intent(in) :: efil       ! endf file name
-    integer*4, intent(inout) :: nlin        ! # lines in file (ignored here)
-    logical*4, intent(in) :: qwrt           ! true if writing, false if reading
-    integer*4, intent(in) :: iover          ! set /= 0 to overwrite existing file
-    logical*4, intent(in) :: qlin           ! set true to add line numbers (76:80) to output records
+    character*(*), intent(in) :: efil       !! endf file name
+    integer*4, intent(inout) :: nlin        !! # lines in file (ignored here)
+    logical*4, intent(in) :: qwrt           !! true if writing, false if reading
+    integer*4, intent(in) :: iover          !! set /= 0 to overwrite existing file
+    logical*4, intent(in) :: qlin           !! set true to add line numbers (76:80) to output records
 
     logical*4 qex
     integer*4 stat
@@ -119,11 +119,11 @@ module endf_line_io
 
     integer*4 function get_endf_line()
 
-    ! get a line from ENDF file
-    ! all lines in an ENDF file should be the same length
-    ! traditional ENDF files were 80 characters and had line numbers in (76:80)
-    ! a new shorted format has been approved that skips the line numbers and is 75 characters
-    ! only allow lines that have the same length as the first line in file = recsiz
+    !! get a line from ENDF file
+    !! all lines in an ENDF file should be the same length
+    !! traditional ENDF files were 80 characters and had line numbers in (76:80)
+    !! a new shorted format has been approved that skips the line numbers and is 75 characters
+    !! only allow lines that have the same length as the first line in file = recsiz
 
     implicit none
 
@@ -201,11 +201,11 @@ module endf_line_io
 
     character*5, intent(out) :: clin
 
-    ! this routine is here for error reporting only.
-    ! if we hit an error reading an input file, then
-    ! we need to print the entire 80-character line
-    ! from input if it had line numbers present.
-    ! return the line number for input files
+    !! this routine is here for error reporting only.
+    !! if we hit an error reading an input file, then
+    !! we need to print the entire 80-character line
+    !! from input if it had line numbers present.
+    !! return the line number for input files
 
     if(.not.qlins) then
         clin = '     '
@@ -220,8 +220,8 @@ module endf_line_io
 
     integer*4 function get_endf_record_size()
 
-    ! return the record size of currently opened ENDF file
-    ! here, this is taken as the length of the first line in file
+    !! return the record size of currently opened ENDF file
+    !! here, this is taken as the length of the first line in file
 
     implicit none
 

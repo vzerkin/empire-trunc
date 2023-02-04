@@ -13,22 +13,22 @@ module ENDF_MF40_IO
     public
 
     type MF40_subsect
-        integer mf1                        ! mf of 2nd E-dep crs
-        integer lfs1                       ! final excited state of 2nd E-dep crs
-        integer mat1                       ! MAT for 2nd E-dep crs
-        integer mt1                        ! MT for 2nd E-dep crs
-        integer nc                         ! # of NC-type sub-sections
-        integer ni                         ! # of NI-type sub-sections
-        type (nc_cov_sect), pointer :: ncs(:)    ! NC sections
-        type (ni_cov_sect), pointer :: nis(:)    ! NI sections
+        integer mf1                        !! mf of 2nd E-dep crs
+        integer lfs1                       !! final excited state of 2nd E-dep crs
+        integer mat1                       !! MAT for 2nd E-dep crs
+        integer mt1                        !! MT for 2nd E-dep crs
+        integer nc                         !! # of NC-type sub-sections
+        integer ni                         !! # of NI-type sub-sections
+        type (nc_cov_sect), pointer :: ncs(:)    !! NC sections
+        type (ni_cov_sect), pointer :: nis(:)    !! NI sections
     end type
 
     type MF40_sect
-        real qm                            ! mass-diff Q value based on GS of residual
-        real qi                            ! reaction Q-value.
-        integer lfs                        ! level number of nuclide produced
-        integer nl                         ! # subsections
-        type (mf40_subsect), pointer :: sub(:)     ! subsections
+        real qm                            !! mass-diff Q value based on GS of residual
+        real qi                            !! reaction Q-value.
+        integer lfs                        !! level number of nuclide produced
+        integer nl                         !! # subsections
+        type (mf40_subsect), pointer :: sub(:)     !! subsections
     end type
 
     type MF_40
@@ -36,9 +36,9 @@ module ENDF_MF40_IO
         integer mt
         real za
         real awr
-        integer lis                        ! level # of target
-        integer ns                         ! number of subsections
-        type (MF40_sect), pointer :: sct(:)        ! sections (ns)
+        integer lis                        !! level # of target
+        integer ns                         !! number of subsections
+        type (MF40_sect), pointer :: sct(:)        !! sections (ns)
     end type
 
 !------------------------------------------------------------------------------

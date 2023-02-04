@@ -2,42 +2,42 @@ module endf_lines
 
     use endf_line_io
 
-    ! author: Sam Hoblit, NNDC, BNL
-    ! this module handles the I/O of endf lines keeping track of the
-    ! control fields in columns 67:80 containing the MAT, MF, MT and
-    ! optional line numbers. These fields are accessed through the public
-    ! routines. Access is also given to the lower-level routines that
-    ! actually read/write the lines to the ENDF file.
+    !! author: Sam Hoblit, NNDC, BNL
+    !! this module handles the I/O of endf lines keeping track of the
+    !! control fields in columns 67:80 containing the MAT, MF, MT and
+    !! optional line numbers. These fields are accessed through the public
+    !! routines. Access is also given to the lower-level routines that
+    !! actually read/write the lines to the ENDF file.
 
     implicit none
 
     private
 
-    integer*4, parameter :: imend = 0     ! state when between materials
-    integer*4, parameter :: ifend = 1     ! state when between MF files
-    integer*4, parameter :: isend = 2     ! state when between MT sections
-    integer*4, parameter :: idata = 3     ! state when within a MT section
+    integer*4, parameter :: imend = 0     !! state when between materials
+    integer*4, parameter :: ifend = 1     !! state when between MF files
+    integer*4, parameter :: isend = 2     !! state when between MT sections
+    integer*4, parameter :: idata = 3     !! state when within a MT section
 
-    logical*4 :: verbose = .false.        ! type MAT, MF, MT whenever MT changes
-    logical*4 :: qmat = .false.           ! if true, only issue warning if MAT changes unexpectedly
-    logical*4 :: qmf = .false.            ! if true, only issue warning if MF  changes unexpectedly
-    logical*4 :: qmt = .false.            ! if true, only issue warning if MT  changes unexpectedly
-    logical*4 :: qlin = .false.           ! if true, put line numbers in (76:80) of output files
-    logical*4 :: qfst = .true.            ! set true when file opened for first read of header line
+    logical*4 :: verbose = .false.        !! type MAT, MF, MT whenever MT changes
+    logical*4 :: qmat = .false.           !! if true, only issue warning if MAT changes unexpectedly
+    logical*4 :: qmf = .false.            !! if true, only issue warning if MF  changes unexpectedly
+    logical*4 :: qmt = .false.            !! if true, only issue warning if MT  changes unexpectedly
+    logical*4 :: qlin = .false.           !! if true, put line numbers in (76:80) of output files
+    logical*4 :: qfst = .true.            !! set true when file opened for first read of header line
 
-    integer*4 :: lbm(3)	= 0               ! contains last bad MAT, MF, MT encountered when qmat, qmf, or qmt set
-    integer*4 :: errlim = 50              ! limit of errors in file before giving up.
+    integer*4 :: lbm(3)	= 0               !! contains last bad MAT, MF, MT encountered when qmat, qmf, or qmt set
+    integer*4 :: errlim = 50              !! limit of errors in file before giving up.
 
-    character*9 lmft                      ! MAT, MF, MT in cols 66-75 of last section read
-    character*9 cmft                      ! MAT, MF, MT in cols 66-75 of current line
-    integer*4 istate                      ! current 'state' on input
-    character*200 erlin                   ! for error reporting
+    character*9 lmft                      !! MAT, MF, MT in cols 66-75 of last section read
+    character*9 cmft                      !! MAT, MF, MT in cols 66-75 of current line
+    integer*4 istate                      !! current 'state' on input
+    character*200 erlin                   !! for error reporting
 
 ! -------------------- Public interface ----------------------------------------
 
-    public endline                        ! line supplied by endf_line_io
-    integer, public :: ipos               ! current position on line
-    integer, public :: errcnt             ! error counter
+    public endline                        !! line supplied by endf_line_io
+    integer, public :: ipos               !! current position on line
+    integer, public :: errcnt             !! error counter
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect, set_error_limit
@@ -51,10 +51,10 @@ module endf_lines
 
     implicit none
 
-    character*(*), intent(in) :: efil             ! endf file name
-    integer*4, intent(inout) :: nlin              ! # lines in file
-    logical*4, intent(in) :: qwrt                 ! true for output file
-    logical*4, intent(in), optional :: qover      ! true to allow overwriting existing file
+    character*(*), intent(in) :: efil             !! endf file name
+    integer*4, intent(inout) :: nlin              !! # lines in file
+    logical*4, intent(in) :: qwrt                 !! true for output file
+    logical*4, intent(in), optional :: qover      !! true to allow overwriting existing file
 
     integer*4 status,iov,irs
     character chr2*2,chr3*3
@@ -127,20 +127,20 @@ module endf_lines
 
     implicit none
 
-    ! this is a general routine to call when an error occurs somewhere
-    ! that is fatal. Supply a line describing the error to be printed
-    ! to standard output. Then, if a file is open, the last line processed
-    ! is printed out along with the line number, and the actions depends
-    ! on the value of the error status.
+    !! this is a general routine to call when an error occurs somewhere
+    !! that is fatal. Supply a line describing the error to be printed
+    !! to standard output. Then, if a file is open, the last line processed
+    !! is printed out along with the line number, and the actions depends
+    !! on the value of the error status.
 
-    ! if errstat > 0            : A warning is printed and control returned
-    ! if errstat = 0            : An informational message printed control returned
-    ! if 0 > errstat > -100     : An error occured, unwound. Section processing aborted.
-    ! if -100 >= errstat > -200 : An error occured, unwound. Material processing aborted.
-    ! if -200 >= errstat        : An error occued, unwound. File processing aborted.
+    !! if errstat > 0            : A warning is printed and control returned
+    !! if errstat = 0            : An informational message printed control returned
+    !! if 0 > errstat > -100     : An error occured, unwound. Section processing aborted.
+    !! if -100 >= errstat > -200 : An error occured, unwound. Material processing aborted.
+    !! if -200 >= errstat        : An error occued, unwound. File processing aborted.
 
-    ! if errstat not supplied, default value of -10 used. This aborts current section
-    ! on read. On write, any errstat < 0 abort writing the whole file.
+    !! if errstat not supplied, default value of -10 used. This aborts current section
+    !! on read. On write, any errstat < 0 abort writing the whole file.
 
     character*(*), intent(in) :: errline
     integer*4, intent(in), optional :: errstat

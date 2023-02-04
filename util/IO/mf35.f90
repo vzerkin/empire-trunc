@@ -15,14 +15,14 @@ module ENDF_MF35_IO
     ! MF35 includes E1 & E2 in the NI section, while the others do not.
 
     type MF35_list
-        real e1                            ! lowest  incident neutron energy (eV)
-        real e2                            ! highest incident neutron energy (eV)
-        integer ls                         ! symm matrix == 1 always
-        integer lb                         ! LB type == 7 always
-        integer nt                         ! number of data items in list
-        integer ne                         ! number of energies 
-        real, pointer :: ek(:)             ! outgoing energy bins
-        real, pointer :: cov(:,:)          ! covariance array 
+        real e1                            !! lowest  incident neutron energy (eV)
+        real e2                            !! highest incident neutron energy (eV)
+        integer ls                         !! symm matrix == 1 always
+        integer lb                         !! LB type == 7 always
+        integer nt                         !! number of data items in list
+        integer ne                         !! number of energies 
+        real, pointer :: ek(:)             !! outgoing energy bins
+        real, pointer :: cov(:,:)          !! covariance array 
     end type
 
     type MF_35
@@ -30,8 +30,8 @@ module ENDF_MF35_IO
         integer mt
         real za
         real awr
-        integer nk                         ! number of sub-sections
-        type (MF35_list), pointer :: sct(:)   ! sections (nk)
+        integer nk                              !! number of sub-sections
+        type (MF35_list), pointer :: sct(:)     !! sections (nk)
     end type
 
     private read_mf35_list, write_mf35_list

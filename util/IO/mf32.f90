@@ -16,14 +16,14 @@ module ENDF_MF32_IO
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Breit-Wigner parameter covariances ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     !                                       LRU = 1, LRF = 1,2
 
-    type MF32_BW_compatible_unc                    ! Compatibility resonance data & unc (LCOMP=0)
+    type MF32_BW_compatible_unc                    !! Compatibility resonance data & unc (LCOMP=0)
         sequence
-        real er                                    ! resonance energy (eV)
-        real aj                                    ! total spin J
-        real gt                                    ! total width
-        real gn                                    ! neutron width
-        real gg                                    ! radiation width
-        real gf                                    ! fission width
+        real er                                    !! resonance energy (eV)
+        real aj                                    !! total spin J
+        real gt                                    !! total width
+        real gn                                    !! neutron width
+        real gg                                    !! radiation width
+        real gf                                    !! fission width
         real de
         real dn
         real dndg
@@ -38,43 +38,43 @@ module ENDF_MF32_IO
         real nul
     end type
 
-    type MF32_BW_compatible                        ! Breit-Wigner parameters, LRF=1,2
-        real awri                                  ! mass in neutron masses
-        integer nrs                                ! # of resonances for ang mom L
-        integer l                                  ! ang mom L
+    type MF32_BW_compatible                        !! Breit-Wigner parameters, LRF=1,2
+        real awri                                  !! mass in neutron masses
+        integer nrs                                !! # of resonances for ang mom L
+        integer l                                  !! ang mom L
         type (MF32_BW_compatible_unc), pointer :: res(:)    ! resonances (NRS)
     end type
 
     !.......................................................................................
 
-    type MF32_BW_res                               ! Breit-Wigner resonance, LRF = 1,2
+    type MF32_BW_res                               !! Breit-Wigner resonance, LRF = 1,2
         sequence
-        real er                                    ! resonance energy (eV)
-        real aj                                    ! total spin J
-        real gt                                    ! total width
-        real gn                                    ! neutron width
-        real gg                                    ! radiation width
-        real gf                                    ! fission width
+        real er                                    !! resonance energy (eV)
+        real aj                                    !! total spin J
+        real gt                                    !! total width
+        real gn                                    !! neutron width
+        real gg                                    !! radiation width
+        real gf                                    !! fission width
     end type
 
     type MF32_BW_block
-        integer nrb                                ! # resonances in block
-        integer mpar                               ! # params/res given (1-5)
-        type (MF32_BW_res), pointer :: res(:)      ! resonances (nrb)
-        real, pointer :: v(:,:)                    ! symmetric covariance matrix of parameter covars
+        integer nrb                                !! # resonances in block
+        integer mpar                               !! # params/res given (1-5)
+        type (MF32_BW_res), pointer :: res(:)      !! resonances (nrb)
+        real, pointer :: v(:,:)                    !! symmetric covariance matrix of parameter covars
     end type
 
-    type MF32_BW_general                           ! Breit-Wigner parameters, LRF=1,2
-        real awri                                  ! mass in neutron masses
-        integer nsrs                               ! # of resonance sub-section blocks
-        integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_BW_block), pointer :: blk(:)    ! resonance blocks (nsrs)
-        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
+    type MF32_BW_general                           !! Breit-Wigner parameters, LRF=1,2
+        real awri                                  !! mass in neutron masses
+        integer nsrs                               !! # of resonance sub-section blocks
+        integer nlrs                               !! # of long-range parameter sub-sections
+        type (MF32_BW_block), pointer :: blk(:)    !! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      !! long-term covariances (nlrs)
     end type
 
     !.......................................................................................
 
-    type MF32_BW_cmpct_unc                         ! Compact resonance data & unc (LCOMP=2)
+    type MF32_BW_cmpct_unc                         !! Compact resonance data & unc (LCOMP=2)
         sequence
         real er
         real aj
@@ -91,31 +91,31 @@ module ENDF_MF32_IO
     end type
 
     type MF32_BW_compact
-        real awri                                  ! mass in neutron masses
-        real qx                                    ! Q-value to add for penetrability factor
-        integer lrx                                ! flag for competitive width. 0=no, 1=yes
-        integer nrsa                               ! # resonances included in covar matrix
-        type (MF32_BW_cmpct_unc), pointer :: res(:)    ! resonances (nrsa)
-        type (compact_cov_sect) cpv                ! compact covars
+        real awri                                  !! mass in neutron masses
+        real qx                                    !! Q-value to add for penetrability factor
+        integer lrx                                !! flag for competitive width. 0=no, 1=yes
+        integer nrsa                               !! # resonances included in covar matrix
+        type (MF32_BW_cmpct_unc), pointer :: res(:)    !! resonances (nrsa)
+        type (compact_cov_sect) cpv                !! compact covars
     end type
 
     !.......................................................................................
 
-    type MF32_BW_subsection                        ! Breit-Wigner section, LRF=1,2
-        real spi                                   ! spin of target
-        real ap                                    ! scat radius
-        real dap                                   ! scat rad unc
-        integer lcomp                              ! compatibility flag
-        integer nls                                ! # of l-values (lcomp=0)
-        integer isr                                ! DAP specified if > 0
-        type (MF32_BW_compatible), pointer :: old(:)   ! compatability covars (lcomp = 0)
-        type (MF32_BW_general), pointer :: gen         ! general covariances  (lcomp = 1)
-        type (MF32_BW_compact), pointer :: cmp         ! compact covariances  (lcomp = 1)
+    type MF32_BW_subsection                        !! Breit-Wigner section, LRF=1,2
+        real spi                                   !! spin of target
+        real ap                                    !! scat radius
+        real dap                                   !! scat rad unc
+        integer lcomp                              !! compatibility flag
+        integer nls                                !! # of l-values (lcomp=0)
+        integer isr                                !! DAP specified if > 0
+        type (MF32_BW_compatible), pointer :: old(:)   !! compatability covars (lcomp = 0)
+        type (MF32_BW_general), pointer :: gen         !! general covariances  (lcomp = 1)
+        type (MF32_BW_compact), pointer :: cmp         !! compact covariances  (lcomp = 1)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reich-Moore ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF32_RM_res                               ! Reich-Moore resonance, LRF = 3
+    type MF32_RM_res                               !! Reich-Moore resonance, LRF = 3
         sequence
         real er
         real aj
@@ -126,23 +126,23 @@ module ENDF_MF32_IO
     end type
 
     type MF32_RM_block
-        integer nrb                                ! # resonances in block
-        integer mpar                               ! # params/res given (1-5)
-        type (MF32_RM_res), pointer :: res(:)      ! resonances (nrb)
-        real, pointer :: v(:,:)                    ! symmetric covariance matrix of parameter covars
+        integer nrb                                !! # resonances in block
+        integer mpar                               !! # params/res given (1-5)
+        type (MF32_RM_res), pointer :: res(:)      !! resonances (nrb)
+        real, pointer :: v(:,:)                    !! symmetric covariance matrix of parameter covars
     end type
 
-    type MF32_RM_general                           ! Reich-Moore parameters, LRF=3
-        real awri                                  ! mass in neutron masses
-        integer nsrs                               ! # of resonance sub-section blocks
-        integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_RM_block), pointer :: blk(:)    ! resonance blocks (nsrs)
-        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
+    type MF32_RM_general                           !! Reich-Moore parameters, LRF=3
+        real awri                                  !! mass in neutron masses
+        integer nsrs                               !! # of resonance sub-section blocks
+        integer nlrs                               !! # of long-range parameter sub-sections
+        type (MF32_RM_block), pointer :: blk(:)    !! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      !! long-term covariances (nlrs)
     end type
 
     !.......................................................................................
 
-    type MF32_RM_cmpct_unc                         ! Compact resonance data & unc (LCOMP=2)
+    type MF32_RM_cmpct_unc                         !! Compact resonance data & unc (LCOMP=2)
         sequence
         real er
         real aj
@@ -159,31 +159,31 @@ module ENDF_MF32_IO
     end type
 
     type MF32_RM_compact
-        real awri                                  ! mass in neutron masses
-        real apl                                   ! l-dep scattering radius
-        integer nrsa                               ! # resonances included in covar matrix
-        type (MF32_RM_cmpct_unc), pointer :: res(:)  ! resonances (nrsa)
-        type (compact_cov_sect) cpv                ! compact covars
+        real awri                                  !! mass in neutron masses
+        real apl                                   !! l-dep scattering radius
+        integer nrsa                               !! # resonances included in covar matrix
+        type (MF32_RM_cmpct_unc), pointer :: res(:)  !! resonances (nrsa)
+        type (compact_cov_sect) cpv                !! compact covars
     end type
 
     !.......................................................................................
 
-    type MF32_RM_subsection                        ! Reich-Moore section, LRF=3
-        real spi                                   ! spin of target
-        real ap                                    ! scat radius
-        real, pointer :: dap(:)                    ! scat rad unc
-        integer lad                                ! flag for ang dist use (LCOMP=2)
-        integer lcomp                              ! compatibility flag
-        integer nls                                ! # of l-values
-        integer mls                                ! # of dap values
-        integer isr                                ! DAP specified if > 0
-        type (MF32_RM_general), pointer :: gen     ! general covariances  (lcomp = 1)
-        type (MF32_RM_compact), pointer :: cmp     ! compact covariances  (lcomp = 2)
+    type MF32_RM_subsection                        !! Reich-Moore section, LRF=3
+        real spi                                   !! spin of target
+        real ap                                    !! scat radius
+        real, pointer :: dap(:)                    !! scat rad unc
+        integer lad                                !! flag for ang dist use (LCOMP=2)
+        integer lcomp                              !! compatibility flag
+        integer nls                                !! # of l-values
+        integer mls                                !! # of dap values
+        integer isr                                !! DAP specified if > 0
+        type (MF32_RM_general), pointer :: gen     !! general covariances  (lcomp = 1)
+        type (MF32_RM_compact), pointer :: cmp     !! compact covariances  (lcomp = 2)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Adler-Adler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF32_AA_res                               ! Adler-Adler resonance, LRF=4
+    type MF32_AA_res                               !! Adler-Adler resonance, LRF=4
         sequence
         real det
         real dwt
@@ -200,79 +200,79 @@ module ENDF_MF32_IO
     end type
 
     type MF32_AA_block
-        integer nrb                                ! # resonances in block
-        integer mpar                               ! # params/res given (1-8)
-        type (MF32_AA_res), pointer :: res(:)      ! resonances (nrb)
-        real, pointer :: v(:,:)                    ! symmetric covariance matrix of parameter covars
+        integer nrb                                !! # resonances in block
+        integer mpar                               !! # params/res given (1-8)
+        type (MF32_AA_res), pointer :: res(:)      !! resonances (nrb)
+        real, pointer :: v(:,:)                    !! symmetric covariance matrix of parameter covars
     end type
 
-    type MF32_AA_general                           ! Adler-Adler section, LRF=4
-        real awri                                  ! mass in neutron masses
-        integer nsrs                               ! # of resonance sub-section blocks
-        integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_AA_block), pointer :: blk(:)    ! resonance blocks (nsrs)
-        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
+    type MF32_AA_general                           !! Adler-Adler section, LRF=4
+        real awri                                  !! mass in neutron masses
+        integer nsrs                               !! # of resonance sub-section blocks
+        integer nlrs                               !! # of long-range parameter sub-sections
+        type (MF32_AA_block), pointer :: blk(:)    !! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      !! long-term covariances (nlrs)
     end type
 
-    type MF32_AA_subsection                        ! Adler-Adler section, LRF=4
-        real spi                                   ! spin of target
-        real ap                                    ! scat radius
-        integer lcomp                              ! LCOMP = 1 only?
-        integer nls                                ! # of l-values
-        type (MF32_AA_general), pointer :: gen     ! general covariances  (lcomp = 1)
+    type MF32_AA_subsection                        !! Adler-Adler section, LRF=4
+        real spi                                   !! spin of target
+        real ap                                    !! scat radius
+        integer lcomp                              !! LCOMP = 1 only?
+        integer nls                                !! # of l-values
+        type (MF32_AA_general), pointer :: gen     !! general covariances  (lcomp = 1)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~ R-Matrix Limited ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF32_ML_gen_spin_grp                      ! general spin group for LCOMP=1
-        integer nch                                ! # channels
-        integer nrb                                ! # resonances
-        integer nx                                 ! # lines
-        real, pointer :: er(:)                     ! resonance energy (nrb)
-        real, pointer :: gam(:,:)                  ! resonance params (nch,nrb)
+    type MF32_ML_gen_spin_grp                      !! general spin group for LCOMP=1
+        integer nch                                !! # channels
+        integer nrb                                !! # resonances
+        integer nx                                 !! # lines
+        real, pointer :: er(:)                     !! resonance energy (nrb)
+        real, pointer :: gam(:,:)                  !! resonance params (nch,nrb)
     end type
 
     type MF32_ML_block
-        integer njsx                               ! # of J-pi values
-        integer nparb                              ! # parameters in cov array
-        type (mf32_ml_gen_spin_grp), pointer :: sp(:)    ! Spin groups (njsx)
-        real, pointer :: v(:,:)                    ! covariance para array (nparb,nparb)
+        integer njsx                               !! # of J-pi values
+        integer nparb                              !! # parameters in cov array
+        type (mf32_ml_gen_spin_grp), pointer :: sp(:)    !! Spin groups (njsx)
+        real, pointer :: v(:,:)                    !! covariance para array (nparb,nparb)
     end type
 
-    type MF32_ML_general                           ! R-Matrix parameters
-        real awri                                  ! mass in neutron masses
-        integer nsrs                               ! # of resonance sub-section blocks
-        integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_ML_block), pointer :: blk(:)    ! resonance blocks (nsrs)
-        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
+    type MF32_ML_general                           !! R-Matrix parameters
+        real awri                                  !! mass in neutron masses
+        integer nsrs                               !! # of resonance sub-section blocks
+        integer nlrs                               !! # of long-range parameter sub-sections
+        type (MF32_ML_block), pointer :: blk(:)    !! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      !! long-term covariances (nlrs)
     end type
 
     !.......................................................................................
 
-    type MF32_ML_chn                               ! channel
+    type MF32_ML_chn                               !! channel
         sequence
-        real ppi                                   ! part-pair number
-        real l                                     ! l ang mom
-        real sch                                   ! spin
-        real bnd                                   ! boundary cond
-        real ape                                   ! eff chan radius
-        real apt                                   ! true chan radius
-        real, pointer :: gam(:)                    ! widths for resonances (nrs)
-        real, pointer :: dgam(:)                   ! unc for resonances (nrs)
+        real ppi                                   !! part-pair number
+        real l                                     !! l ang mom
+        real sch                                   !! spin
+        real bnd                                   !! boundary cond
+        real ape                                   !! eff chan radius
+        real apt                                   !! true chan radius
+        real, pointer :: gam(:)                    !! widths for resonances (nrs)
+        real, pointer :: dgam(:)                   !! unc for resonances (nrs)
     end type
 
-    type MF32_ML_cmp_spin_grp                      ! compact spin group for LCOMP=2
-        real aj                                    ! spin J
-        real pj                                    ! parity
-        integer nch                                ! # channels
-        integer nrsa                               ! # resonances
-        integer nx                                 ! # lines used for resonances
-        real, pointer :: er(:)                     ! E for each resonance (nrsa)
-        real, pointer :: der(:)                    ! dE for each resonance (nrsa)
-        type (MF32_ML_chn), pointer :: chn(:)      ! channels (nrsa)
+    type MF32_ML_cmp_spin_grp                      !! compact spin group for LCOMP=2
+        real aj                                    !! spin J
+        real pj                                    !! parity
+        integer nch                                !! # channels
+        integer nrsa                               !! # resonances
+        integer nx                                 !! # lines used for resonances
+        real, pointer :: er(:)                     !! E for each resonance (nrsa)
+        real, pointer :: der(:)                    !! dE for each resonance (nrsa)
+        type (MF32_ML_chn), pointer :: chn(:)      !! channels (nrsa)
     end type
 
-    type MF32_ML_part_pair                         ! R-Matrix particle pairs LRF=7
+    type MF32_ML_part_pair                         !! R-Matrix particle pairs LRF=7
         sequence
         real ma
         real mb
@@ -289,88 +289,88 @@ module ENDF_MF32_IO
     end type
 
     type MF32_ML_compact
-        integer npp                                ! # of particle-pairs
-        integer njsx                               ! use in compact unknown
-        type (mf32_ml_part_pair), pointer :: pp(:)      ! particle pairs (npp)
-        type (mf32_ml_cmp_spin_grp), pointer :: sg(:)   ! spin groups (njs)
-        type (compact_cov_sect) cpv                ! compact covars
+        integer npp                                !! # of particle-pairs
+        integer njsx                               !! use in compact unknown
+        type (mf32_ml_part_pair), pointer :: pp(:)      !! particle pairs (npp)
+        type (mf32_ml_cmp_spin_grp), pointer :: sg(:)   !! spin groups (njs)
+        type (compact_cov_sect) cpv                !! compact covars
     end type
 
     !.......................................................................................
 
-    type MF32_ML_subsection                        ! R-Matrix Limited section, LRF=7
-        integer ifg                                ! units flag
-        integer lcomp                              ! general or compact
-        integer njs                                ! # of J-pi values
-        integer isr                                ! if >0, then DAP given
-        integer njch                               ! # channels in DAP
-        real, pointer :: dap(:,:)                  ! dap array (NJCH,NJS)
-        type (MF32_ML_general), pointer :: gen     ! general covariances  (lcomp = 1)
-        type (MF32_ML_compact), pointer :: cmp     ! compact covariances  (lcomp = 2)
+    type MF32_ML_subsection                        !! R-Matrix Limited section, LRF=7
+        integer ifg                                !! units flag
+        integer lcomp                              !! general or compact
+        integer njs                                !! # of J-pi values
+        integer isr                                !! if >0, then DAP given
+        integer njch                               !! # channels in DAP
+        real, pointer :: dap(:,:)                  !! dap array (NJCH,NJS)
+        type (MF32_ML_general), pointer :: gen     !! general covariances  (lcomp = 1)
+        type (MF32_ML_compact), pointer :: cmp     !! compact covariances  (lcomp = 2)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~ Unresolved Region ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type mf32_ur_jprm                              ! prm for j state
+    type mf32_ur_jprm                              !! prm for j state
         sequence
-        real d                                     ! ave level spacing
-        real aj                                    ! j-value
-        real gno                                   ! ave reduced neutron width
-        real gg                                    ! ave gamma width
-        real gf                                    ! ave fission width
-        real gx                                    ! ave competitive width
+        real d                                     !! ave level spacing
+        real aj                                    !! j-value
+        real gno                                   !! ave reduced neutron width
+        real gg                                    !! ave gamma width
+        real gf                                    !! ave fission width
+        real gx                                    !! ave competitive width
     end type
 
-    type mf32_ur_lprm                              ! res prms for l
-        real awri                                  ! AWR for l
-        integer l                                  ! l
-        integer njs                                ! # j states
-        type (mf32_ur_jprm), pointer :: jpm(:)     ! parameters
+    type mf32_ur_lprm                              !! res prms for l
+        real awri                                  !! AWR for l
+        integer l                                  !! l
+        integer njs                                !! # j states
+        type (mf32_ur_jprm), pointer :: jpm(:)     !! parameters
     end type
 
-    type MF32_UR_subsection                        ! Unresolved Res subsection, LRU=2
-        real spi                                   ! spin of target
-        real ap                                    ! scat radius
-        integer lssf                               ! flag for use of URR
-        integer nls                                ! # of l-values
-        type (mf32_ur_lprm), pointer :: lpm(:)     ! resonance parameters for each l (nls)
-        integer mpar                               ! # ave params given for each l,j
-        integer npar                               ! total # params in cov matrix = mpar*(sum of all njs)
-        real, pointer :: rv(:,:)                   ! cov matrix (npar,npar)
+    type MF32_UR_subsection                        !! Unresolved Res subsection, LRU=2
+        real spi                                   !! spin of target
+        real ap                                    !! scat radius
+        integer lssf                               !! flag for use of URR
+        integer nls                                !! # of l-values
+        type (mf32_ur_lprm), pointer :: lpm(:)     !! resonance parameters for each l (nls)
+        integer mpar                               !! # ave params given for each l,j
+        integer npar                               !! total # params in cov matrix = mpar*(sum of all njs)
+        real, pointer :: rv(:,:)                   !! cov matrix (npar,npar)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MF32 sections ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF32_range
-        integer lru                                ! flag for res params. 0=only AP, 1=res, 2=unres
-        integer lrf                                ! flag representation 1-7
-        integer nro                                ! flag E-dep of AP. 0=indep, 1=table.
-        integer naps                               ! flag for channel radius
-        real el                                    ! lower limit E
-        real eh                                    ! upper limit E
-        integer ni                                 ! # NI-type sections for E-dep covar for AP (only if NRO /= 0)
-        type (ni_cov_sect), pointer :: nis(:)      ! NI sections to E-dep covar of scattering radius AP
-        type (MF32_BW_subsection), pointer :: bw   ! Briet-Wigner      (LRF = 1,2)
-        type (MF32_RM_subsection), pointer :: rm   ! Reich-Moore       (LRF = 3)
-        type (MF32_AA_subsection), pointer :: aa   ! Adler-Adler       (LRF = 4)
-        type (MF32_ML_subsection), pointer :: ml   ! R-Matrix limited  (LRF = 7)
-        type (MF32_UR_subsection), pointer :: ur   ! Unresolved region (LRU = 2)
+        integer lru                                !! flag for res params. 0=only AP, 1=res, 2=unres
+        integer lrf                                !! flag representation 1-7
+        integer nro                                !! flag E-dep of AP. 0=indep, 1=table.
+        integer naps                               !! flag for channel radius
+        real el                                    !! lower limit E
+        real eh                                    !! upper limit E
+        integer ni                                 !! # NI-type sections for E-dep covar for AP (only if NRO /= 0)
+        type (ni_cov_sect), pointer :: nis(:)      !! NI sections to E-dep covar of scattering radius AP
+        type (MF32_BW_subsection), pointer :: bw   !! Briet-Wigner      (LRF = 1,2)
+        type (MF32_RM_subsection), pointer :: rm   !! Reich-Moore       (LRF = 3)
+        type (MF32_AA_subsection), pointer :: aa   !! Adler-Adler       (LRF = 4)
+        type (MF32_ML_subsection), pointer :: ml   !! R-Matrix limited  (LRF = 7)
+        type (MF32_UR_subsection), pointer :: ur   !! Unresolved region (LRU = 2)
     end type
 
     type MF32_isotope
-        real zai                                   ! ZA for isotope
-        real abn                                   ! number fraction of isotope in material
-        integer lfw                                ! ave fission widths given: 0=no, 1=yes.
-        integer ner                                ! # of res ranges for isotope
-        type (MF32_range), pointer :: rng(:)       ! energy ranges (NER)
+        real zai                                   !! ZA for isotope
+        real abn                                   !! number fraction of isotope in material
+        integer lfw                                !! ave fission widths given: 0=no, 1=yes.
+        integer ner                                !! # of res ranges for isotope
+        type (MF32_range), pointer :: rng(:)       !! energy ranges (NER)
     end type
 
     type MF_32
-        integer :: mt = 151                        ! only 1 MT for MF32
-        real za                                    ! ZA for material
-        real awr                                   ! AWR for material
-        integer nis                                ! # of isotopes
-        type (MF32_isotope), pointer :: iso(:)     ! pointer to NIS isotopes
+        integer :: mt = 151                        !! only 1 MT for MF32
+        real za                                    !! ZA for material
+        real awr                                   !! AWR for material
+        integer nis                                !! # of isotopes
+        type (MF32_isotope), pointer :: iso(:)     !! pointer to NIS isotopes
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ private ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

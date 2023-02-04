@@ -15,97 +15,97 @@ module ENDF_MF6_IO
 
     type mf6_law1_eprm
         real e2
-        real, pointer :: b(:)                   ! angle parameters (na)
+        real, pointer :: b(:)                   !! angle parameters (na)
     end type
 
     type mf6_law1_list
-        real e1                                 ! incident energy
-        integer nd                              ! # outgoing discreet energies
-        integer na                              ! # angular params
-        integer nep                             ! # secondary energies
-        type (mf6_law1_eprm), pointer :: prm(:) ! energy bin parameters (nep)
+        real e1                                 !! incident energy
+        integer nd                              !! # outgoing discreet energies
+        integer na                              !! # angular params
+        integer nep                             !! # secondary energies
+        type (mf6_law1_eprm), pointer :: prm(:) !! energy bin parameters (nep)
     end type
 
     type mf6_law1
-        integer lang                            ! ang rep flag
-        integer lep                             ! interpolation scheme for 2nd E
-        integer nr                              ! tab2 interpolation for primary
-        integer ne                              ! # primary energies
-        type (int_pair), pointer :: itp(:)      ! interpolation tables
-        type (mf6_law1_list), pointer :: ll(:)  ! primaries
+        integer lang                            !! ang rep flag
+        integer lep                             !! interpolation scheme for 2nd E
+        integer nr                              !! tab2 interpolation for primary
+        integer ne                              !! # primary energies
+        type (int_pair), pointer :: itp(:)      !! interpolation tables
+        type (mf6_law1_list), pointer :: ll(:)  !! primaries
     end type
 
     !---------------------  LAW 2  ---------------------------------------------
 
     type mf6_law2_list
-        real e1                                 ! incident energy
-        integer lang                            ! ang rep flag
-        integer nl                              ! highest order L or # cosines
-        real, pointer :: a(:)                   ! parameters (nw
+        real e1                                 !! incident energy
+        integer lang                            !! ang rep flag
+        integer nl                              !! highest order L or # cosines
+        real, pointer :: a(:)                   !! parameters (nw
     end type
 
     type mf6_law2
-        integer nr                              ! tab2 interpolation for primary
-        integer ne                              ! # primary energies
-        type (int_pair), pointer :: itp(:)      ! interpolation tables
-        type (mf6_law2_list), pointer :: ll(:)  ! primaries
+        integer nr                              !! tab2 interpolation for primary
+        integer ne                              !! # primary energies
+        type (int_pair), pointer :: itp(:)      !! interpolation tables
+        type (mf6_law2_list), pointer :: ll(:)  !! primaries
     end type
 
     !---------------------  LAW 5  ---------------------------------------------
 
     type mf6_law5_list
-        real e1                                 ! incident energy
-        integer ltp                             ! representation
-        integer nl                              ! highest order L or # cosines
-        real, pointer :: a(:)                   ! parameters (nw)
+        real e1                                 !! incident energy
+        integer ltp                             !! representation
+        integer nl                              !! highest order L or # cosines
+        real, pointer :: a(:)                   !! parameters (nw)
     end type
 
     type mf6_law5
-        real spi                                ! spin of particle
-        integer lidp                            ! flag for identical. 1=yes, no=0.
-        integer nr                              ! tab2 interpolation for primary
-        integer ne                              ! # primary energies
-        type (int_pair), pointer :: itp(:)      ! interpolation tables
-        type (mf6_law5_list), pointer :: ll(:)  ! primaries
+        real spi                                !! spin of particle
+        integer lidp                            !! flag for identical. 1=yes, no=0.
+        integer nr                              !! tab2 interpolation for primary
+        integer ne                              !! # primary energies
+        type (int_pair), pointer :: itp(:)      !! interpolation tables
+        type (mf6_law5_list), pointer :: ll(:)  !! primaries
     end type
 
     !---------------------  LAW 6  ---------------------------------------------
 
     type mf6_law6
-        real apsx                               ! total mass in neutron units of parts
-        integer npsx                            ! # particles dist with phase space
+        real apsx                               !! total mass in neutron units of parts
+        integer npsx                            !! # particles dist with phase space
     end type
 
     !---------------------  LAW 7  ---------------------------------------------
 
     type mf6_law7_mu
-        real mu                                 ! emission cosine mu
-        type (tab1) sec                         ! secondary (np=nep). x=E', y=f
+        real mu                                 !! emission cosine mu
+        type (tab1) sec                         !! secondary (np=nep). x=E', y=f
     end type
 
     type mf6_law7_inc
-        real e1                                 ! incident energy
-        integer nrm                             ! tab2 interpolation for mu
-        integer nmu                             ! # mu points
-        type (int_pair), pointer :: itp(:)      ! interpolation tables
-        type (mf6_law7_mu), pointer :: mu(:)    ! mu tables (nmu)
+        real e1                                 !! incident energy
+        integer nrm                             !! tab2 interpolation for mu
+        integer nmu                             !! # mu points
+        type (int_pair), pointer :: itp(:)      !! interpolation tables
+        type (mf6_law7_mu), pointer :: mu(:)    !! mu tables (nmu)
     end type
 
     type mf6_law7
-        integer nr                              ! tab2 interpolation for primary
-        integer ne                              ! # primary energies
-        type (int_pair), pointer :: itp(:)      ! interpolation tables
-        type (mf6_law7_inc), pointer :: inc(:)  ! incident tables (ne)
+        integer nr                              !! tab2 interpolation for primary
+        integer ne                              !! # primary energies
+        type (int_pair), pointer :: itp(:)      !! interpolation tables
+        type (mf6_law7_inc), pointer :: inc(:)  !! incident tables (ne)
     end type
 
     !---------------------   products  ---------------------------------------------
 
     type mf6_product
-        real zap                                ! product ZA
-        real awp                                ! product AWR in neutron units
-        integer lip                             ! lip modifier flag
-        integer law                             ! law type
-        type (tab1) mul                         ! multiplicity table
+        real zap                                !! product ZA
+        real awp                                !! product AWR in neutron units
+        integer lip                             !! lip modifier flag
+        integer law                             !! law type
+        type (tab1) mul                         !! multiplicity table
         type (mf6_law1), pointer :: law1
         type (mf6_law2), pointer :: law2
         type (mf6_law5), pointer :: law5
@@ -114,16 +114,16 @@ module ENDF_MF6_IO
     end type
 
     type MF_6
-        type (mf_6), pointer :: next            ! next section
-        integer mt                              ! MT
-        real za                                 ! ZA for material
-        real awr                                ! AWR for material
-        integer jp                              ! P(nu) flag for fission
-        integer jpn                             ! P(nu_neutron) flag, computed from jp
-        integer jpp                             ! P(nu_gamma) flag, computed from jp
-        integer lct                             ! ref system flag
-        integer nk                              ! # reaction product subsections
-        type (mf6_product), pointer :: prd(:)   ! product sub-section
+        type (mf_6), pointer :: next            !! next section
+        integer mt                              !! MT
+        real za                                 !! ZA for material
+        real awr                                !! AWR for material
+        integer jp                              !! P(nu) flag for fission
+        integer jpn                             !! P(nu_neutron) flag, computed from jp
+        integer jpp                             !! P(nu_gamma) flag, computed from jp
+        integer lct                             !! ref system flag
+        integer nk                              !! # reaction product subsections
+        type (mf6_product), pointer :: prd(:)   !! product sub-section
     end type
 
     !---------------------  private ---------------------------------------------

@@ -13,135 +13,135 @@ module ENDF_MF2_IO
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ No resonances ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF2_special_case                ! special case, LRU = 0
+    type MF2_special_case                !! special case, LRU = 0
         real spi
         real ap
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Breit-Wigner ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF2_BW_res                    ! Breit-Wigner resonance, LRF = 1,2
+    type MF2_BW_res                    !! Breit-Wigner resonance, LRF = 1,2
         sequence
-        real er                        ! resonance energy (eV)
-        real aj                        ! total spin J
-        real gt                        ! total width
-        real gn                        ! neutron width
-        real gg                        ! radiation width
-        real gf                        ! fission width
+        real er                        !! resonance energy (eV)
+        real aj                        !! total spin J
+        real gt                        !! total width
+        real gn                        !! neutron width
+        real gg                        !! radiation width
+        real gf                        !! fission width
     end type
 
-    type MF2_BW_param                  ! Breit-Wigner parameters, LRF=1,2
-        real awri                      ! mass in neutron masses
-        real qx                        ! Q-value to add for penetrability factor 
-        integer l                      ! l-value
-        integer lrx                    ! flag for competitive width. 0=no, 1=yes
-        integer nrs                    ! # of resonances for l-value
-        type (MF2_BW_res), pointer :: res(:)    ! resonances (NRS)
+    type MF2_BW_param                  !! Breit-Wigner parameters, LRF=1,2
+        real awri                      !! mass in neutron masses
+        real qx                        !! Q-value to add for penetrability factor 
+        integer l                      !! l-value
+        integer lrx                    !! flag for competitive width. 0=no, 1=yes
+        integer nrs                    !! # of resonances for l-value
+        type (MF2_BW_res), pointer :: res(:)    !! resonances (NRS)
     end type
 
-    type MF2_BW_subsection             ! Breit-Wigner section, LRF=1,2
-        type (tab1), pointer :: ape    ! E-dep AP, if specified (NRO.ne.0)
-        real spi                       ! spin of target
-        real ap                        ! scat radius
-        integer nls                    ! # of l-values
-        type (MF2_BW_param), pointer :: prm(:)   ! list of params for each l-value (nls)
+    type MF2_BW_subsection             !! Breit-Wigner section, LRF=1,2
+        type (tab1), pointer :: ape    !! E-dep AP, if specified (NRO.ne.0)
+        real spi                       !! spin of target
+        real ap                        !! scat radius
+        integer nls                    !! # of l-values
+        type (MF2_BW_param), pointer :: prm(:)   !! list of params for each l-value (nls)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Reich-Moore ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF2_RM_res                    ! Reich-Moore resonance, LRF = 3
+    type MF2_RM_res                    !! Reich-Moore resonance, LRF = 3
         sequence
-        real er                        ! resonance energy (eV)
-        real aj                        ! total spin J
-        real gn                        ! neutron width
-        real gg                        ! radiation width
-        real gfa                       ! 1st partial fission width
-        real gfb                       ! 2nd partial fission width
+        real er                        !! resonance energy (eV)
+        real aj                        !! total spin J
+        real gn                        !! neutron width
+        real gg                        !! radiation width
+        real gfa                       !! 1st partial fission width
+        real gfb                       !! 2nd partial fission width
     end type
 
-    type MF2_RM_param                  ! Reich-Moore parameters, LRF=3
-        real awri                      ! mass in neutron masses
-        real apl                       ! l-dep scattering radius
-        integer l                      ! l-value
-        integer nrs                    ! # of resonances for l-value
-        type (MF2_RM_res), pointer :: res(:)    ! list of params for each l-value (nls)
+    type MF2_RM_param                  !! Reich-Moore parameters, LRF=3
+        real awri                      !! mass in neutron masses
+        real apl                       !! l-dep scattering radius
+        integer l                      !! l-value
+        integer nrs                    !! # of resonances for l-value
+        type (MF2_RM_res), pointer :: res(:)    !! list of params for each l-value (nls)
     end type
 
-    type MF2_RM_subsection             ! Reich-Moore section, LRF=3
-        type (tab1), pointer :: ape    ! E-dep AP, if specified (NRO.ne.0)
-        real spi                       ! spin of target
-        real ap                        ! scat radius
-        integer lad                    ! flag for ang dist use
-        integer nls                    ! # of l-values
-        integer nlsc                   ! # of l-values for convergence
-        type (MF2_RM_param), pointer :: prm(:)    ! list of params for each l-value (nls)
+    type MF2_RM_subsection             !! Reich-Moore section, LRF=3
+        type (tab1), pointer :: ape    !! E-dep AP, if specified (NRO.ne.0)
+        real spi                       !! spin of target
+        real ap                        !! scat radius
+        integer lad                    !! flag for ang dist use
+        integer nls                    !! # of l-values
+        integer nlsc                   !! # of l-values for convergence
+        type (MF2_RM_param), pointer :: prm(:)    !! list of params for each l-value (nls)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Adler-Adler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF2_AA_res                    ! Adler-Adler resonance, LRF=4
+    type MF2_AA_res                    !! Adler-Adler resonance, LRF=4
         sequence
-        real det                       ! resonance energy for total crs
-        real dwt                       ! Gamma/2 for total
-        real grt                       ! symm total crs parameter Gt
-        real git                       ! asymm total crs parameter Ht
-        real def                       ! resonance energy for fission crs
-        real dwf                       ! Gamma/2 for fission
-        real grf                       ! symm fission crs parameter Gf
-        real gif                       ! asymm fission crs parameter Hf
-        real dec                       ! resonance energy for capture crs
-        real dwc                       ! Gamma/2 for capture
-        real grc                       ! symm capture crs parameter Gc
-        real gic                       ! asymm capture crs parameter Hc
+        real det                       !! resonance energy for total crs
+        real dwt                       !! Gamma/2 for total
+        real grt                       !! symm total crs parameter Gt
+        real git                       !! asymm total crs parameter Ht
+        real def                       !! resonance energy for fission crs
+        real dwf                       !! Gamma/2 for fission
+        real grf                       !! symm fission crs parameter Gf
+        real gif                       !! asymm fission crs parameter Hf
+        real dec                       !! resonance energy for capture crs
+        real dwc                       !! Gamma/2 for capture
+        real grc                       !! symm capture crs parameter Gc
+        real gic                       !! asymm capture crs parameter Hc
     end type
 
     type MF2_AA_Jprm
-        real aj                        ! J-value
-        integer nlj                    ! # resonances at this l,j
-        type (MF2_AA_res), pointer :: res(:)    ! resonance params (nlj)
+        real aj                        !! J-value
+        integer nlj                    !! # resonances at this l,j
+        type (MF2_AA_res), pointer :: res(:)    !! resonance params (nlj)
     end type
         
-    type MF2_AA_back                   ! Adler-Adler background, LRF=4
+    type MF2_AA_back                   !! Adler-Adler background, LRF=4
         sequence
-        real at(4)                     ! background constants for total
+        real at(4)                     !! background constants for total
         real bt(2)
-        real af(4)                     ! background constants for fission
+        real af(4)                     !! background constants for fission
         real bf(2)
-        real ac(4)                     ! background constants for capture
+        real ac(4)                     !! background constants for capture
         real bc(2)
     end type
 
-    type MF2_AA_Lprm                   ! Adler-Adler l parameters, LRF=4
-        real awri                      ! mass in neutron masses
-        integer li                     ! flag for which params specified
-        integer nx                     ! # of backgrounds (0-3)
-        integer l                      ! l-value
-        integer njs                    ! # J values given
-        type (mf2_aa_back) bck         ! background parameters
-        type (mf2_aa_jprm), pointer :: jpm(:)   ! resonance parameters for each j (njs)
+    type MF2_AA_Lprm                   !! Adler-Adler l parameters, LRF=4
+        real awri                      !! mass in neutron masses
+        integer li                     !! flag for which params specified
+        integer nx                     !! # of backgrounds (0-3)
+        integer l                      !! l-value
+        integer njs                    !! # J values given
+        type (mf2_aa_back) bck         !! background parameters
+        type (mf2_aa_jprm), pointer :: jpm(:)   !! resonance parameters for each j (njs)
     end type
 
-    type MF2_AA_subsection              ! Adler-Adler section, LRF=4
-        type (tab1), pointer :: ape     ! E-dep AP, if specified (NRO.ne.0)
-        real spi                        ! spin of target
-        real ap                         ! scat radius
-        integer nls                     ! # of l-values
+    type MF2_AA_subsection              !! Adler-Adler section, LRF=4
+        type (tab1), pointer :: ape     !! E-dep AP, if specified (NRO.ne.0)
+        real spi                        !! spin of target
+        real ap                         !! scat radius
+        integer nls                     !! # of l-values
         type (mf2_aa_lprm), pointer :: lpm(:)    ! resonance parameters for each l (nls)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~ R-Matrix Limited ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    type MF2_ML_phas_tab                ! R-Matrix tabulated phase shifts LRF=7
-        integer lps                     ! type of background
-        type (tab1), pointer :: psr     ! real part of cmplx phase shift
-        type (tab1), pointer :: psi     ! imag part of cmplx phase shift
+    type MF2_ML_phas_tab                !! R-Matrix tabulated phase shifts LRF=7
+        integer lps                     !! type of background
+        type (tab1), pointer :: psr     !! real part of cmplx phase shift
+        type (tab1), pointer :: psi     !! imag part of cmplx phase shift
     end type
 
-    type MF2_ML_back                    ! R-Matrix background LRF=7
-        integer lbk                     ! type of background
-        type (tab1), pointer :: rbr     ! real part of cmpl funct, LBK=1
-        type (tab1), pointer :: rbi     ! imag part of cmpl funct, LBK=1
-        real ed                         ! Sammy, Frohner params,   LBK=2,3
+    type MF2_ML_back                    !! R-Matrix background LRF=7
+        integer lbk                     !! type of background
+        type (tab1), pointer :: rbr     !! real part of cmpl funct, LBK=1
+        type (tab1), pointer :: rbi     !! imag part of cmpl funct, LBK=1
+        real ed                         !! Sammy, Frohner params,   LBK=2,3
         real eu
         real r0
         real r1
@@ -151,142 +151,142 @@ module ENDF_MF2_IO
         real ga
     end type
 
-    type MF2_ML_chn                     ! channel
+    type MF2_ML_chn                     !! channel
         sequence
-        real ppi                        ! part-pair number
-        real l                          ! l ang mom
-        real sch                        ! spin
-        real bnd                        ! boundary cond
-        real ape                        ! eff chan radius
-        real apt                        ! true chan radius
-        real, pointer :: gam(:)         ! widths for resonances (nrs)
+        real ppi                        !! part-pair number
+        real l                          !! l ang mom
+        real sch                        !! spin
+        real bnd                        !! boundary cond
+        real ape                        !! eff chan radius
+        real apt                        !! true chan radius
+        real, pointer :: gam(:)         !! widths for resonances (nrs)
     end type
 
     type MF2_ML_spin_grp
-        real aj                         ! spin J
-        real pj                         ! parity
-        integer kbk                     ! background present if kbk > 0
-        integer kps                     ! phase shift present if kps > 0
-        integer nch                     ! # channels
-        integer nrs                     ! # resonances
-        integer nx                      ! # lines used for resonances
-        real, pointer :: er(:)          ! E for each resonance (nrs)
-        type (MF2_ML_chn), pointer :: chn(:)     ! channels
-        type (mf2_ml_back), pointer ::bck        ! background tables
-        type (mf2_ml_phas_tab), pointer :: psf   ! tabulated phase shifts
+        real aj                         !! spin J
+        real pj                         !! parity
+        integer kbk                     !! background present if kbk > 0
+        integer kps                     !! phase shift present if kps > 0
+        integer nch                     !! # channels
+        integer nrs                     !! # resonances
+        integer nx                      !! # lines used for resonances
+        real, pointer :: er(:)          !! E for each resonance (nrs)
+        type (MF2_ML_chn), pointer :: chn(:)     !! channels
+        type (mf2_ml_back), pointer ::bck        !! background tables
+        type (mf2_ml_phas_tab), pointer :: psf   !! tabulated phase shifts
     end type
 
-    type MF2_ML_part_pair               ! R-Matrix particle pairs LRF=7
+    type MF2_ML_part_pair               !! R-Matrix particle pairs LRF=7
         sequence
-        real ma                         ! mass of 1st part in pair (unit of neutron mass)
-        real mb                         ! mass of 2nd part in pair (unit of neutron mass)
-        real za                         ! charge of 1st particle
-        real zb                         ! charge of 2nd particle
-        real ia                         ! spin of 1st part
-        real ib                         ! spin of 2nd part
-        real q                          ! Q-value for this particle pair
-        real pnt                        ! penetrability flag
-        real shf                        ! flag to calc phase shift
-        real mt                         ! reaction type with pair
-        real pa                         ! parity for 1st part
-        real pb                         ! parity for 2nd part
+        real ma                         !! mass of 1st part in pair (unit of neutron mass)
+        real mb                         !! mass of 2nd part in pair (unit of neutron mass)
+        real za                         !! charge of 1st particle
+        real zb                         !! charge of 2nd particle
+        real ia                         !! spin of 1st part
+        real ib                         !! spin of 2nd part
+        real q                          !! Q-value for this particle pair
+        real pnt                        !! penetrability flag
+        real shf                        !! flag to calc phase shift
+        real mt                         !! reaction type with pair
+        real pa                         !! parity for 1st part
+        real pb                         !! parity for 2nd part
     end type
 
-    type MF2_ML_subsection              ! R-Matrix Limited section, LRF=7
-        integer ifg                     ! units flag
-        integer krm                     ! formula flag
-        integer krl                     ! relativistic flag. 0=nonrel, 1=rel
-        integer njs                     ! # of J-pi values
-        integer npp                     ! # of particle-pairs
-        type (mf2_ml_part_pair), pointer :: pp(:)    ! particle pairs
-        type (mf2_ml_spin_grp), pointer :: sg(:)     ! spin groups
+    type MF2_ML_subsection              !! R-Matrix Limited section, LRF=7
+        integer ifg                     !! units flag
+        integer krm                     !! formula flag
+        integer krl                     !! relativistic flag. 0=nonrel, 1=rel
+        integer njs                     !! # of J-pi values
+        integer npp                     !! # of particle-pairs
+        type (mf2_ml_part_pair), pointer :: pp(:)    !! particle pairs
+        type (mf2_ml_spin_grp), pointer :: sg(:)     !! spin groups
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~ Unresolved Resonance Region ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-    type mf2_ur_jprm                    ! case A,B res prm for j state
+    type mf2_ur_jprm                    !! case A,B res prm for j state
         sequence
-        real d                          ! ave level spacing
-        real aj                         ! j
-        real amun                       ! # deg free in neutron width
-        real gno                        ! ave reduced neutron width
-        real gg                         ! ave radiation width
-        real amuf                       ! # deg freedom for fiss width, case B
+        real d                          !! ave level spacing
+        real aj                         !! j
+        real amun                       !! # deg free in neutron width
+        real gno                        !! ave reduced neutron width
+        real gg                         !! ave radiation width
+        real amuf                       !! # deg freedom for fiss width, case B
         real, pointer :: gf(:)
     end type
 
-    type mf2_ur_fullprm                 ! case C, when all are E-dep
+    type mf2_ur_fullprm                 !! case C, when all are E-dep
         sequence
-        real es                         ! E of ne points
-        real d                          ! ave level spacing
-        real gx                         ! ave competitive width
-        real gno                        ! ave reduced neutron width
-        real gg                         ! ave radiation width
-        real gf                         ! ave fission width
+        real es                         !! E of ne points
+        real d                          !! ave level spacing
+        real gx                         !! ave competitive width
+        real gno                        !! ave reduced neutron width
+        real gg                         !! ave radiation width
+        real gf                         !! ave fission width
     end type
 
-    type mf2_ur_jcprm                   ! case C (full) res prm
-        integer ne                      ! # E bins for this j
-        integer int                     ! interpolation scheme
-        real aj                         ! j
-        real amux                       ! competitive width
-        real amun                       ! neutron width
-        real amug                       ! radiative width
-        real amuf                       ! fission width
+    type mf2_ur_jcprm                   !! case C (full) res prm
+        integer ne                      !! # E bins for this j
+        integer int                     !! interpolation scheme
+        real aj                         !! j
+        real amux                       !! competitive width
+        real amun                       !! neutron width
+        real amug                       !! radiative width
+        real amuf                       !! fission width
         type (mf2_ur_fullprm), pointer :: fpm(:)
     end type
 
-    type mf2_ur_lprm                    ! res prms for l
-        real awri                       ! AWR for l
-        integer l                       ! l
-        integer njs                     ! # j states
-        type (mf2_ur_jprm), pointer :: jpm(:)    ! case A,B ~ simpler
-        type (mf2_ur_jcprm), pointer :: jpc(:)   ! case C - full talbles
+    type mf2_ur_lprm                    !! res prms for l
+        real awri                       !! AWR for l
+        integer l                       !! l
+        integer njs                     !! # j states
+        type (mf2_ur_jprm), pointer :: jpm(:)    !! case A,B ~ simpler
+        type (mf2_ur_jcprm), pointer :: jpc(:)   !! case C - full talbles
     end type
 
-    type MF2_UR_subsection              ! Unresolved Res subsection, LRU=2
-        real spi                        ! spin of target
-        real ap                         ! scat radius
-        type (tab1), pointer :: ape    ! E-dep AP, if specified (NRO.ne.0)
-        integer lssf                    ! flag for use of URR
-        integer nls                     ! # of l-values
-        integer ne                      ! number of fission energies, Case B, LFW=LRF=1, only
-        real, pointer :: es(:)          ! E for each subsection NE
-        type (mf2_ur_lprm), pointer :: lpm(:)    ! resonance parameters for each l (nls)
+    type MF2_UR_subsection              !! Unresolved Res subsection, LRU=2
+        real spi                        !! spin of target
+        real ap                         !! scat radius
+        type (tab1), pointer :: ape     !! E-dep AP, if specified (NRO.ne.0)
+        integer lssf                    !! flag for use of URR
+        integer nls                     !! # of l-values
+        integer ne                      !! number of fission energies, Case B, LFW=LRF=1, only
+        real, pointer :: es(:)          !! E for each subsection NE
+        type (mf2_ur_lprm), pointer :: lpm(:)    !! resonance parameters for each l (nls)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ MF2 sections ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF2_range
-        integer lru                                    ! flag for res params. 0=only AP, 1=res, 2=unres
-        integer lrf                                    ! flag representation 1-7
-        integer nro                                    ! flag E-dep of AP. 0=indep, 1=table.
-        integer naps                                   ! flag for channel radius
-        real el                                        ! lower limit E
-        real eh                                        ! upper limit E
-        type (MF2_special_case),  pointer :: sc        ! special case      (LRF = 0)
-        type (MF2_BW_subsection), pointer :: bw        ! Briet-Wigner      (LRF = 1,2)
-        type (MF2_RM_subsection), pointer :: rm        ! Reich-Moore       (LRF = 3)
-        type (MF2_AA_subsection), pointer :: aa        ! Adler-Adler       (LRF = 4)
-        type (MF2_ML_subsection), pointer :: ml        ! R-Matrix limited  (LRF = 7)
-        type (MF2_UR_subsection), pointer :: ur        ! Unresolved region (LRU = 2)
+        integer lru                                    !! flag for res params. 0=only AP, 1=res, 2=unres
+        integer lrf                                    !! flag representation 1-7
+        integer nro                                    !! flag E-dep of AP. 0=indep, 1=table.
+        integer naps                                   !! flag for channel radius
+        real el                                        !! lower limit E
+        real eh                                        !! upper limit E
+        type (MF2_special_case),  pointer :: sc        !! special case      (LRF = 0)
+        type (MF2_BW_subsection), pointer :: bw        !! Briet-Wigner      (LRF = 1,2)
+        type (MF2_RM_subsection), pointer :: rm        !! Reich-Moore       (LRF = 3)
+        type (MF2_AA_subsection), pointer :: aa        !! Adler-Adler       (LRF = 4)
+        type (MF2_ML_subsection), pointer :: ml        !! R-Matrix limited  (LRF = 7)
+        type (MF2_UR_subsection), pointer :: ur        !! Unresolved region (LRU = 2)
     end type
 
     type MF2_isotope
-        real zai                               	! ZA for isotope
-        real abn                               	! number fraction of isotope in material
-        integer lfw                            	! ave fission widths given: 0=no, 1=yes.
-        integer ner                            	! # of res ranges for isotope
-        type (MF2_range), pointer :: rng(:)    	! energy ranges (NER)
+        real zai                               	!! ZA for isotope
+        real abn                               	!! number fraction of isotope in material
+        integer lfw                            	!! ave fission widths given: 0=no, 1=yes.
+        integer ner                            	!! # of res ranges for isotope
+        type (MF2_range), pointer :: rng(:)    	!! energy ranges (NER)
     end type
 
     type MF_2
-        integer :: mt = 151                    	! only 1 MT for MF2
-        real za                                	! ZA for material
-        real awr                               	! AWR for material
-        integer nis                            	! # of isotopes
-        type (MF2_isotope), pointer :: iso(:)  	! NIS isotopes
+        integer :: mt = 151                    	!! only 1 MT for MF2
+        real za                                	!! ZA for material
+        real awr                               	!! AWR for material
+        integer nis                            	!! # of isotopes
+        type (MF2_isotope), pointer :: iso(:)  	!! NIS isotopes
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ private ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -29,28 +29,28 @@ module ENDF_MF4_IO
     type mf4_tab2l
         integer nr
         integer ne
-        type (int_pair), pointer :: itp(:)    ! interpolation tables
+        type (int_pair), pointer :: itp(:)    !! interpolation tables
         type (mf4_list), pointer :: lst(:)
     end type
 
     type mf4_tab2t
         integer nr
         integer ne
-        type (int_pair), pointer :: itp(:)    ! interpolation tables
+        type (int_pair), pointer :: itp(:)    !! interpolation tables
         type (mf4_tab), pointer :: lst(:)
     end type
 
     type MF_4
-        type (mf_4), pointer :: next          ! next section
-        integer mt                            ! MT
-        real za                               ! ZA for material
-        real awr                              ! AWR for material
-        integer ltt                           ! flag
-        integer li                            ! isotropic flag. 0=no, 1=yes
-        integer lct                           ! frame of ref flag. 1=lab, 2=CM
-        integer nm                            ! max legendre order
-        type (mf4_tab2l), pointer :: tb1      ! tab2 with list
-        type (mf4_tab2t), pointer :: tb2      ! tab2 with tab1
+        type (mf_4), pointer :: next          !! next section
+        integer mt                            !! MT
+        real za                               !! ZA for material
+        real awr                              !! AWR for material
+        integer ltt                           !! flag
+        integer li                            !! isotropic flag. 0=no, 1=yes
+        integer lct                           !! frame of ref flag. 1=lab, 2=CM
+        integer nm                            !! max legendre order
+        type (mf4_tab2l), pointer :: tb1      !! tab2 with list
+        type (mf4_tab2t), pointer :: tb2      !! tab2 with tab1
     end type
 
     private read_list, read_tab, write_list, write_tab
