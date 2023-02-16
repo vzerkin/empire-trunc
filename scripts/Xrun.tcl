@@ -1,6 +1,6 @@
-# $Rev: 5415 $
+# $Rev: 5437 $
 # $Author: mwherman $
-# $Date: 2023-01-13 03:55:49 +0100 (Fr, 13 Jän 2023) $
+# $Date: 2023-02-16 03:46:18 +0100 (Do, 16 Feb 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8915,7 +8915,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu95 add command \
         -command { editFile $file-zvv.yml } -label {Edit Yaml}  
     $site_3_0.menu95 add command \
-        -command { exec xterm -e $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
+        -command { exec xterm -e python $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
 
     $site_3_0.menu95 add command \
         -command { exec xterm -e $::env(EMPIREDIR)/scripts/c4toggle $file 
