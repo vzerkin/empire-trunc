@@ -188,3537 +188,3538 @@ module endf_queue
         module procedure cnt40
     end interface
 
-    public :: pop,put,find,del,cnt
+    public :: pop, put, find, del, cnt
 
-    contains
+contains
 
-!=========================================================================
+    !=========================================================================
 
-    function find1(hed,mt)
+    function find1(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_1), pointer :: find1
-    type (mf_1), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_1), pointer :: find1
+        type(mf_1), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_1), pointer :: mf
+        type(mf_1), pointer :: mf
 
-    nullify(find1)
+        nullify (find1)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find1 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find1 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find1
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find2(hed,mt)
+    function find2(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_2), pointer :: find2
-    type (mf_2), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_2), pointer :: find2
+        type(mf_2), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    nullify(find2)
-    if(mt /= 151) return
-    find2 => hed
+        nullify (find2)
+        if (mt /= 151) return
+        find2 => hed
 
-    return
+        return
     end function find2
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find3(hed,mt)
+    function find3(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_3), pointer :: find3
-    type (mf_3), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_3), pointer :: find3
+        type(mf_3), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_3), pointer :: mf
+        type(mf_3), pointer :: mf
 
-    nullify(find3)
+        nullify (find3)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find3 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find3 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find3
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find4(hed,mt)
+    function find4(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_4), pointer :: find4
-    type (mf_4), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_4), pointer :: find4
+        type(mf_4), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_4), pointer :: mf
+        type(mf_4), pointer :: mf
 
-    nullify(find4)
+        nullify (find4)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find4 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find4 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find4
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find5(hed,mt)
+    function find5(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_5), pointer :: find5
-    type (mf_5), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_5), pointer :: find5
+        type(mf_5), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_5), pointer :: mf
+        type(mf_5), pointer :: mf
 
-    nullify(find5)
+        nullify (find5)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find5 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find5 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find5
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find6(hed,mt)
+    function find6(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_6), pointer :: find6
-    type (mf_6), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_6), pointer :: find6
+        type(mf_6), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_6), pointer :: mf
+        type(mf_6), pointer :: mf
 
-    nullify(find6)
+        nullify (find6)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find6 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find6 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find6
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find7(hed,mt)
+    function find7(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_7), pointer :: find7
-    type (mf_7), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_7), pointer :: find7
+        type(mf_7), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_7), pointer :: mf
+        type(mf_7), pointer :: mf
 
-    nullify(find7)
+        nullify (find7)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find7 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find7 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find7
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find8(hed,mt)
+    function find8(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_8), pointer :: find8
-    type (mf_8), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_8), pointer :: find8
+        type(mf_8), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_8), pointer :: mf
+        type(mf_8), pointer :: mf
 
-    nullify(find8)
+        nullify (find8)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find8 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find8 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find8
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find9(hed,mt)
+    function find9(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_9), pointer :: find9
-    type (mf_9), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_9), pointer :: find9
+        type(mf_9), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_9), pointer :: mf
+        type(mf_9), pointer :: mf
 
-    nullify(find9)
+        nullify (find9)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find9 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find9 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find9
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find10(hed,mt)
+    function find10(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_10), pointer :: find10
-    type (mf_10), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_10), pointer :: find10
+        type(mf_10), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_10), pointer :: mf
+        type(mf_10), pointer :: mf
 
-    nullify(find10)
+        nullify (find10)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find10 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find10 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find10
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find12(hed,mt)
+    function find12(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_12), pointer :: find12
-    type (mf_12), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_12), pointer :: find12
+        type(mf_12), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_12), pointer :: mf
+        type(mf_12), pointer :: mf
 
-    nullify(find12)
+        nullify (find12)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find12 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find12 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find12
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find13(hed,mt)
+    function find13(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_13), pointer :: find13
-    type (mf_13), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_13), pointer :: find13
+        type(mf_13), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_13), pointer :: mf
+        type(mf_13), pointer :: mf
 
-    nullify(find13)
+        nullify (find13)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find13 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find13 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find13
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find14(hed,mt)
+    function find14(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_14), pointer :: find14
-    type (mf_14), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_14), pointer :: find14
+        type(mf_14), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_14), pointer :: mf
+        type(mf_14), pointer :: mf
 
-    nullify(find14)
+        nullify (find14)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find14 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find14 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find14
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find15(hed,mt)
+    function find15(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_15), pointer :: find15
-    type (mf_15), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_15), pointer :: find15
+        type(mf_15), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_15), pointer :: mf
+        type(mf_15), pointer :: mf
 
-    nullify(find15)
+        nullify (find15)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find15 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find15 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find15
-!-------------------------------------------------------------------------
 
-    function find23(hed,mt)
+    !-------------------------------------------------------------------------
 
-    implicit none
+    function find23(hed, mt)
 
-    type (mf_23), pointer :: find23
-    type (mf_23), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        implicit none
 
-    type (mf_23), pointer :: mf
+        type(mf_23), pointer :: find23
+        type(mf_23), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    nullify(find23)
+        type(mf_23), pointer :: mf
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find23 => mf
-        endif
-        exit
-    end do
+        nullify (find23)
 
-    return
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find23 => mf
+            end if
+            exit
+        end do
+
+        return
     end function find23
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find26(hed,mt)
+    function find26(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_26), pointer :: find26
-    type (mf_26), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_26), pointer :: find26
+        type(mf_26), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_26), pointer :: mf
+        type(mf_26), pointer :: mf
 
-    nullify(find26)
+        nullify (find26)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find26 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find26 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find26
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find27(hed,mt)
+    function find27(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_27), pointer :: find27
-    type (mf_27), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_27), pointer :: find27
+        type(mf_27), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_27), pointer :: mf
+        type(mf_27), pointer :: mf
 
-    nullify(find27)
+        nullify (find27)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find27 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find27 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find27
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find28(hed,mt)
+    function find28(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_28), pointer :: find28
-    type (mf_28), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_28), pointer :: find28
+        type(mf_28), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_28), pointer :: mf
+        type(mf_28), pointer :: mf
 
-    nullify(find28)
+        nullify (find28)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find28 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find28 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find28
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find31(hed,mt)
+    function find31(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_31), pointer :: find31
-    type (mf_31), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_31), pointer :: find31
+        type(mf_31), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_31), pointer :: mf
+        type(mf_31), pointer :: mf
 
-    nullify(find31)
+        nullify (find31)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find31 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find31 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find31
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find32(hed,mt)
+    function find32(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_32), pointer :: find32
-    type (mf_32), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_32), pointer :: find32
+        type(mf_32), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    nullify(find32)
+        nullify (find32)
 
-    nullify(find32)
-    if(mt /= 151) return
-    find32 => hed
+        nullify (find32)
+        if (mt /= 151) return
+        find32 => hed
 
-    return
+        return
     end function find32
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find33(hed,mt)
+    function find33(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_33), pointer :: find33
-    type (mf_33), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_33), pointer :: find33
+        type(mf_33), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_33), pointer :: mf
+        type(mf_33), pointer :: mf
 
-    nullify(find33)
+        nullify (find33)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find33 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find33 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find33
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find34(hed,mt)
+    function find34(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_34), pointer :: find34
-    type (mf_34), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_34), pointer :: find34
+        type(mf_34), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_34), pointer :: mf
+        type(mf_34), pointer :: mf
 
-    nullify(find34)
+        nullify (find34)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find34 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find34 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find34
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find35(hed,mt)
+    function find35(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_35), pointer :: find35
-    type (mf_35), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_35), pointer :: find35
+        type(mf_35), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_35), pointer :: mf
+        type(mf_35), pointer :: mf
 
-    nullify(find35)
+        nullify (find35)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find35 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find35 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find35
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function find40(hed,mt)
+    function find40(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_40), pointer :: find40
-    type (mf_40), intent(in), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_40), pointer :: find40
+        type(mf_40), intent(in), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_40), pointer :: mf
+        type(mf_40), pointer :: mf
 
-    nullify(find40)
+        nullify (find40)
 
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            mf => mf%next
-            cycle
-        else if(mf%mt == mt) then
-            find40 => mf
-        endif
-        exit
-    end do
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                mf => mf%next
+                cycle
+            else if (mf%mt == mt) then
+                find40 => mf
+            end if
+            exit
+        end do
 
-    return
+        return
     end function find40
 
-!=========================================================================
+    !=========================================================================
 
-    function pop1(hed,mt)
+    function pop1(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_1), pointer :: pop1
-    type (mf_1), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_1), pointer :: pop1
+        type(mf_1), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_1), pointer :: lm,mf
+        type(mf_1), pointer :: lm, mf
 
-    nullify(pop1)
-    if(.not.associated(hed)) return
+        nullify (pop1)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop1 => mf
 
-    nullify(mf%next)
-    pop1 => mf
-
-    return
+        return
 
     end function pop1
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop2(hed,mt)
+    function pop2(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_2), pointer :: pop2
-    type (mf_2), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_2), pointer :: pop2
+        type(mf_2), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    ! MF2 is special : only 1 MT = 151
+        ! MF2 is special : only 1 MT = 151
 
-    nullify(pop2)
-    if(mt /= 151) return
-    if(.not.associated(hed)) return
-    pop2 => hed
-    nullify(hed)
+        nullify (pop2)
+        if (mt /= 151) return
+        if (.not. associated(hed)) return
+        pop2 => hed
+        nullify (hed)
 
-    return
+        return
 
     end function pop2
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop3(hed,mt)
+    function pop3(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_3), pointer :: pop3
-    type (mf_3), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_3), pointer :: pop3
+        type(mf_3), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_3), pointer :: lm,mf
+        type(mf_3), pointer :: lm, mf
 
-    nullify(pop3)
-    if(.not.associated(hed)) return
+        nullify (pop3)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop3 => mf
 
-    nullify(mf%next)
-    pop3 => mf
-
-    return
+        return
 
     end function pop3
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop4(hed,mt)
+    function pop4(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_4), pointer :: pop4
-    type (mf_4), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_4), pointer :: pop4
+        type(mf_4), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_4), pointer :: lm,mf
+        type(mf_4), pointer :: lm, mf
 
-    nullify(pop4)
-    if(.not.associated(hed)) return
+        nullify (pop4)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop4 => mf
 
-    nullify(mf%next)
-    pop4 => mf
-
-    return
+        return
 
     end function pop4
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop5(hed,mt)
+    function pop5(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_5), pointer :: pop5
-    type (mf_5), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_5), pointer :: pop5
+        type(mf_5), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_5), pointer :: lm,mf
+        type(mf_5), pointer :: lm, mf
 
-    nullify(pop5)
-    if(.not.associated(hed)) return
+        nullify (pop5)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop5 => mf
 
-    nullify(mf%next)
-    pop5 => mf
-
-    return
+        return
 
     end function pop5
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop6(hed,mt)
+    function pop6(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_6), pointer :: pop6
-    type (mf_6), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_6), pointer :: pop6
+        type(mf_6), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_6), pointer :: lm,mf
+        type(mf_6), pointer :: lm, mf
 
-    nullify(pop6)
-    if(.not.associated(hed)) return
+        nullify (pop6)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop6 => mf
 
-    nullify(mf%next)
-    pop6 => mf
-
-    return
+        return
 
     end function pop6
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop7(hed,mt)
+    function pop7(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_7), pointer :: pop7
-    type (mf_7), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_7), pointer :: pop7
+        type(mf_7), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_7), pointer :: lm,mf
+        type(mf_7), pointer :: lm, mf
 
-    nullify(pop7)
-    if(.not.associated(hed)) return
+        nullify (pop7)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop7 => mf
 
-    nullify(mf%next)
-    pop7 => mf
-
-    return
+        return
 
     end function pop7
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop8(hed,mt)
+    function pop8(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_8), pointer :: pop8
-    type (mf_8), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_8), pointer :: pop8
+        type(mf_8), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_8), pointer :: lm,mf
+        type(mf_8), pointer :: lm, mf
 
-    nullify(pop8)
-    if(.not.associated(hed)) return
+        nullify (pop8)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop8 => mf
 
-    nullify(mf%next)
-    pop8 => mf
-
-    return
+        return
 
     end function pop8
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop9(hed,mt)
+    function pop9(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_9), pointer :: pop9
-    type (mf_9), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_9), pointer :: pop9
+        type(mf_9), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_9), pointer :: lm,mf
+        type(mf_9), pointer :: lm, mf
 
-    nullify(pop9)
-    if(.not.associated(hed)) return
+        nullify (pop9)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop9 => mf
 
-    nullify(mf%next)
-    pop9 => mf
-
-    return
+        return
 
     end function pop9
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop10(hed,mt)
+    function pop10(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_10), pointer :: pop10
-    type (mf_10), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_10), pointer :: pop10
+        type(mf_10), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_10), pointer :: lm,mf
+        type(mf_10), pointer :: lm, mf
 
-    nullify(pop10)
-    if(.not.associated(hed)) return
+        nullify (pop10)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop10 => mf
 
-    nullify(mf%next)
-    pop10 => mf
-
-    return
+        return
 
     end function pop10
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop12(hed,mt)
+    function pop12(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_12), pointer :: pop12
-    type (mf_12), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_12), pointer :: pop12
+        type(mf_12), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_12), pointer :: lm,mf
+        type(mf_12), pointer :: lm, mf
 
-    nullify(pop12)
-    if(.not.associated(hed)) return
+        nullify (pop12)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop12 => mf
 
-    nullify(mf%next)
-    pop12 => mf
-
-    return
+        return
 
     end function pop12
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop13(hed,mt)
+    function pop13(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_13), pointer :: pop13
-    type (mf_13), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_13), pointer :: pop13
+        type(mf_13), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_13), pointer :: lm,mf
+        type(mf_13), pointer :: lm, mf
 
-    nullify(pop13)
-    if(.not.associated(hed)) return
+        nullify (pop13)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop13 => mf
 
-    nullify(mf%next)
-    pop13 => mf
-
-    return
+        return
 
     end function pop13
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop14(hed,mt)
+    function pop14(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_14), pointer :: pop14
-    type (mf_14), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_14), pointer :: pop14
+        type(mf_14), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_14), pointer :: lm,mf
+        type(mf_14), pointer :: lm, mf
 
-    nullify(pop14)
-    if(.not.associated(hed)) return
+        nullify (pop14)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop14 => mf
 
-    nullify(mf%next)
-    pop14 => mf
-
-    return
+        return
 
     end function pop14
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop15(hed,mt)
+    function pop15(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_15), pointer :: pop15
-    type (mf_15), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_15), pointer :: pop15
+        type(mf_15), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_15), pointer :: lm,mf
+        type(mf_15), pointer :: lm, mf
 
-    nullify(pop15)
-    if(.not.associated(hed)) return
+        nullify (pop15)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop15 => mf
 
-    nullify(mf%next)
-    pop15 => mf
-
-    return
+        return
 
     end function pop15
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop23(hed,mt)
+    function pop23(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_23), pointer :: pop23
-    type (mf_23), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_23), pointer :: pop23
+        type(mf_23), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_23), pointer :: lm,mf
+        type(mf_23), pointer :: lm, mf
 
-    nullify(pop23)
-    if(.not.associated(hed)) return
+        nullify (pop23)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop23 => mf
 
-    nullify(mf%next)
-    pop23 => mf
-
-    return
+        return
 
     end function pop23
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop26(hed,mt)
+    function pop26(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_26), pointer :: pop26
-    type (mf_26), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_26), pointer :: pop26
+        type(mf_26), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_26), pointer :: lm,mf
+        type(mf_26), pointer :: lm, mf
 
-    nullify(pop26)
-    if(.not.associated(hed)) return
+        nullify (pop26)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop26 => mf
 
-    nullify(mf%next)
-    pop26 => mf
-
-    return
+        return
 
     end function pop26
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop27(hed,mt)
+    function pop27(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_27), pointer :: pop27
-    type (mf_27), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_27), pointer :: pop27
+        type(mf_27), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_27), pointer :: lm,mf
+        type(mf_27), pointer :: lm, mf
 
-    nullify(pop27)
-    if(.not.associated(hed)) return
+        nullify (pop27)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop27 => mf
 
-    nullify(mf%next)
-    pop27 => mf
-
-    return
+        return
 
     end function pop27
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop28(hed,mt)
+    function pop28(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_28), pointer :: pop28
-    type (mf_28), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_28), pointer :: pop28
+        type(mf_28), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_28), pointer :: lm,mf
+        type(mf_28), pointer :: lm, mf
 
-    nullify(pop28)
-    if(.not.associated(hed)) return
+        nullify (pop28)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop28 => mf
 
-    nullify(mf%next)
-    pop28 => mf
-
-    return
+        return
 
     end function pop28
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop31(hed,mt)
+    function pop31(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_31), pointer :: pop31
-    type (mf_31), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_31), pointer :: pop31
+        type(mf_31), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_31), pointer :: lm,mf
+        type(mf_31), pointer :: lm, mf
 
-    nullify(pop31)
-    if(.not.associated(hed)) return
+        nullify (pop31)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop31 => mf
 
-    nullify(mf%next)
-    pop31 => mf
-
-    return
+        return
 
     end function pop31
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop32(hed,mt)
+    function pop32(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_32), pointer :: pop32
-    type (mf_32), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_32), pointer :: pop32
+        type(mf_32), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    ! MF32 is special : only 1 MT = 151
+        ! MF32 is special : only 1 MT = 151
 
-    nullify(pop32)
-    if(mt /= 151) return
-    if(.not.associated(hed)) return
-    pop32 => hed
-    nullify(hed)
+        nullify (pop32)
+        if (mt /= 151) return
+        if (.not. associated(hed)) return
+        pop32 => hed
+        nullify (hed)
 
-    return
+        return
 
     end function pop32
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop33(hed,mt)
+    function pop33(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_33), pointer :: pop33
-    type (mf_33), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_33), pointer :: pop33
+        type(mf_33), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_33), pointer :: lm,mf
+        type(mf_33), pointer :: lm, mf
 
-    nullify(pop33)
-    if(.not.associated(hed)) return
+        nullify (pop33)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop33 => mf
 
-    nullify(mf%next)
-    pop33 => mf
-
-    return
+        return
 
     end function pop33
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop34(hed,mt)
+    function pop34(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_34), pointer :: pop34
-    type (mf_34), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_34), pointer :: pop34
+        type(mf_34), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_34), pointer :: lm,mf
+        type(mf_34), pointer :: lm, mf
 
-    nullify(pop34)
-    if(.not.associated(hed)) return
+        nullify (pop34)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop34 => mf
 
-    nullify(mf%next)
-    pop34 => mf
-
-    return
+        return
 
     end function pop34
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop35(hed,mt)
+    function pop35(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_35), pointer :: pop35
-    type (mf_35), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_35), pointer :: pop35
+        type(mf_35), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_35), pointer :: lm,mf
+        type(mf_35), pointer :: lm, mf
 
-    nullify(pop35)
-    if(.not.associated(hed)) return
+        nullify (pop35)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop35 => mf
 
-    nullify(mf%next)
-    pop35 => mf
-
-    return
+        return
 
     end function pop35
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    function pop40(hed,mt)
+    function pop40(hed, mt)
 
-    implicit none
+        implicit none
 
-    type (mf_40), pointer :: pop40
-    type (mf_40), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
+        type(mf_40), pointer :: pop40
+        type(mf_40), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
 
-    type (mf_40), pointer :: lm,mf
+        type(mf_40), pointer :: lm, mf
 
-    nullify(pop40)
-    if(.not.associated(hed)) return
+        nullify (pop40)
+        if (.not. associated(hed)) return
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mt) then
-            exit
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mt) then
+                exit
+            else
+                return
+            end if
+        end do
+
+        if (associated(lm)) then
+            lm%next => mf%next
         else
-            return
-        endif
-    end do
+            hed => mf%next
+        end if
 
-    if(associated(lm)) then
-        lm%next => mf%next
-    else
-        hed => mf%next
-    endif
+        nullify (mf%next)
+        pop40 => mf
 
-    nullify(mf%next)
-    pop40 => mf
-
-    return
+        return
 
     end function pop40
 
-!=========================================================================
+    !=========================================================================
 
-    subroutine del1(hed,mt,qstat)
+    subroutine del1(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_1), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_1), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_1), pointer :: mf
+        logical*4 qs
+        type(mf_1), pointer :: mf
 
-    mf = pop1(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf1(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop1(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf1(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del1
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del2(hed,mt,qstat)
+    subroutine del2(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_2), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_2), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_2), pointer :: mf
+        logical*4 qs
+        type(mf_2), pointer :: mf
 
-    mf = pop2(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf2(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop2(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf2(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del2
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del3(hed,mt,qstat)
+    subroutine del3(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_3), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_3), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_3), pointer :: mf
+        logical*4 qs
+        type(mf_3), pointer :: mf
 
-    mf = pop3(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf3(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop3(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf3(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del3
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del4(hed,mt,qstat)
+    subroutine del4(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_4), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_4), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_4), pointer :: mf
+        logical*4 qs
+        type(mf_4), pointer :: mf
 
-    mf = pop4(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf4(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop4(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf4(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del4
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del5(hed,mt,qstat)
+    subroutine del5(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_5), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_5), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_5), pointer :: mf
+        logical*4 qs
+        type(mf_5), pointer :: mf
 
-    mf = pop5(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf5(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop5(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf5(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del5
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del6(hed,mt,qstat)
+    subroutine del6(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_6), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_6), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_6), pointer :: mf
+        logical*4 qs
+        type(mf_6), pointer :: mf
 
-    mf = pop6(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf6(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop6(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf6(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del6
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del7(hed,mt,qstat)
+    subroutine del7(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_7), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_7), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_7), pointer :: mf
+        logical*4 qs
+        type(mf_7), pointer :: mf
 
-    mf = pop7(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf7(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop7(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf7(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del7
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del8(hed,mt,qstat)
+    subroutine del8(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_8), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_8), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_8), pointer :: mf
+        logical*4 qs
+        type(mf_8), pointer :: mf
 
-    mf = pop8(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf8(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop8(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf8(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del8
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del9(hed,mt,qstat)
+    subroutine del9(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_9), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_9), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_9), pointer :: mf
+        logical*4 qs
+        type(mf_9), pointer :: mf
 
-    mf = pop9(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf9(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop9(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf9(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del9
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del10(hed,mt,qstat)
+    subroutine del10(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_10), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_10), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_10), pointer :: mf
+        logical*4 qs
+        type(mf_10), pointer :: mf
 
-    mf = pop10(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf10(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop10(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf10(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del10
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del12(hed,mt,qstat)
+    subroutine del12(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_12), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_12), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_12), pointer :: mf
+        logical*4 qs
+        type(mf_12), pointer :: mf
 
-    mf = pop12(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf12(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop12(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf12(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del12
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del13(hed,mt,qstat)
+    subroutine del13(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_13), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_13), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_13), pointer :: mf
+        logical*4 qs
+        type(mf_13), pointer :: mf
 
-    mf = pop13(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf13(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop13(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf13(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del13
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del14(hed,mt,qstat)
+    subroutine del14(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_14), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_14), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_14), pointer :: mf
+        logical*4 qs
+        type(mf_14), pointer :: mf
 
-    mf = pop14(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf14(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop14(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf14(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del14
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del15(hed,mt,qstat)
+    subroutine del15(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_15), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_15), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_15), pointer :: mf
+        logical*4 qs
+        type(mf_15), pointer :: mf
 
-    mf = pop15(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf15(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop15(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf15(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del15
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del23(hed,mt,qstat)
+    subroutine del23(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_23), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_23), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_23), pointer :: mf
+        logical*4 qs
+        type(mf_23), pointer :: mf
 
-    mf = pop23(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf23(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop23(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf23(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del23
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del26(hed,mt,qstat)
+    subroutine del26(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_26), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_26), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_26), pointer :: mf
+        logical*4 qs
+        type(mf_26), pointer :: mf
 
-    mf = pop26(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf26(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop26(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf26(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del26
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del27(hed,mt,qstat)
+    subroutine del27(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_27), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_27), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_27), pointer :: mf
+        logical*4 qs
+        type(mf_27), pointer :: mf
 
-    mf = pop27(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf27(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop27(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf27(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del27
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del28(hed,mt,qstat)
+    subroutine del28(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_28), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_28), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_28), pointer :: mf
+        logical*4 qs
+        type(mf_28), pointer :: mf
 
-    mf = pop28(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf28(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop28(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf28(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del28
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del31(hed,mt,qstat)
+    subroutine del31(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_31), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_31), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_31), pointer :: mf
+        logical*4 qs
+        type(mf_31), pointer :: mf
 
-    mf = pop31(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf31(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop31(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf31(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del31
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del32(hed,mt,qstat)
+    subroutine del32(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_32), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_32), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_32), pointer :: mf
+        logical*4 qs
+        type(mf_32), pointer :: mf
 
-    mf = pop32(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf32(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop32(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf32(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del32
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del33(hed,mt,qstat)
+    subroutine del33(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_33), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_33), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_33), pointer :: mf
+        logical*4 qs
+        type(mf_33), pointer :: mf
 
-    mf = pop33(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf33(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop33(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf33(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del33
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del34(hed,mt,qstat)
+    subroutine del34(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_34), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_34), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_34), pointer :: mf
+        logical*4 qs
+        type(mf_34), pointer :: mf
 
-    mf = pop34(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf34(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop34(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf34(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del34
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del35(hed,mt,qstat)
+    subroutine del35(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_35), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_35), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_35), pointer :: mf
+        logical*4 qs
+        type(mf_35), pointer :: mf
 
-    mf = pop35(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf35(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop35(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf35(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del35
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    subroutine del40(hed,mt,qstat)
+    subroutine del40(hed, mt, qstat)
 
-    implicit none
+        implicit none
 
-    type (mf_40), intent(inout), pointer :: hed
-    integer*4, intent(in) :: mt
-    logical*4, intent(out), optional :: qstat
+        type(mf_40), intent(inout), pointer :: hed
+        integer*4, intent(in) :: mt
+        logical*4, intent(out), optional :: qstat
 
-    logical*4 qs
-    type (mf_40), pointer :: mf
+        logical*4 qs
+        type(mf_40), pointer :: mf
 
-    mf = pop40(hed,mt)
-    qs = associated(mf)
-    if(qs) call del_mf40(mf)
-    if(present(qstat)) qstat = qs
+        mf = pop40(hed, mt)
+        qs = associated(mf)
+        if (qs) call del_mf40(mf)
+        if (present(qstat)) qstat = qs
 
-    return
+        return
     end subroutine del40
 
-!=========================================================================
+    !=========================================================================
 
-    logical*4 function put1(hed,mx)
+    logical*4 function put1(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_1), intent(inout), pointer :: hed
-    type (mf_1), intent(inout), target :: mx
+        type(mf_1), intent(inout), pointer :: hed
+        type(mf_1), intent(inout), target :: mx
 
-    type (mf_1), pointer :: lm,mf
+        type(mf_1), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put1 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put1 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put1 = .true.
 
-    put1 = .true.
-
-    return
+        return
     end function put1
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put2(hed,mx)
+    logical*4 function put2(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_2), intent(inout), pointer :: hed
-    type (mf_2), intent(inout), target :: mx
+        type(mf_2), intent(inout), pointer :: hed
+        type(mf_2), intent(inout), target :: mx
 
-    ! MF2 is special : only 1 MT = 151
+        ! MF2 is special : only 1 MT = 151
 
-    put2 = .false.
-    if(mx%mt /= 151) return
-    if(associated(hed)) return
-    hed => mx
-    put2 = .true.
+        put2 = .false.
+        if (mx%mt /= 151) return
+        if (associated(hed)) return
+        hed => mx
+        put2 = .true.
 
-    return
+        return
     end function put2
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put3(hed,mx)
+    logical*4 function put3(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_3), intent(inout), pointer :: hed
-    type (mf_3), intent(inout), target :: mx
+        type(mf_3), intent(inout), pointer :: hed
+        type(mf_3), intent(inout), target :: mx
 
-    type (mf_3), pointer :: lm,mf
+        type(mf_3), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put3 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put3 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put3 = .true.
 
-    put3 = .true.
-
-    return
+        return
     end function put3
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put4(hed,mx)
+    logical*4 function put4(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_4), intent(inout), pointer :: hed
-    type (mf_4), intent(inout), target :: mx
+        type(mf_4), intent(inout), pointer :: hed
+        type(mf_4), intent(inout), target :: mx
 
-    type (mf_4), pointer :: lm,mf
+        type(mf_4), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put4 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put4 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put4 = .true.
 
-    put4 = .true.
-
-    return
+        return
     end function put4
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put5(hed,mx)
+    logical*4 function put5(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_5), intent(inout), pointer :: hed
-    type (mf_5), intent(inout), target :: mx
+        type(mf_5), intent(inout), pointer :: hed
+        type(mf_5), intent(inout), target :: mx
 
-    type (mf_5), pointer :: lm,mf
+        type(mf_5), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put5 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put5 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put5 = .true.
 
-    put5 = .true.
-
-    return
+        return
     end function put5
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put6(hed,mx)
+    logical*4 function put6(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_6), intent(inout), pointer :: hed
-    type (mf_6), intent(inout), target :: mx
+        type(mf_6), intent(inout), pointer :: hed
+        type(mf_6), intent(inout), target :: mx
 
-    type (mf_6), pointer :: lm,mf
+        type(mf_6), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put6 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put6 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put6 = .true.
 
-    put6 = .true.
-
-    return
+        return
     end function put6
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put7(hed,mx)
+    logical*4 function put7(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_7), intent(inout), pointer :: hed
-    type (mf_7), intent(inout), target :: mx
+        type(mf_7), intent(inout), pointer :: hed
+        type(mf_7), intent(inout), target :: mx
 
-    type (mf_7), pointer :: lm,mf
+        type(mf_7), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put7 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put7 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put7 = .true.
 
-    put7 = .true.
-
-    return
+        return
     end function put7
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put8(hed,mx)
+    logical*4 function put8(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_8), intent(inout), pointer :: hed
-    type (mf_8), intent(inout), target :: mx
+        type(mf_8), intent(inout), pointer :: hed
+        type(mf_8), intent(inout), target :: mx
 
-    type (mf_8), pointer :: lm,mf
+        type(mf_8), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put8 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put8 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put8 = .true.
 
-    put8 = .true.
-
-    return
+        return
     end function put8
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put9(hed,mx)
+    logical*4 function put9(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_9), intent(inout), pointer :: hed
-    type (mf_9), intent(inout), target :: mx
+        type(mf_9), intent(inout), pointer :: hed
+        type(mf_9), intent(inout), target :: mx
 
-    type (mf_9), pointer :: lm,mf
+        type(mf_9), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put9 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put9 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put9 = .true.
 
-    put9 = .true.
-
-    return
+        return
     end function put9
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put10(hed,mx)
+    logical*4 function put10(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_10), intent(inout), pointer :: hed
-    type (mf_10), intent(inout), target :: mx
+        type(mf_10), intent(inout), pointer :: hed
+        type(mf_10), intent(inout), target :: mx
 
-    type (mf_10), pointer :: lm,mf
+        type(mf_10), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put10 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put10 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put10 = .true.
 
-    put10 = .true.
-
-    return
+        return
     end function put10
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put12(hed,mx)
+    logical*4 function put12(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_12), intent(inout), pointer :: hed
-    type (mf_12), intent(inout), target :: mx
+        type(mf_12), intent(inout), pointer :: hed
+        type(mf_12), intent(inout), target :: mx
 
-    type (mf_12), pointer :: lm,mf
+        type(mf_12), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put12 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put12 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put12 = .true.
 
-    put12 = .true.
-
-    return
+        return
     end function put12
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put13(hed,mx)
+    logical*4 function put13(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_13), intent(inout), pointer :: hed
-    type (mf_13), intent(inout), target :: mx
+        type(mf_13), intent(inout), pointer :: hed
+        type(mf_13), intent(inout), target :: mx
 
-    type (mf_13), pointer :: lm,mf
+        type(mf_13), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put13 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put13 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put13 = .true.
 
-    put13 = .true.
-
-    return
+        return
     end function put13
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put14(hed,mx)
+    logical*4 function put14(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_14), intent(inout), pointer :: hed
-    type (mf_14), intent(inout), target :: mx
+        type(mf_14), intent(inout), pointer :: hed
+        type(mf_14), intent(inout), target :: mx
 
-    type (mf_14), pointer :: lm,mf
+        type(mf_14), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put14 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put14 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put14 = .true.
 
-    put14 = .true.
-
-    return
+        return
     end function put14
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put15(hed,mx)
+    logical*4 function put15(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_15), intent(inout), pointer :: hed
-    type (mf_15), intent(inout), target :: mx
+        type(mf_15), intent(inout), pointer :: hed
+        type(mf_15), intent(inout), target :: mx
 
-    type (mf_15), pointer :: lm,mf
+        type(mf_15), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put15 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put15 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put15 = .true.
 
-    put15 = .true.
-
-    return
+        return
     end function put15
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put23(hed,mx)
+    logical*4 function put23(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_23), intent(inout), pointer :: hed
-    type (mf_23), intent(inout), target :: mx
+        type(mf_23), intent(inout), pointer :: hed
+        type(mf_23), intent(inout), target :: mx
 
-    type (mf_23), pointer :: lm,mf
+        type(mf_23), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put23 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put23 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put23 = .true.
 
-    put23 = .true.
-
-    return
+        return
     end function put23
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put26(hed,mx)
+    logical*4 function put26(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_26), intent(inout), pointer :: hed
-    type (mf_26), intent(inout), target :: mx
+        type(mf_26), intent(inout), pointer :: hed
+        type(mf_26), intent(inout), target :: mx
 
-    type (mf_26), pointer :: lm,mf
+        type(mf_26), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put26 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put26 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put26 = .true.
 
-    put26 = .true.
-
-    return
+        return
     end function put26
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put27(hed,mx)
+    logical*4 function put27(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_27), intent(inout), pointer :: hed
-    type (mf_27), intent(inout), target :: mx
+        type(mf_27), intent(inout), pointer :: hed
+        type(mf_27), intent(inout), target :: mx
 
-    type (mf_27), pointer :: lm,mf
+        type(mf_27), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put27 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put27 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put27 = .true.
 
-    put27 = .true.
-
-    return
+        return
     end function put27
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put28(hed,mx)
+    logical*4 function put28(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_28), intent(inout), pointer :: hed
-    type (mf_28), intent(inout), target :: mx
+        type(mf_28), intent(inout), pointer :: hed
+        type(mf_28), intent(inout), target :: mx
 
-    type (mf_28), pointer :: lm,mf
+        type(mf_28), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put28 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put28 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put28 = .true.
 
-    put28 = .true.
-
-    return
+        return
     end function put28
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put31(hed,mx)
+    logical*4 function put31(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_31), intent(inout), pointer :: hed
-    type (mf_31), intent(inout), target :: mx
+        type(mf_31), intent(inout), pointer :: hed
+        type(mf_31), intent(inout), target :: mx
 
-    type (mf_31), pointer :: lm,mf
+        type(mf_31), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put31 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put31 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put31 = .true.
 
-    put31 = .true.
-
-    return
+        return
     end function put31
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put32(hed,mx)
+    logical*4 function put32(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_32), intent(inout), pointer :: hed
-    type (mf_32), intent(inout), target :: mx
+        type(mf_32), intent(inout), pointer :: hed
+        type(mf_32), intent(inout), target :: mx
 
-    ! MF32 is special : only 1 MT = 151
+        ! MF32 is special : only 1 MT = 151
 
-    put32 = .false.
-    if(mx%mt /= 151) return
-    if(associated(hed)) return
-    hed => mx
-    put32 = .true.
+        put32 = .false.
+        if (mx%mt /= 151) return
+        if (associated(hed)) return
+        hed => mx
+        put32 = .true.
 
-    return
+        return
     end function put32
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put33(hed,mx)
+    logical*4 function put33(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_33), intent(inout), pointer :: hed
-    type (mf_33), intent(inout), target :: mx
+        type(mf_33), intent(inout), pointer :: hed
+        type(mf_33), intent(inout), target :: mx
 
-    type (mf_33), pointer :: lm,mf
+        type(mf_33), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put33 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put33 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put33 = .true.
 
-    put33 = .true.
-
-    return
+        return
     end function put33
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put34(hed,mx)
+    logical*4 function put34(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_34), intent(inout), pointer :: hed
-    type (mf_34), intent(inout), target :: mx
+        type(mf_34), intent(inout), pointer :: hed
+        type(mf_34), intent(inout), target :: mx
 
-    type (mf_34), pointer :: lm,mf
+        type(mf_34), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put34 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put34 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put34 = .true.
 
-    put34 = .true.
-
-    return
+        return
     end function put34
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put35(hed,mx)
+    logical*4 function put35(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_35), intent(inout), pointer :: hed
-    type (mf_35), intent(inout), target :: mx
+        type(mf_35), intent(inout), pointer :: hed
+        type(mf_35), intent(inout), target :: mx
 
-    type (mf_35), pointer :: lm,mf
+        type(mf_35), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put35 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put35 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put35 = .true.
 
-    put35 = .true.
-
-    return
+        return
     end function put35
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
-    logical*4 function put40(hed,mx)
+    logical*4 function put40(hed, mx)
 
-    implicit none
+        implicit none
 
-    type (mf_40), intent(inout), pointer :: hed
-    type (mf_40), intent(inout), target :: mx
+        type(mf_40), intent(inout), pointer :: hed
+        type(mf_40), intent(inout), target :: mx
 
-    type (mf_40), pointer :: lm,mf
+        type(mf_40), pointer :: lm, mf
 
-    nullify(lm)
-    mf => hed
-    do while(associated(mf))
-        if(mf%mt < mx%mt) then
-            lm => mf
-            mf => mf%next
-        else if(mf%mt == mx%mt) then
-            put40 = .false.
-            return
+        nullify (lm)
+        mf => hed
+        do while (associated(mf))
+            if (mf%mt < mx%mt) then
+                lm => mf
+                mf => mf%next
+            else if (mf%mt == mx%mt) then
+                put40 = .false.
+                return
+            else
+                exit
+            end if
+        end do
+
+        mx%next => mf
+        if (associated(lm)) then
+            lm%next => mx
         else
-            exit
-        endif
-    end do
+            hed => mx
+        end if
 
-    mx%next => mf
-    if(associated(lm)) then
-        lm%next => mx
-    else
-        hed => mx
-    endif
+        put40 = .true.
 
-    put40 = .true.
-
-    return
+        return
     end function put40
 
 !=========================================================================
 
     integer*4 function cnt1(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_1), intent(inout), pointer :: hed
+        type(mf_1), intent(inout), pointer :: hed
 
-    type (mf_1), pointer :: mf
-    integer*4 n
+        type(mf_1), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt1 = n
+        cnt1 = n
 
-    return
+        return
     end function cnt1
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt2(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_2), intent(inout), pointer :: hed
+        type(mf_2), intent(inout), pointer :: hed
 
-    integer*4 n
+        integer*4 n
 
-    n = 0
-
-    if(associated(hed)) then
-        n = 1
-    else
         n = 0
-    endif
 
-    cnt2 = n
+        if (associated(hed)) then
+            n = 1
+        else
+            n = 0
+        end if
 
-    return
+        cnt2 = n
+
+        return
     end function cnt2
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt3(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_3), intent(inout), pointer :: hed
+        type(mf_3), intent(inout), pointer :: hed
 
-    type (mf_3), pointer :: mf
-    integer*4 n
+        type(mf_3), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt3 = n
+        cnt3 = n
 
-    return
+        return
     end function cnt3
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt4(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_4), intent(inout), pointer :: hed
+        type(mf_4), intent(inout), pointer :: hed
 
-    type (mf_4), pointer :: mf
-    integer*4 n
+        type(mf_4), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt4 = n
+        cnt4 = n
 
-    return
+        return
     end function cnt4
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt5(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_5), intent(inout), pointer :: hed
+        type(mf_5), intent(inout), pointer :: hed
 
-    type (mf_5), pointer :: mf
-    integer*4 n
+        type(mf_5), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt5 = n
+        cnt5 = n
 
-    return
+        return
     end function cnt5
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt6(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_6), intent(inout), pointer :: hed
+        type(mf_6), intent(inout), pointer :: hed
 
-    type (mf_6), pointer :: mf
-    integer*4 n
+        type(mf_6), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt6 = n
+        cnt6 = n
 
-    return
+        return
     end function cnt6
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt7(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_7), intent(inout), pointer :: hed
+        type(mf_7), intent(inout), pointer :: hed
 
-    type (mf_7), pointer :: mf
-    integer*4 n
+        type(mf_7), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt7 = n
+        cnt7 = n
 
-    return
+        return
     end function cnt7
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt8(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_8), intent(inout), pointer :: hed
+        type(mf_8), intent(inout), pointer :: hed
 
-    type (mf_8), pointer :: mf
-    integer*4 n
+        type(mf_8), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt8 = n
+        cnt8 = n
 
-    return
+        return
     end function cnt8
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt9(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_9), intent(inout), pointer :: hed
+        type(mf_9), intent(inout), pointer :: hed
 
-    type (mf_9), pointer :: mf
-    integer*4 n
+        type(mf_9), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt9 = n
+        cnt9 = n
 
-    return
+        return
     end function cnt9
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt10(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_10), intent(inout), pointer :: hed
+        type(mf_10), intent(inout), pointer :: hed
 
-    type (mf_10), pointer :: mf
-    integer*4 n
+        type(mf_10), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt10 = n
+        cnt10 = n
 
-    return
+        return
     end function cnt10
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt12(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_12), intent(inout), pointer :: hed
+        type(mf_12), intent(inout), pointer :: hed
 
-    type (mf_12), pointer :: mf
-    integer*4 n
+        type(mf_12), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt12 = n
+        cnt12 = n
 
-    return
+        return
     end function cnt12
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt13(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_13), intent(inout), pointer :: hed
+        type(mf_13), intent(inout), pointer :: hed
 
-    type (mf_13), pointer :: mf
-    integer*4 n
+        type(mf_13), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt13 = n
+        cnt13 = n
 
-    return
+        return
     end function cnt13
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt14(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_14), intent(inout), pointer :: hed
+        type(mf_14), intent(inout), pointer :: hed
 
-    type (mf_14), pointer :: mf
-    integer*4 n
+        type(mf_14), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt14 = n
+        cnt14 = n
 
-    return
+        return
     end function cnt14
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt15(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_15), intent(inout), pointer :: hed
+        type(mf_15), intent(inout), pointer :: hed
 
-    type (mf_15), pointer :: mf
-    integer*4 n
+        type(mf_15), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt15 = n
+        cnt15 = n
 
-    return
+        return
     end function cnt15
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt23(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_23), intent(inout), pointer :: hed
+        type(mf_23), intent(inout), pointer :: hed
 
-    type (mf_23), pointer :: mf
-    integer*4 n
+        type(mf_23), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt23 = n
+        cnt23 = n
 
-    return
+        return
     end function cnt23
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt26(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_26), intent(inout), pointer :: hed
+        type(mf_26), intent(inout), pointer :: hed
 
-    type (mf_26), pointer :: mf
-    integer*4 n
+        type(mf_26), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt26 = n
+        cnt26 = n
 
-    return
+        return
     end function cnt26
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt27(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_27), intent(inout), pointer :: hed
+        type(mf_27), intent(inout), pointer :: hed
 
-    type (mf_27), pointer :: mf
-    integer*4 n
+        type(mf_27), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt27 = n
+        cnt27 = n
 
-    return
+        return
     end function cnt27
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt28(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_28), intent(inout), pointer :: hed
+        type(mf_28), intent(inout), pointer :: hed
 
-    type (mf_28), pointer :: mf
-    integer*4 n
+        type(mf_28), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt28 = n
+        cnt28 = n
 
-    return
+        return
     end function cnt28
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt31(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_31), intent(inout), pointer :: hed
+        type(mf_31), intent(inout), pointer :: hed
 
-    type (mf_31), pointer :: mf
-    integer*4 n
+        type(mf_31), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt31 = n
+        cnt31 = n
 
-    return
+        return
     end function cnt31
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt32(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_32), intent(inout), pointer :: hed
+        type(mf_32), intent(inout), pointer :: hed
 
-    integer*4 n
+        integer*4 n
 
-    n = 0
-
-    if(associated(hed)) then
-        n = 1
-    else
         n = 0
-    endif
 
-    cnt32 = n
+        if (associated(hed)) then
+            n = 1
+        else
+            n = 0
+        end if
 
-    return
+        cnt32 = n
+
+        return
     end function cnt32
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt33(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_33), intent(inout), pointer :: hed
+        type(mf_33), intent(inout), pointer :: hed
 
-    type (mf_33), pointer :: mf
-    integer*4 n
+        type(mf_33), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt33 = n
+        cnt33 = n
 
-    return
+        return
     end function cnt33
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt34(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_34), intent(inout), pointer :: hed
+        type(mf_34), intent(inout), pointer :: hed
 
-    type (mf_34), pointer :: mf
-    integer*4 n
+        type(mf_34), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt34 = n
+        cnt34 = n
 
-    return
+        return
     end function cnt34
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt35(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_35), intent(inout), pointer :: hed
+        type(mf_35), intent(inout), pointer :: hed
 
-    type (mf_35), pointer :: mf
-    integer*4 n
+        type(mf_35), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt35 = n
+        cnt35 = n
 
-    return
+        return
     end function cnt35
 
-!-------------------------------------------------------------------------
+    !-------------------------------------------------------------------------
 
     integer*4 function cnt40(hed)
 
-    implicit none
+        implicit none
 
-    type (mf_40), intent(inout), pointer :: hed
+        type(mf_40), intent(inout), pointer :: hed
 
-    type (mf_40), pointer :: mf
-    integer*4 n
+        type(mf_40), pointer :: mf
+        integer*4 n
 
-    n = 0
+        n = 0
 
-    mf => hed
-    do while(associated(mf))
-        n = n + 1
-        mf => mf%next
-    end do
+        mf => hed
+        do while (associated(mf))
+            n = n + 1
+            mf => mf%next
+        end do
 
-    cnt40 = n
+        cnt40 = n
 
-    return
+        return
     end function cnt40
 
 end module endf_queue

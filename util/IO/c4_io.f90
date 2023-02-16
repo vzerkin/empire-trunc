@@ -54,8 +54,7 @@ contains
    !-----------------------------------------------------------------------------------------
 
    integer*4 function read_c4_file(cfil, c4, Eminr, Emaxr, Xminr)
-
-      ! read the C4 file specified in the string cfil into the c4 data structure
+      !! read the C4 file specified in the string cfil into the c4 data structure
 
       implicit none
 
@@ -194,7 +193,7 @@ contains
       end do
 
       ! try to comment the line below in case c4service crashes on memory allocation
-   !   call delete_c4(c4)
+      !   call delete_c4(c4)
       allocate(c4%sec(k))
       c4%nsec = k
 
@@ -265,7 +264,7 @@ contains
 
       read_c4_file = 0
 
-10    deallocate(chk)
+      10 deallocate(chk)
       return
 
    end function read_c4_file
@@ -388,7 +387,7 @@ contains
       wrl = lin(1:9)
       return
 
-10    write(6,*) 'Error occured writing real value:',xx
+      10 write(6,*) 'Error occured writing real value:',xx
 
       return
    end function wrl

@@ -96,940 +96,902 @@ module ENDF_IOLIB
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal, chk_siz
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat, skip_sect, skip_mf
 
-!------------------------------------------------------------------------------
-    contains
-!------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------
+contains
+    !------------------------------------------------------------------------------
 
     subroutine read_tab1(tb)
+        !! read a tab1 structure starting on next line
 
-    ! read a tab1 structure starting on next line
+        implicit none
 
-    implicit none
+        integer*4 istat
 
-    integer*4 istat
+        type (tab1) tb
 
-    type (tab1) tb
+        if(tb%nr <= 0) then
+            write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
+            call endf_error(erlin)
+        endif
 
-    if(tb%nr <= 0) then
-        write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
-        call endf_error(erlin)
-    endif
+        if(tb%np <= 0) then
+            write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%np
+            call endf_error(erlin)
+        endif
 
-    if(tb%np <= 0) then
-        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%np
-        call endf_error(erlin)
-    endif
+        allocate(tb%itp(tb%nr),tb%dat(tb%np),stat=istat)
+        if(istat /= 0) then
+            write(erlin,*) ' Error allocating TAB1 record'
+            call endf_error(erlin,-500)
+        endif
 
-    allocate(tb%itp(tb%nr),tb%dat(tb%np),stat=istat)
-    if(istat /= 0) then
-        write(erlin,*) ' Error allocating TAB1 record'
-        call endf_error(erlin,-500)
-    endif
+        call read_int_pair(tb%itp,tb%nr)
+        call read_real_pair(tb%dat,tb%np)
 
-    call read_int_pair(tb%itp,tb%nr)
-    call read_real_pair(tb%dat,tb%np)
-
-    return
+        return
     end subroutine read_tab1
 
-!------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------
 
     subroutine del_tab1(tb)
+        !! deallocate a tab1 structure contents, but not the structure itself
 
-    ! deallocate a tab1 structure contents, but not the structure itself
+        implicit none
 
-    implicit none
+        integer*4 n
+        type (tab1) tb
 
-    integer*4 n
-    type (tab1) tb
+        if(associated(tb%itp)) deallocate(tb%itp, tb%dat, stat=n)
 
-    if(associated(tb%itp)) deallocate(tb%itp, tb%dat, stat=n)
-
-    return
+        return
     end subroutine del_tab1
 
-!------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------
 
     subroutine remove_tab1(tb)
+        !! deallocate a tab1 structure contents & the tab1 itself
 
-    ! deallocate a tab1 structure contents & the tab1 itself
+        implicit none
 
-    implicit none
+        integer*4 n
+        type (tab1), pointer :: tb
 
-    integer*4 n
-    type (tab1), pointer :: tb
+        if(associated(tb)) then 
+            if(associated(tb%itp)) deallocate(tb%itp, tb%dat, stat=n)
+            deallocate(tb, stat=n)
+        endif 
 
-    if(associated(tb)) then 
-        if(associated(tb%itp)) deallocate(tb%itp, tb%dat, stat=n)
-        deallocate(tb, stat=n)
-    endif 
-
-    return
+        return
     end subroutine remove_tab1
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_6r(x1,x2,x3,x4,x5,x6)
+        !! read 6 reals starting at next line
 
-    ! read 6 reals starting at next line
+        implicit none
 
-    implicit none
+        real, intent(out) :: x1,x2,x3,x4,x5,x6
 
-    real, intent(out) :: x1,x2,x3,x4,x5,x6
+        call get_endline
+        read(endline(jp(1):jp(1)+10),rfmt,err=10) x1
+        read(endline(jp(2):jp(2)+10),rfmt,err=10) x2
+        read(endline(jp(3):jp(3)+10),rfmt,err=10) x3
+        read(endline(jp(4):jp(4)+10),rfmt,err=10) x4
+        read(endline(jp(5):jp(5)+10),rfmt,err=10) x5
+        read(endline(jp(6):jp(6)+10),rfmt,err=10) x6
+        ipos = 6
+        return
 
-    call get_endline
-    read(endline(jp(1):jp(1)+10),rfmt,err=10) x1
-    read(endline(jp(2):jp(2)+10),rfmt,err=10) x2
-    read(endline(jp(3):jp(3)+10),rfmt,err=10) x3
-    read(endline(jp(4):jp(4)+10),rfmt,err=10) x4
-    read(endline(jp(5):jp(5)+10),rfmt,err=10) x5
-    read(endline(jp(6):jp(6)+10),rfmt,err=10) x6
-    ipos = 6
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_6r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_tri(x,n)
+        !! read triagonal matrix from next line
 
-    ! read triagonal matrix from next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! size of array
+        real, intent(out) :: x(n,n)    ! output array
 
-    integer, intent(in) :: n    ! size of array
-    real, intent(out) :: x(n,n)    ! output array
+        if(n <= 0) return
+        call get_endline
+        call get_tri(x,n)
 
-    if(n <= 0) return
-    call get_endline
-    call get_tri(x,n)
-
-    return
+        return
     end subroutine read_tri
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_tri(x,n)
+        !! get triagonal matrix
 
-    ! get triagonal matrix
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! size of array
+        real, intent(out) :: x(n,n)    ! output array
 
-    integer, intent(in) :: n    ! size of array
-    real, intent(out) :: x(n,n)    ! output array
+        integer i,j
+        real xx
 
-    integer i,j
-    real xx
-
-    do i = 1,n
-        do j = i,n
-            if(ipos == 6) call get_endline
-            ipos = ipos + 1
-            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
-            x(i,j) = xx
-            x(j,i) = xx
+        do i = 1,n
+            do j = i,n
+                if(ipos == 6) call get_endline
+                ipos = ipos + 1
+                read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
+                x(i,j) = xx
+                x(j,i) = xx
+            end do
         end do
-    end do
 
-    return
+        return
 
-10  call endf_error('Error occured reading tri-diagonal matrix from ENDF file')
+        10  call endf_error('Error occured reading tri-diagonal matrix from ENDF file')
 
     end subroutine get_tri
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_mtx(x,n,m)
+        !! read general matrix starting at next line
 
-    ! read general matrix starting at next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n,m    ! size of array
+        real, intent(out) :: x(n,m)    ! output array
 
-    integer, intent(in) :: n,m    ! size of array
-    real, intent(out) :: x(n,m)    ! output array
+        if((n <= 0) .or. (m <= 0)) then
+            write(erlin,*) 'Read matrix with zero or negative size:',n,m
+            call endf_error(erlin)
+        endif
 
-    if((n <= 0) .or. (m <= 0)) then
-        write(erlin,*) 'Read matrix with zero or negative size:',n,m
-        call endf_error(erlin)
-    endif
+        call get_endline
+        call get_mtx(x,n,m)
 
-    call get_endline
-    call get_mtx(x,n,m)
-
-    return
+        return
     end subroutine read_mtx
 
-!---------------------------------------------------------------------
+    !---------------------------------------------------------------------
 
     subroutine get_mtx(x,n,m)
+        !! get general matrix starting from current position
 
-    ! get general matrix starting from current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n,m    ! size of array
+        real, intent(out) :: x(n,m)    ! output array
 
-    integer, intent(in) :: n,m    ! size of array
-    real, intent(out) :: x(n,m)    ! output array
+        integer i,j
+        real xx
 
-    integer i,j
-    real xx
+        if((n <= 0) .or. (m <= 0)) then
+            write(erlin,*) 'Read matrix with zero or negative size:',n,m
+            call endf_error(erlin)
+        endif
 
-    if((n <= 0) .or. (m <= 0)) then
-        write(erlin,*) 'Read matrix with zero or negative size:',n,m
-        call endf_error(erlin)
-    endif
-
-    do i = 1,n
-        do j = 1,m
-            if(ipos == 6) call get_endline
-            ipos = ipos + 1
-            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
-            x(i,j) = xx
+        do i = 1,n
+            do j = 1,m
+                if(ipos == 6) call get_endline
+                ipos = ipos + 1
+                read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
+                x(i,j) = xx
+            end do
         end do
-    end do
 
-    return
+        return
 
-10  call endf_error('Error occured reading matrix from ENDF file')
+        10  call endf_error('Error occured reading matrix from ENDF file')
 
     end subroutine get_mtx
 
-!---------------------------------------------------------------------
+    !---------------------------------------------------------------------
 
     subroutine read_r(x,n)
+        !! read n reals starting at next line
 
-    ! read n reals starting at next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to get
+        real, intent(out) :: x(*)    ! output array
 
-    integer, intent(in) :: n    ! # reals to get
-    real, intent(out) :: x(*)    ! output array
+        integer i
 
-    integer i
+        if(n <= 0) return
 
-    if(n <= 0) return
+        call get_endline
 
-    call get_endline
+        do i = 1,n
+            if(ipos == 6) call get_endline
+            ipos = ipos + 1
+            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
+        end do
 
-    do i = 1,n
-        if(ipos == 6) call get_endline
-        ipos = ipos + 1
-        read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
-    end do
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_r(x,n)
+        !! read n reals starting at current position
 
-    ! read n reals starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to get
+        real, intent(out) :: x(n)    ! output array
 
-    integer, intent(in) :: n    ! # reals to get
-    real, intent(out) :: x(n)    ! output array
+        integer i
 
-    integer i
+        do i = 1,n
+            if(ipos == 6) call get_endline
+            ipos = ipos + 1
+            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
+        end do
 
-    do i = 1,n
-        if(ipos == 6) call get_endline
-        ipos = ipos + 1
-        read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
-    end do
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_real_pair(rp,n)
+        !! read n real pairs starting at next line
 
-    ! read n real pairs starting at next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to get
+        type (real_pair), intent(out) :: rp(n)    ! output pairs
 
-    integer, intent(in) :: n        ! # pairs to get
-    type (real_pair), intent(out) :: rp(n)    ! output pairs
+        if(n <= 0) return
+        call get_endline
+        call get_real_pair(rp,n)
 
-    if(n <= 0) return
-    call get_endline
-    call get_real_pair(rp,n)
-
-    return
+        return
     end subroutine read_real_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_real_pair(rp,n)
+        !! read n real pairs starting at current position
 
-    ! read n real pairs starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to get
+        type (real_pair), intent(out) :: rp(n)    ! output pairs
 
-    integer, intent(in) :: n        ! # pairs to get
-    type (real_pair), intent(out) :: rp(n)    ! output pairs
+        integer i
 
-    integer i
+        do i = 1,n
+            if(ipos == 6) call get_endline
+            ipos = ipos + 1
+            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) rp(i)%x
+            ipos = ipos + 1
+            read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) rp(i)%y
+        end do
 
-    do i = 1,n
-        if(ipos == 6) call get_endline
-        ipos = ipos + 1
-        read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) rp(i)%x
-        ipos = ipos + 1
-        read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) rp(i)%y
-    end do
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_real_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_1r(x)
+        !! read a real starting at next line
 
-    ! read a real starting at next line
+        implicit none
 
-    implicit none
+        real, intent(out) :: x    ! output variable
 
-    real, intent(out) :: x    ! output variable
+        call get_endline
+        read(endline(1:11),rfmt,err=10) x
+        ipos = 1
 
-    call get_endline
-    read(endline(1:11),rfmt,err=10) x
-    ipos = 1
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine read_1r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_1r(x)
+        !! read a real starting at current position
+        !! this must be called after one of the read_real routines
+        !! that will leave ipos set
 
-    ! read a real starting at current position
-    ! this must be called after one of the read_real routines
-    ! that will leave ipos set
+        implicit none
 
-    implicit none
+        real, intent(out) :: x    ! output variable
 
-    real, intent(out) :: x    ! output variable
+        if(ipos == 6) call get_endline
+        ipos = ipos + 1
+        read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x
 
-    if(ipos == 6) call get_endline
-    ipos = ipos + 1
-    read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
 
     end subroutine get_1r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_int_pair(ip,n)
+        !! read n integer pairs starting on next line
 
-    ! read n integer pairs starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to read
+        type (int_pair), intent(out) :: ip(*)    ! output pairs
 
-    integer, intent(in) :: n        ! # pairs to read
-    type (int_pair), intent(out) :: ip(*)    ! output pairs
+        integer i,j,m
 
-    integer i,j,m
+        if(n <= 0) return
 
-    if(n <= 0) return
+        j = 0
+        do while(j < n)
+            call get_endline
+            m = min(j+3,n)
+            read(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
+            j = m
+        end do
 
-    j = 0
-    do while(j < n)
-        call get_endline
-        m = min(j+3,n)
-        read(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
-        j = m
-    end do
+        ipos = mod(2*n-1,6) + 1
 
-    ipos = mod(2*n-1,6) + 1
+        return
 
-    return
-
-10  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_int_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_i(k,n)
+        !! read n integers starting on next line
 
-    ! read n integers starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to get
+        integer, intent(out) :: k(*)    ! output array
 
-    integer, intent(in) :: n    ! # reals to get
-    integer, intent(out) :: k(*)    ! output array
+        integer i,j,m
 
-    integer i,j,m
+        if(n <= 0) return
 
-    if(n <= 0) return
+        j = 0
+        do while(j < n)
+            call get_endline
+            m = min(j+6,n)
+            read(endline,'(6I11)',err=10) (k(i),i=j+1,m)
+            j = m
+        end do
 
-    j = 0
-    do while(j < n)
-        call get_endline
-        m = min(j+6,n)
-        read(endline,'(6I11)',err=10) (k(i),i=j+1,m)
-        j = m
-    end do
+        ipos = mod(n-1,6) + 1
 
-    ipos = mod(n-1,6) + 1
+        return
 
-    return
-
-10  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_2r4i(x1,x2,i1,i2,i3,i4)
+        !! read 2 reals and 4 integers starting at next line
 
-    ! read 2 reals and 4 integers starting at next line
+        implicit none
 
-    implicit none
+        real, intent(out) :: x1,x2            ! reals
+        integer, intent(out) :: i1,i2,i3,i4        ! integers
 
-    real, intent(out) :: x1,x2            ! reals
-    integer, intent(out) :: i1,i2,i3,i4        ! integers
+        call get_endline
+        read(endline(1:11),rfmt,err=10) x1
+        read(endline(12:22),rfmt,err=10) x2
+        read(endline(23:66),'(4I11)',err=20) i1, i2, i3, i4
+        ipos = 6
 
-    call get_endline
-    read(endline(1:11),rfmt,err=10) x1
-    read(endline(12:22),rfmt,err=10) x2
-    read(endline(23:66),'(4I11)',err=20) i1, i2, i3, i4
-    ipos = 6
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
-20  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
+        20  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_2r4i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_2r4i(x1,x2,i1,i2,i3,i4)
+        !! read 2 reals and 4 integers from current line
 
-    ! read 2 reals and 4 integers from current line
+        implicit none
 
-    implicit none
+        real, intent(out) :: x1,x2
+        integer, intent(out) :: i1,i2,i3,i4
 
-    real, intent(out) :: x1,x2
-    integer, intent(out) :: i1,i2,i3,i4
+        read(endline(1:11),rfmt,err=10) x1
+        read(endline(12:22),rfmt,err=10) x2
+        read(endline(23:66),'(4I11)',err=20) i1, i2, i3, i4
+        ipos = 6
 
-    read(endline(1:11),rfmt,err=10) x1
-    read(endline(12:22),rfmt,err=10) x2
-    read(endline(23:66),'(4I11)',err=20) i1, i2, i3, i4
-    ipos = 6
+        return
 
-    return
-
-10  call endf_error('Error occured reading reals from ENDF file')
-20  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading reals from ENDF file')
+        20  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine get_2r4i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine read_4i(i1,i2,i3,i4)
+        !! 4 integers starting at next line, skipping blanks in 1:22
 
-    ! 4 integers starting at next line, skipping blanks in 1:22
+        implicit none
 
-    implicit none
+        integer, intent(out) :: i1,i2,i3,i4
 
-    integer, intent(out) :: i1,i2,i3,i4
+        call get_endline
+        read(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
+        ipos = 6
 
-    call get_endline
-    read(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
-    ipos = 6
+        return
 
-    return
-
-10  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine read_4i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine get_4i(i1,i2,i3,i4)
+        !! get 4 integers starting on current line, skipping reals in 1:22
 
-    ! get 4 integers starting on current line, skipping reals in 1:22
+        implicit none
 
-    implicit none
+        integer, intent(out) :: i1,i2,i3,i4
 
-    integer, intent(out) :: i1,i2,i3,i4
+        read(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
+        ipos = 6
 
-    read(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
-    ipos = 6
+        return
 
-    return
-
-10  call endf_error('Error occured reading integers from ENDF file')
+        10  call endf_error('Error occured reading integers from ENDF file')
 
     end subroutine get_4i
 
-!------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------
 
     subroutine write_tab1(tb)
+        !! write a tab1 structure starting on next line
 
-    ! write a tab1 structure starting on next line
+        implicit none
 
-    implicit none
+        type (tab1), intent(in) :: tb
 
-    type (tab1), intent(in) :: tb
+        if(tb%nr <= 0) then
+            write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
+            call endf_error(erlin)
+        endif
 
-    if(tb%nr <= 0) then
-        write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
-        call endf_error(erlin)
-    endif
+        if(tb%np <= 0) then
+            write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
+            call endf_error(erlin)
+        endif
 
-    if(tb%np <= 0) then
-        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
-        call endf_error(erlin)
-    endif
+        call write_int_pair(tb%itp, tb%nr)
+        call write_real_pair(tb%dat, tb%np)
 
-    call write_int_pair(tb%itp, tb%nr)
-    call write_real_pair(tb%dat, tb%np)
-
-    return
+        return
     end subroutine write_tab1
 
-!------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------
 
     integer function lc_tab1(tb)
+        !! return # of lines this tab1 record consumes
 
-    ! return # of lines this tab1 record consumes
+        implicit none
 
-    implicit none
+        type (tab1), intent(in) :: tb
 
-    type (tab1), intent(in) :: tb
+        lc_tab1 = (2*tb%nr + 5)/6 + (2*tb%np + 5)/6
 
-    lc_tab1 = (2*tb%nr + 5)/6 + (2*tb%np + 5)/6
-
-    return
+        return
     end function lc_tab1
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_6r(x1,x2,x3,x4,x5,x6)
+        !! write 6 reals starting on next line
 
-    ! write 6 reals starting on next line
+        implicit none
 
-    implicit none
+        real, intent(in) :: x1,x2,x3,x4,x5,x6
 
-    real, intent(in) :: x1,x2,x3,x4,x5,x6
+        if(ipos /= 0) call put_endline
+        endline(jp(1):jp(1)+10) = rlw(x1)
+        endline(jp(2):jp(2)+10) = rlw(x2)
+        endline(jp(3):jp(3)+10) = rlw(x3)
+        endline(jp(4):jp(4)+10) = rlw(x4)
+        endline(jp(5):jp(5)+10) = rlw(x5)
+        endline(jp(6):jp(6)+10) = rlw(x6)
+        call put_endline
 
-    if(ipos /= 0) call put_endline
-    endline(jp(1):jp(1)+10) = rlw(x1)
-    endline(jp(2):jp(2)+10) = rlw(x2)
-    endline(jp(3):jp(3)+10) = rlw(x3)
-    endline(jp(4):jp(4)+10) = rlw(x4)
-    endline(jp(5):jp(5)+10) = rlw(x5)
-    endline(jp(6):jp(6)+10) = rlw(x6)
-    call put_endline
-
-    return
+        return
     end subroutine write_6r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_tri(x,n)
+        !! write triagonal matrix starting on next line
 
-    ! write triagonal matrix starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! size of array
+        real, intent(in) :: x(n,n)    ! output array
 
-    integer, intent(in) :: n    ! size of array
-    real, intent(in) :: x(n,n)    ! output array
+        if(n <= 0) return
+        if(ipos /= 0) call put_endline
+        call put_tri(x,n)
 
-    if(n <= 0) return
-    if(ipos /= 0) call put_endline
-    call put_tri(x,n)
-
-    return
+        return
     end subroutine write_tri
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine put_tri(x,n)
+        !! write triagonal matrix starting at current position
 
-    ! write triagonal matrix starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! size of array
+        real, intent(in) :: x(n,n)    ! output array
 
-    integer, intent(in) :: n    ! size of array
-    real, intent(in) :: x(n,n)    ! output array
+        integer i,j
 
-    integer i,j
-
-    do i = 1,n
-        do j = i,n
-            ipos = ipos + 1
-            endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
-            if(ipos == 6) call put_endline
+        do i = 1,n
+            do j = i,n
+                ipos = ipos + 1
+                endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
+                if(ipos == 6) call put_endline
+            end do
         end do
-    end do
 
-    return
+        return
     end subroutine put_tri
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_mtx(x,n,m)
+        !! write matrix starting on next line
 
-    ! write matrix starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n,m    ! size of array
+        real, intent(in) :: x(n,m)    ! output array
 
-    integer, intent(in) :: n,m    ! size of array
-    real, intent(in) :: x(n,m)    ! output array
+        if(n <= 0) return
+        if(m <= 0) return
+        if(ipos /= 0) call put_endline
+        call put_mtx(x,n,m)
 
-    if(n <= 0) return
-    if(m <= 0) return
-    if(ipos /= 0) call put_endline
-    call put_mtx(x,n,m)
-
-    return
+        return
     end subroutine write_mtx
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine put_mtx(x,n,m)
+        !! put matrix starting at current position
 
-    ! put matrix starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n,m    ! size of array
+        real, intent(in) :: x(n,m)    ! output array
 
-    integer, intent(in) :: n,m    ! size of array
-    real, intent(in) :: x(n,m)    ! output array
+        integer i,j
 
-    integer i,j
-
-    do i = 1,n
-        do j = 1,m
-            ipos = ipos + 1
-            endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
-            if(ipos == 6) call put_endline
+        do i = 1,n
+            do j = 1,m
+                ipos = ipos + 1
+                endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
+                if(ipos == 6) call put_endline
+            end do
         end do
-    end do
 
-    return
+        return
     end subroutine put_mtx
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_r(x,n)
+        !! write n reals starting on next line
 
-    ! write n reals starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to write
+        real, intent(in) :: x(*)    ! output array
 
-    integer, intent(in) :: n    ! # reals to write
-    real, intent(in) :: x(*)    ! output array
+        integer i
 
-    integer i
+        if(n <= 0) return
+        if(ipos /= 0) call put_endline
 
-    if(n <= 0) return
-    if(ipos /= 0) call put_endline
+        do i = 1,n
+            ipos = ipos + 1
+            endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
+            if(ipos == 6) call put_endline
+        end do
 
-    do i = 1,n
-        ipos = ipos + 1
-        endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
-        if(ipos == 6) call put_endline
-    end do
-
-    return
+        return
     end subroutine write_r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine put_r(x,n)
+        !! write n reals starting at current position
 
-    ! write n reals starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to write
+        real, intent(in) :: x(n)    ! output array
 
-    integer, intent(in) :: n    ! # reals to write
-    real, intent(in) :: x(n)    ! output array
+        integer i
 
-    integer i
+        do i = 1,n
+            ipos = ipos + 1
+            endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
+            if(ipos == 6) call put_endline
+        end do
 
-    do i = 1,n
-        ipos = ipos + 1
-        endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
-        if(ipos == 6) call put_endline
-    end do
-
-    return
+        return
     end subroutine put_r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_real_pair(rp,n)
+        !! write n real pairs starting on next line
 
-    ! write n real pairs starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to write
+        type (real_pair), intent(in) :: rp(n)    ! output pair
 
-    integer, intent(in) :: n        ! # pairs to write
-    type (real_pair), intent(in) :: rp(n)    ! output pair
+        if(n <= 0) return
+        if(ipos /= 0) call put_endline
+        call put_real_pair(rp,n)
 
-    if(n <= 0) return
-    if(ipos /= 0) call put_endline
-    call put_real_pair(rp,n)
-
-    return
+        return
     end subroutine write_real_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine put_real_pair(rp,n)
+        !! write n real pairs starting at current position
 
-    ! write n real pairs starting at current position
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to write
+        type (real_pair), intent(in) :: rp(n)    ! output pairs
 
-    integer, intent(in) :: n        ! # pairs to write
-    type (real_pair), intent(in) :: rp(n)    ! output pairs
+        integer i
 
-    integer i
+        do i = 1,n
+            ipos = ipos + 1
+            endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%x)
+            if(ipos == 6) call put_endline
+            ipos = ipos + 1
+            endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%y)
+            if(ipos == 6) call put_endline
+        end do
 
-    do i = 1,n
-        ipos = ipos + 1
-        endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%x)
-        if(ipos == 6) call put_endline
-        ipos = ipos + 1
-        endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%y)
-        if(ipos == 6) call put_endline
-    end do
-
-    return
+        return
     end subroutine put_real_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_1r(x)
+        !! write a real in first position of next line
 
-    ! write a real in first position of next line
+        implicit none
 
-    implicit none
+        real, intent(in) :: x
 
-    real, intent(in) :: x
+        if(ipos /= 0) call put_endline
+        endline(1:11) = rlw(x)
+        ipos = 1
 
-    if(ipos /= 0) call put_endline
-    endline(1:11) = rlw(x)
-    ipos = 1
-
-    return
+        return
     end subroutine write_1r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine put_1r(x)
+        !! write a real at current position
 
-    ! write a real at current position
+        implicit none
 
-    implicit none
+        real, intent(in) :: x
 
-    real, intent(in) :: x
+        ipos = ipos + 1
+        endline(jp(ipos):jp(ipos)+10) = rlw(x)
+        if(ipos == 6) call put_endline
 
-    ipos = ipos + 1
-    endline(jp(ipos):jp(ipos)+10) = rlw(x)
-    if(ipos == 6) call put_endline
-
-    return
+        return
     end subroutine put_1r
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_int_pair(ip,n)
+        !! write n integer pairs starting on next line
 
-    ! write n integer pairs starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n        ! # pairs to write
+        type (int_pair), intent(in) :: ip(n)    ! output pairs
 
-    integer, intent(in) :: n        ! # pairs to write
-    type (int_pair), intent(in) :: ip(n)    ! output pairs
+        integer i,j,m
 
-    integer i,j,m
+        if(n <= 0) return
+        if(ipos /= 0) call put_endline
 
-    if(n <= 0) return
-    if(ipos /= 0) call put_endline
+        j = 0
+        do while(j < n)
+            m = min(j+3,n)
+            write(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
+            if(m == (j+3)) then
+                call put_endline
+            else
+                ipos = m - j
+            endif
+            j = m
+        end do
 
-    j = 0
-    do while(j < n)
-        m = min(j+3,n)
-        write(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
-        if(m == (j+3)) then
-            call put_endline
-        else
-            ipos = m - j
-        endif
-        j = m
-    end do
+        return
 
-    return
-
-10  call endf_error('Error occured writing integers')
+        10  call endf_error('Error occured writing integers')
 
     end subroutine write_int_pair
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_i(k,n)
+        !! write n integers starting on next line
 
-    ! write n integers starting on next line
+        implicit none
 
-    implicit none
+        integer, intent(in) :: n    ! # reals to write
+        integer, intent(in) :: k(*)    ! output array
 
-    integer, intent(in) :: n    ! # reals to write
-    integer, intent(in) :: k(*)    ! output array
+        integer i,j,m
 
-    integer i,j,m
+        if(n <= 0) return
+        if(ipos /= 0) call put_endline
 
-    if(n <= 0) return
-    if(ipos /= 0) call put_endline
+        j = 0
+        do while(j < n)
+            m = min(j+6,n)
+            write(endline,'(6I11)',err=10) (k(i),i=j+1,m)
+            if(m == (j+6)) then
+                call put_endline
+            else
+                ipos = m - j
+            endif
+            j = m
+        end do
 
-    j = 0
-    do while(j < n)
-        m = min(j+6,n)
-        write(endline,'(6I11)',err=10) (k(i),i=j+1,m)
-        if(m == (j+6)) then
-            call put_endline
-        else
-            ipos = m - j
-        endif
-        j = m
-    end do
+        return
 
-    return
-
-10  call endf_error('Error occured writing integers')
+        10  call endf_error('Error occured writing integers')
 
     end subroutine write_i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_2r4i(x1,x2,i1,i2,i3,i4)
+        !! read 2 reals and 4 integers starting at next line
 
-    ! read 2 reals and 4 integers starting at next line
+        implicit none
 
-    implicit none
+        real, intent(in) :: x1,x2            ! reals
+        integer, intent(in) :: i1,i2,i3,i4        ! integers
 
-    real, intent(in) :: x1,x2            ! reals
-    integer, intent(in) :: i1,i2,i3,i4        ! integers
+        if(ipos /= 0) call put_endline
 
-    if(ipos /= 0) call put_endline
+        endline(1:11) = rlw(x1)
+        endline(12:22) = rlw(x2)
+        write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
+        call put_endline
 
-    endline(1:11) = rlw(x1)
-    endline(12:22) = rlw(x2)
-    write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
-    call put_endline
+        return
 
-    return
-
-10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
-    call endf_error(erlin)
+        10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
+        call endf_error(erlin)
 
     end subroutine write_2r4i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_4i(i1,i2,i3,i4)
+        !! 4 integers starting on next line, 2 leading reals = 0.0
 
-    ! 4 integers starting on next line, 2 leading reals = 0.0
+        implicit none
 
-    implicit none
+        integer, intent(in) :: i1,i2,i3,i4        ! integers
 
-    integer, intent(in) :: i1,i2,i3,i4        ! integers
+        if(ipos /= 0) call put_endline
 
-    if(ipos /= 0) call put_endline
+        endline(1:22)  = ' 0.000000+0 0.000000+0'
+        write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
+        call put_endline
 
-    endline(1:22)  = ' 0.000000+0 0.000000+0'
-    write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
-    call put_endline
+        return
 
-    return
-
-10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
-    call endf_error(erlin)
+        10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
+        call endf_error(erlin)
 
     end subroutine write_4i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_5i(i0,i1,i2,i3,i4)
+        !! 4 integers starting on next line, 22 leading spaces
+        !! this is used mainly to write MF1/451 directory
 
-    ! 4 integers starting on next line, 22 leading spaces
-    ! this is used mainly to write MF1/451 directory
+        implicit none
 
-    implicit none
+        integer, intent(in) :: i0,i1,i2,i3,i4        ! integers
 
-    integer, intent(in) :: i0,i1,i2,i3,i4        ! integers
+        ! insist that i0 be 0
+        if(i0 /= 0) then
+            write(erlin,*) 'Put 2f,4i line with leading blanks with non-zero leading int:',i0
+            call endf_error(erlin)
+        end if
 
-    ! insist that i0 be 0
-    if(i0 /= 0) then
-        write(erlin,*) 'Put 2f,4i line with leading blanks with non-zero leading int:',i0
+        if(ipos /= 0) call put_endline
+
+        write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
+        call put_endline
+
+        return
+
+        10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
         call endf_error(erlin)
-    end if
-
-    if(ipos /= 0) call put_endline
-
-    write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
-    call put_endline
-
-    return
-
-10  write(erlin,*) 'Error occured writing integers:',i1,i2,i3,i4
-    call endf_error(erlin)
 
     end subroutine write_5i
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     character*11 function rlw(xx)
 
-    implicit none
+        implicit none
 
-    real, intent(in) :: xx
+        real, intent(in) :: xx
 
-    character*13 dum
+        character*13 dum
 
-    write(dum,'(1PE13.6)',err=10) xx
-    if(dum(12:12) == '0') then
-        dum(10:10) = dum(11:11)
-        dum(11:11) = dum(13:13)
-    else
-        write(dum,'(1PE12.5)') xx
-        dum(9:11) = dum(10:12)
-    endif
+        write(dum,'(1PE13.6)',err=10) xx
+        if(dum(12:12) == '0') then
+            dum(10:10) = dum(11:11)
+            dum(11:11) = dum(13:13)
+        else
+            write(dum,'(1PE12.5)') xx
+            dum(9:11) = dum(10:12)
+        endif
 
-    rlw = dum(1:11)
+        rlw = dum(1:11)
 
-    return
+        return
 
-10  write(erlin,*) 'Error occured writing real value:',xx
-    call endf_error(erlin)
+        10  write(erlin,*) 'Error occured writing real value:',xx
+        call endf_error(erlin)
 
     end function rlw
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_send
 
@@ -1045,20 +1007,20 @@ module ENDF_IOLIB
     return
     end subroutine write_send
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_fend
 
-    implicit none
+        implicit none
 
-    ! written to file when done with an MF
+        ! written to file when done with an MF
 
-    if(ipos /= 0) call put_endline
+        if(ipos /= 0) call put_endline
 
-    call set_mf(0)
-    call write_2r4i(zero, zero, 0, 0, 0, 0)
+        call set_mf(0)
+        call write_2r4i(zero, zero, 0, 0, 0, 0)
 
-    return
+        return
     end subroutine write_fend
 
 end module ENDF_IOLIB
@@ -1076,30 +1038,30 @@ end module ENDF_IOLIB
 
     subroutine read_reals(x,n)
 
-    use ENDF_IOLIB
+        use ENDF_IOLIB
 
-    implicit none
+        implicit none
 
-    integer, intent(in) :: n    ! # reals to write
-    real, intent(out) :: x(*)    ! output array
+        integer, intent(in) :: n    ! # reals to write
+        real, intent(out) :: x(*)    ! output array
 
-    call read_endf(x,n)
+        call read_endf(x,n)
 
-    return
+        return
     end subroutine read_reals
 
-!--------------------------------------------------------------------------------
+    !--------------------------------------------------------------------------------
 
     subroutine write_reals(x,n)
 
-    use ENDF_IOLIB
+        use ENDF_IOLIB
 
-    implicit none
+        implicit none
 
-    integer, intent(in) :: n    ! # reals to write
-    real, intent(in) :: x(*)    ! output array
+        integer, intent(in) :: n    ! # reals to write
+        real, intent(in) :: x(*)    ! output array
 
-    call write_endf(x,n)
+        call write_endf(x,n)
 
-    return
+        return
     end subroutine write_reals
