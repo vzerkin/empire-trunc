@@ -117,6 +117,8 @@ C-M               columns 11-50.
 C-M  '   NANGLES' Maximum number of discrete angles for tabulation are
 C-M               defined columns 11-20. The actual number of angles
 C-M               depends on the Legendre order.
+C-M  '   NENGAM ' Number of points for resolution-broadened gamma lines.
+C-M  '   EPSGAM ' Resolution-broadening width for discrete gamma lines.
 C-M  '   ENDSIX ' This keyword signals the end of SIXTAB input. All
 C-M               instructions that follow are ignored.
 C-M
@@ -147,6 +149,10 @@ C* Scratch file unit number and name
 C*
 C* Default number of angles
       NCS=65
+C* Default number of energies and Gaussian resolution width 
+C* for discrete gammas in the spectra
+      NENGAM=21
+      EPSGAM=0.02
 C*
 C* Check for the existence of the input file
       INQUIRE(FILE=FLIN,EXIST=EXST)
@@ -157,12 +163,12 @@ C* SIXTAB Input does not exist - try interpreting default input
 C* SIXTAB Input exists -Process the input file
    14 OPEN(UNIT=LIN,FILE=FLIN,STATUS='OLD')
       IER=0
-      CALL SIXINP(LIN,LTT,FLEN,FLOU,NCS,IER)
+      CALL SIXINP(LIN,LTT,FLEN,FLOU,NCS,NENGAM,EPSGAM,IER)
       CLOSE(UNIT=LIN)
       IF(IER.EQ.0) GO TO 16
 C* Remedial action if fatal error on input is encountered:
 C* Print a warning to default output and try reading default input
-   15 CALL SIXINP(LKB,LTT,FLEN,FLOU,NCS,IER)
+   15 CALL SIXINP(LKB,LTT,FLEN,FLOU,NCS,NENGAM,EPSGAM,IER)
       FLIN='Keyboard'
       IF(IER.EQ.0) GO TO 16
 C* Try input/output ENDF files from default input/output
@@ -187,6 +193,8 @@ C* Input instructions processed
       WRITE(LTT,900) '              Target output ENDF file : ',FLOU
       WRITE(LTT,900)
       WRITE(LTT,903) '            Number of discrete angles : ',NCS
+      WRITE(LTT,903) '  No. of energies for discrete gammas : ',NENGAM
+      WRITE(LTT,904) '  Resolution width of discrete gammas : ',EPSGAM
 C*
 C* Copy the header card
       READ (LEN,901) C66,MATH,MFH,MTH,NS
@@ -196,7 +204,7 @@ C* Edit the comment section to identify changes
      1       ' SIXTAB Version 10/02 '//
      1       '**********************'
       WRITE(CMT(2),991) NCS
-   20 CALL EDTMF1(LEN,LOU,CMT,NCM,C66,MATH,MFH,MTH,IER)
+   20 CALL EDTMF1(LEN,LOU,CMT,NCM,C66,AWI,NSUB,MATH,MFH,MTH,IER)
       IF(MATH.LT.0) GO TO 80
       IF(IER.EQ.1 .AND.LTT.GT.0) THEN
         WRITE(LTT,901) ' WARNING - No comments section on file  '
@@ -242,7 +250,8 @@ C* Process the ENDF file MF6
       DO I=1,NQI
         IF(MTH.EQ.MTI(I)) QI=QQI(I)
       END DO
-      CALL MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,C66,MATH,MFH,MTH,IER)
+      CALL MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,NENGAM,EPSGAM
+     &           ,C66,AWI,NSUB,MATH,MFH,MTH,IER)
       IF(IER.NE.0) THEN
         READ (LEN,901) C66,MATH,MFH,MTH
         IF(MFH.EQ.0) GO TO 50
@@ -276,17 +285,19 @@ C* File processing finished
 C*
 C* Error traps
    82 STOP 'SIXTAB ERROR - Illegal input'
-   84 STOP 'SIXTAB ERROR - Source ENDF file invalid'
+   84 WRITE(LTT,*) 'Incorrect filename:',FLEN
+      STOP 'SIXTAB ERROR - Source ENDF file invalid'
 C*
   900 FORMAT(2A40)
   901 FORMAT(A66,I4,I2,I3,I5)
   903 FORMAT(A40,I4)
+  904 FORMAT(A40,F10.4)
   910 FORMAT(8A10)
   911 FORMAT(2F11.0,4I11)
   991 FORMAT(' Neutron distributions in MF6 con',
      2       'verted to Law 7 using',I4,' cosines')
       END
-      SUBROUTINE SIXINP(LIN,LTT,FLEN,FLOU,NCS,IER)
+      SUBROUTINE SIXINP(LIN,LTT,FLEN,FLOU,NCS,NENGAM,EPSGAM,IER)
 C-Title  : Subroutine SIXINP
 C-Purpose: Process input instructions for SIXTAB
       PARAMETER    (MXKW=10)
@@ -294,8 +305,8 @@ C-Purpose: Process input instructions for SIXTAB
       CHARACTER*10  KWRD(MXKW),REC(8),C10
 C*
       DATA KWRD
-     1/'$* SIXTAB ','   FLNINP ','   FLNOUT ','   NANGLES','          '
-     1,'          ','          ','          ','          ','   ENDSIX '/
+     1/'$* SIXTAB ','   FLNINP ','   FLNOUT ','   NANGLES','   NENGAM '
+     1,'   EPSGAM ','          ','          ','          ','   ENDSIX '/
 C*
       READ (LIN,901,ERR=800) REC
       C10=REC(1)
@@ -343,9 +354,13 @@ C* '   NANGLES'
   140 READ (REC(2),902) I
       IF(I.GT.0) NCS=I
       GO TO 90
+C* '   NENGAM'
+  150 READ (REC(2),902) NENGAM
+      GO TO 90
+C* '   EPSGAM
+  160 READ (REC(2),903) EPSGAM
+      GO TO 90
 C* Unused keywords
-  150 CONTINUE
-  160 CONTINUE
   170 CONTINUE
   180 CONTINUE
   190 CONTINUE
@@ -359,9 +374,11 @@ C* Error trapped
 C*
   901 FORMAT(8A10)
   902 FORMAT(BN,I10)
+  903 FORMAT(BN,F10.0)
   904 FORMAT(' Unrecognised keyword "',A10,'"')
       END
-      SUBROUTINE MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,C66,MAT0,MF0,MT0,IER)
+      SUBROUTINE MF6LW7(LEN,LOU,LTT,LSC,QI,NCS,NENGAM,EPSGAM
+     &                 ,C66,AWI,NSUB,MAT0,MF0,MT0,IER)
 C-Title  : Subroutine MF6LW7
 C-Purpose: Adapted fix6 routine of NJOY
 C-Author : A. Trkov, International Atomic Energy Agency, Vienna
@@ -403,8 +420,9 @@ C*
       TWO =2
       NS  =0
       REWIND LSC
-C* Assume the projectile is neutron
+C* Define the projectile
       IZPR=1
+c...  IZPR=NSUB/10
 C* Define NCS cosines for NCS-1 angle intervals
       IF(NCS.GT.MXMU) STOP 'SIXTAB ERROR - MXMU limit exceeded'
       DPI= PI/(NCS-2)
@@ -454,7 +472,9 @@ C* Redefine co-ordinate system to Lab
         LCT1=1
       END IF
 C* Define the mass of the incident particle
-      IF     (IZPR.EQ.   1) THEN
+      IF     (IZPR.EQ.   0) THEN
+        AM1=1.E-14
+      ELSE IF(IZPR.EQ.   1) THEN
         AM1=AWN
       ELSE IF(IZPR.EQ.1001) THEN
         AM1=AWH
@@ -600,6 +620,9 @@ C*      -- Read in the data for this energy
         PRINT *,'SIXTAB ERROR - Reading RDLIST IER=',IER
         STOP 'MF6LW7 ERROR - reading incident energy LIST'
       END IF
+C...
+C...    print *,'LTT,NA,ND',LTT,NA,ND
+C...
       IF(ND.GT.0) THEN
 C*      Case: Discrete particle energies present
         IF(LTT.GT.0 .AND. NA.GT.0) THEN
@@ -636,8 +659,8 @@ C*        Linearise the continuum distribution
           NR=1
           NBT(1)=NEPP
           INR(1)=LEP
-          EPS=0.005
-          CALL VECLIN(NR,NEPP,NBT,INR,RWO(LXE),RWO(LXS),NXS,EPS)
+          EPSCNT=0.005
+          CALL VECLIN(NR,NEPP,NBT,INR,RWO(LXE),RWO(LXS),NXS,EPSCNT)
         ELSE
 C*        -- If only discrete lines present, preset the range to zero
           NEPP=2
@@ -654,17 +677,18 @@ C*        -- If only discrete lines present, preset the range to zero
           END IF
         END IF
 C*      -- Add contributions from discrete lines
-C*        (Gaussian NEP1=21 points)
+C*        (Gaussian NENGAM points)
+C...
+        print *,'NENGAM,EPSGAM',NENGAM,EPSGAM
+C...
         DO IP=1,ND
-          EPS=0.02
-          NEP1=21
           EG =ABS(RWO(LX1+(NA+2)*(IP-1)))
           FF=RWO(LX1+(NA+2)*(IP-1)+1)
           IF(FF.GT.0) THEN
 C*          -- Generate Gaussian around energy Eg
-            CALL FNGAUS(EG,NEP1,RWO(LXE1),RWO(LXS1),EPS)
+            CALL FNGAUS(EG,NENGAM,RWO(LXE1),RWO(LXS1),EPSGAM)
 C*          -- Generate union grid with previous distribution
-            CALL UNIGRD(NEPP,RWO(LXE),NEP1,RWO(LXE1)
+            CALL UNIGRD(NEPP,RWO(LXE),NENGAM,RWO(LXE1)
      &                 ,NEP2,RWO(LXE2),NXS)
 C*          -- Interpolate previous distribution to the union grid
             CALL FITGRD(NEPP,RWO(LXE),RWO(LXS)
@@ -677,8 +701,8 @@ C*          -- Save the previous distribution
             END DO
 C*          -- Interpolate discrete Gaussian distribution to
 C*             the union grid
-            CALL FITGRD(NEP1,RWO(LXE1),RWO(LXS1)
-     &                 ,NEP2,RWO(LXE2),RWO(LXS2))
+            CALL FITGRD(NENGAM,RWO(LXE1),RWO(LXS1)
+     &                 ,NEP2,  RWO(LXE2),RWO(LXS2))
 C*          -- Add the discrete Gaussian distribution
             DO K=1,NEPP
               RWO(LXS-1+K)=RWO(LXS-1+K)+RWO(LXS2-1+K)*FF
@@ -985,7 +1009,7 @@ C*
   902 FORMAT(2F11.0,4I11,I4,I2,I3,I5)
   903 FORMAT(A40,F11.1)
   950 FORMAT(/' Converting MF=6, MT=',I3,' from Law',I3
-     &        ,' for particle',I3)
+     &        ,' for particle No.',I3)
   651 FORMAT(A40,I3)
   961 FORMAT(' SIXTAB ERROR - Can not process Law',I3,' for ZAP',I6)
   962 FORMAT(12X,A8,' Representation for particle IZAP',I6)
@@ -1144,7 +1168,7 @@ C
       BACH=B1*X1+B2*X1**3+B3*FA*FB*X3**4
       RETURN
       END
-      SUBROUTINE EDTMF1(LEN,LOU,CMT,NCT,C66,MATD,MFD,MTD,IER)
+      SUBROUTINE EDTMF1(LEN,LOU,CMT,NCT,C66,AWI,NSUB,MATD,MFD,MTD,IER)
 C-Title  : Subroutine EDTMF1
 C-Purpose: Edit ENDF file MF1 MT451 comments section
       CHARACTER*66  CMT(NCT),C66
@@ -1165,6 +1189,9 @@ C* Copy the first three records
       WRITE(LOU,901) C66,MATD,MFD,MTD,NS
       READ (LEN,901) C66,MATD,MFD,MTD
       IF(IC.LT.3) GO TO 20
+C* Read projectile mass and library type (by incident particle)
+      READ (C66( 1:11),*) AWI
+      READ (C66(56:66),904) NSUB
 C* Correct the length of the comments section
       READ (C66(45:55),904) NDC
       WRITE(C66(45:55),904) NDC+NCT
