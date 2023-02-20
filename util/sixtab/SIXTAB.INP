@@ -1,2 +1,6 @@
-ENDF.IN
-ENDF.OUT
+$* SIXTAB              
+   FLNINP ENDF.IN               
+   FLNOUT ENDF.OUT             
+   NENGAM 30          
+   EPSGAM 0.001       
+   ENDSIX             
