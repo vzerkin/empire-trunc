@@ -98,6 +98,10 @@ Version: Original code March 2001
                 columns 11-50.
    '   NANGLES' Number of discrete angles for tabulation are defined
                 columns 11-20.
+   '   NENGAM ' Number of points for resolution-broadened gamma lines
+                columns 11-20.
+   '   EPSGAM ' Resolution-broadening width for discrete gamma lines
+                (fraction), columns 11-20.
    '   ENDSIX ' This keyword signals the end of SIXTAB input. All
                 instructions that follow are ignored.
  
