@@ -25,6 +25,7 @@ C-V  16/09 Fix error summing Legendre components in update 09/12.
 C-V  17/10 Allow negative LAW pointing to MF=|LAW| where the actual
 C-V        spectra are given (new feature for P(nu) in ENDF)
 C-V  20/05 Fix LAW=2/LANG=0 (discrete level distributions) in MF=6.
+C-V  23/02 Input control of the resolution of discrete gamma lines.
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -117,8 +118,10 @@ C-M               columns 11-50.
 C-M  '   NANGLES' Maximum number of discrete angles for tabulation are
 C-M               defined columns 11-20. The actual number of angles
 C-M               depends on the Legendre order.
-C-M  '   NENGAM ' Number of points for resolution-broadened gamma lines.
-C-M  '   EPSGAM ' Resolution-broadening width for discrete gamma lines.
+C-M  '   NENGAM ' Number of points for resolution-broadened gamma lines,
+C-M               columns 11-20.
+C-M  '   EPSGAM ' Resolution-broadening width for discrete gamma lines
+C-M               (fraction), columns 11-20.
 C-M  '   ENDSIX ' This keyword signals the end of SIXTAB input. All
 C-M               instructions that follow are ignored.
 C-M
@@ -679,7 +682,7 @@ C*        -- If only discrete lines present, preset the range to zero
 C*      -- Add contributions from discrete lines
 C*        (Gaussian NENGAM points)
 C...
-        print *,'NENGAM,EPSGAM',NENGAM,EPSGAM
+C...    print *,'NENGAM,EPSGAM',NENGAM,EPSGAM
 C...
         DO IP=1,ND
           EG =ABS(RWO(LX1+(NA+2)*(IP-1)))
