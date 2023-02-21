@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2021-07-20 11:21:03 +0200 (Di, 20 Jul 2021) $
+Ccc   * $Date: 2023-02-21 23:31:52 +0100 (Di, 21 Feb 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -167,6 +167,9 @@ C-M  20/02 Fix printing or radionuclide production in MF10.
 C-M  20/03 Add routine WRMF6D to write discrete level angular
 C-M        distributions in MF=6 (no recoils at the moment).
 C-M        NOTE: one optional extra input record.
+C-M  23/02 Process discrete gamma lines from all reactions including
+C-M        primary gammas from capture.
+C-M        Process discrete levels of (n,d), (n,t), (n,He3).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -340,7 +343,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=400,MXM=200,MXR=2400000,MXI=8000,MLV=3)
+      PARAMETER   (MXE=200,MXT=400,MXM=200,MXR=2400000,MXI=8000,MLV=6)
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK
       CHARACTER*80 FLNM,FLN1,FLN2,FLER
@@ -410,6 +413,9 @@ c...  NMOD= 0
       D0LV=0
       LRP =0
       I600=0
+      I650=0
+      I700=0
+      I750=0
       I800=0
       IRCOIL=0
       NT6 =0
@@ -642,6 +648,9 @@ C* Write the ENDF file-3 data
         END IF
 C*      -- Flag the presence of discrete level proton and alpha production
         IF(JT.GE.600 .AND. JT.LT.649) I600=1
+        IF(JT.GE.650 .AND. JT.LT.699) I650=1
+        IF(JT.GE.700 .AND. JT.LT.749) I700=1
+        IF(JT.GE.750 .AND. JT.LT.799) I750=1
         IF(JT.GE.800 .AND. JT.LT.849) I800=1
       END DO
 C*
@@ -661,6 +670,7 @@ C* Check if discrete level cross section exist, but no spectra
 C...
 C...    print *,'i,k,nt6,kt6,it6',i,k,nt6,kt6,it6,i600,i800
 C...
+C*
 C*      -- Check if continuum proton emission is present
         IF(IT6.EQ.649) THEN
           I600=0
@@ -684,6 +694,79 @@ C*        -- Flag insertion of isotropic discrete levels
           K  =K+1
           KT6=KT6+1
         END IF
+C*
+C*      -- Check if continuum deuteron emission is present
+        IF(IT6.EQ.699) THEN
+          I650=0
+          IF(I.LT.NT6) THEN
+            CYCLE
+          ELSE
+            GO TO 380
+          END IF
+        END IF
+C*      -- Check to insert isotropic deuteron emission
+        IF(I650.EQ.1 .AND. (IT6.GT.699 .OR. I.EQ.NT6)) THEN
+          IF(I.LE.NT6) THEN
+C*          -- Shift remaining entries
+            N=KT6-I+1
+            DO J=1,N
+              IWO(LBI+K+1-J)=IWO(LBI+K-J)
+            END DO
+          END IF
+C*        -- Flag insertion of isotropic discrete levels
+          IWO(LBI+K-1)=650
+          K  =K+1
+          KT6=KT6+1
+        END IF
+C*
+C*      -- Check if continuum triton emission is present
+        IF(IT6.EQ.749) THEN
+          I700=0
+          IF(I.LT.NT6) THEN
+            CYCLE
+          ELSE
+            GO TO 380
+          END IF
+        END IF
+C*      -- Check to insert isotropic triton emission
+        IF(I700.EQ.1 .AND. (IT6.GT.749 .OR. I.EQ.NT6)) THEN
+          IF(I.LE.NT6) THEN
+C*          -- Shift remaining entries
+            N=KT6-I+1
+            DO J=1,N
+              IWO(LBI+K+1-J)=IWO(LBI+K-J)
+            END DO
+          END IF
+C*        -- Flag insertion of isotropic discrete levels
+          IWO(LBI+K-1)=700
+          K  =K+1
+          KT6=KT6+1
+        END IF
+C*
+C*      -- Check if continuum helion emission is present
+        IF(IT6.EQ.799) THEN
+          I750=0
+          IF(I.LT.NT6) THEN
+            CYCLE
+          ELSE
+            GO TO 380
+          END IF
+        END IF
+C*      -- Check to insert isotropic helion emission
+        IF(I750.EQ.1 .AND. (IT6.GT.799 .OR. I.EQ.NT6)) THEN
+          IF(I.LE.NT6) THEN
+C*          -- Shift remaining entries
+            N=KT6-I+1
+            DO J=1,N
+              IWO(LBI+K+1-J)=IWO(LBI+K-J)
+            END DO
+          END IF
+C*        -- Flag insertion of isotropic discrete levels
+          IWO(LBI+K-1)=750
+          K  =K+1
+          KT6=KT6+1
+        END IF
+C*
 C*      -- Check if continuum alpha emission is present
   380   IF(IT6.EQ.849) THEN
           I800=0
@@ -760,6 +843,9 @@ C* Read the EMPIRE output file to extract angular distributions
 C*    -- Skip ground state for compound elastic
       IF((IZI.EQ.   1 .AND. MT6.EQ. 91) .OR.
      &   (IZI.EQ.1001 .AND. MT6.EQ.649) .OR.
+     &   (IZI.EQ.1002 .AND. MT6.EQ.699) .OR.
+     &   (IZI.EQ.1003 .AND. MT6.EQ.749) .OR.
+     &   (IZI.EQ.2003 .AND. MT6.EQ.799) .OR.
      &   (IZI.EQ.2004 .AND. MT6.EQ.849) ) THEN
         JT4=1
        END IF
@@ -779,6 +865,34 @@ C* Process angular distributions of elastic and discrete levels in MF4
         GO TO 420
       ELSE IF(MT6.EQ.649 .AND. IMF4.GE.649) THEN
         GO TO 410
+C*
+      ELSE IF(MT6.EQ.650 .AND. IMF4.GE.699) THEN
+        LCT=-2
+        MT4=MT6
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 420
+      ELSE IF(MT6.EQ.699 .AND. IMF4.GE.699) THEN
+        GO TO 410
+C*
+      ELSE IF(MT6.EQ.700 .AND. IMF4.GE.749) THEN
+        LCT=-2
+        MT4=MT6
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 420
+      ELSE IF(MT6.EQ.749 .AND. IMF4.GE.749) THEN
+        GO TO 410
+C*
+      ELSE IF(MT6.EQ.750 .AND. IMF4.GE.799) THEN
+        LCT=-2
+        MT4=MT6
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 420
+      ELSE IF(MT6.EQ.799 .AND. IMF4.GE.799) THEN
+        GO TO 410
+C*
       ELSE IF(MT6.EQ.800 .AND. IMF4.GE.849) THEN
         LCT=-2
         MT4=MT6
@@ -864,7 +978,7 @@ C* Process double differential data
 C* Check if yields for unassigned reactions need to be printed
       NK=0
       DO I=1,NT6
-        IF(IWO(LBI-1+I).EQ.5) GO TO 600
+        IF(IWO(LBI-1+I).EQ.  5) GO TO 600
         IF(IWO(LBI-1+I).EQ.201) NK=NK+1
         IF(IWO(LBI-1+I).EQ.203) NK=NK+1
         IF(IWO(LBI-1+I).EQ.204) NK=NK+1
@@ -901,14 +1015,32 @@ C...
         GO TO 680
       ELSE IF(MT6.EQ. 91 .AND. IMF4.LT. 91) THEN
         IF(IDL.NE.MT6) GO TO 650
+C*
       ELSE IF(MT6.EQ.600 .AND. IMF4.LT.649) THEN
         IF(IDL.NE.MT6) GO TO 650
       ELSE IF(MT6.EQ.649 .AND. IMF4.LT.649) THEN
         IF(IDL.NE.MT6) GO TO 650
+C*
+      ELSE IF(MT6.EQ.650 .AND. IMF4.LT.699) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.699 .AND. IMF4.LT.699) THEN
+        IF(IDL.NE.MT6) GO TO 650
+C*
+      ELSE IF(MT6.EQ.700 .AND. IMF4.LT.749) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.749 .AND. IMF4.LT.749) THEN
+        IF(IDL.NE.MT6) GO TO 650
+C*
+      ELSE IF(MT6.EQ.750 .AND. IMF4.LT.799) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.799 .AND. IMF4.LT.799) THEN
+        IF(IDL.NE.MT6) GO TO 650
+C*
       ELSE IF(MT6.EQ.800 .AND. IMF4.LT.849) THEN
         IF(IDL.NE.MT6)GO TO 650
       ELSE IF(MT6.EQ.849 .AND. IMF4.LT.849) THEN
         IF(IDL.NE.MT6) GO TO 650
+C*
       END IF
       REWIND LIN
       CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
@@ -938,6 +1070,9 @@ C* Write discrete level ang.distr. in File-6 format
 C*    -- Skip ground state for compound elastic
       IF((IZI.EQ.   1 .AND. (MT6.GT. 50 .AND. MT6.LE. 91)) .OR.
      &   (IZI.EQ.1001 .AND. (MT6.GT.600 .AND. MT6.LE.649)) .OR.
+     &   (IZI.EQ.1002 .AND. (MT6.GT.650 .AND. MT6.LE.699)) .OR.
+     &   (IZI.EQ.1003 .AND. (MT6.GT.700 .AND. MT6.LE.749)) .OR.
+     &   (IZI.EQ.2003 .AND. (MT6.GT.750 .AND. MT6.LE.799)) .OR.
      &   (IZI.EQ.2004 .AND. (MT6.GT.800 .AND. MT6.LE.849)) ) THEN
         JT4=1
 C...
@@ -949,6 +1084,9 @@ C...  print *,'      mt6,jt4,imf4',mt6,jt4,imf4
 c...
 C*    -- Check angular distributions (if none, purely isotropic, -LCT)
       IF(MT6.EQ.649) I600=0
+      IF(MT6.EQ.699) I650=0
+      IF(MT6.EQ.749) I700=0
+      IF(MT6.EQ.799) I750=0
       IF(MT6.EQ.849) I800=0
 C*
       IF(MT6.EQ.600 .AND. IMF4.LT.649) THEN
@@ -959,6 +1097,34 @@ C*
         RWO(LA  )=1001
         RWO(LA+1)=AWH/AWN
         GO TO 660
+C*
+      ELSE IF(MT6.EQ.650 .AND. IMF4.LT.699) THEN
+        LCT=-2
+        MT4=MT6+JT4
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        RWO(LA  )=1002
+        RWO(LA+1)=AWD/AWN
+        GO TO 660
+C*
+      ELSE IF(MT6.EQ.700 .AND. IMF4.LT.749) THEN
+        LCT=-2
+        MT4=MT6+JT4
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        RWO(LA  )=1003
+        RWO(LA+1)=AWT/AWN
+        GO TO 660
+C*
+      ELSE IF(MT6.EQ.750 .AND. IMF4.LT.799) THEN
+        LCT=-2
+        MT4=MT6+JT4
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        RWO(LA  )=2003
+        RWO(LA+1)=AW3/AWN
+        GO TO 660
+C*
       ELSE IF(MT6.EQ.800 .AND. IMF4.LT.849) THEN
         LCT=-2
         MT4=MT6+JT4
@@ -1013,7 +1179,9 @@ C* Write the ENDF file-6 data for discrete levels
       END IF
       WRITE(LTT,995) BLNK
       WRITE(LER,995) BLNK
-      IF(MT6.EQ.600 .OR. MT6.EQ.800) JT6=JT6+1
+      IF(MT6.EQ.600 .OR. MT6.EQ.650 .OR.
+     &   MT6.EQ.700 .OR. MT6.EQ.750 .OR.
+     &   MT6.EQ.800) JT6=JT6+1
 c...
 C...  print *,'JT4,KT4,JT6,NT6,I800',JT4,KT4,JT6,NT6,I800
 c...
@@ -1103,16 +1271,31 @@ C...
           LVLF(1)=LVLF(1)+1
           LVMT(1)=51
           LVIZ(1)=1
-        ELSE IF(IWO(MTH-1+I).GE.601 .AND. IWO(MTH-1+I).LT.649) THEN
+        ELSE IF(IWO(MTH-1+I).GE.600 .AND. IWO(MTH-1+I).LT.649) THEN
 C* Count levels of the MT600 series, set mt and IZP
           LVLF(2)=LVLF(2)+1
           LVMT(2)=601
           LVIZ(2)=1001
-        ELSE IF(IWO(MTH-1+I).GE.801 .AND. IWO(MTH-1+I).LT.849) THEN
-C* Count levels of the MT800 series, set mt and IZP
+        ELSE IF(IWO(MTH-1+I).GE.650 .AND. IWO(MTH-1+I).LT.699) THEN
+C* Count levels of the MT650 series, set mt and IZP
           LVLF(3)=LVLF(3)+1
-          LVMT(3)=801
-          LVIZ(3)=2004
+          LVMT(3)=651
+          LVIZ(3)=1002
+        ELSE IF(IWO(MTH-1+I).GE.700 .AND. IWO(MTH-1+I).LT.749) THEN
+C* Count levels of the MT700 series, set mt and IZP
+          LVLF(4)=LVLF(4)+1
+          LVMT(4)=701
+          LVIZ(4)=1003
+        ELSE IF(IWO(MTH-1+I).GE.750 .AND. IWO(MTH-1+I).LT.799) THEN
+C* Count levels of the MT750 series, set mt and IZP
+          LVLF(5)=LVLF(5)+1
+          LVMT(5)=751
+          LVIZ(5)=2003
+        ELSE IF(IWO(MTH-1+I).GE.800 .AND. IWO(MTH-1+I).LT.849) THEN
+C* Count levels of the MT800 series, set mt and IZP
+          LVLF(6)=LVLF(6)+1
+          LVMT(6)=801
+          LVIZ(6)=2004
         END IF
       END DO
 C* Process selecte discrete level reactions
@@ -1370,8 +1553,6 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=IZA+IZI-  3-2002-2004
       ELSE IF(MT.EQ.200) THEN
         JZA=IZA+IZI-  5-2002
-
-
       ELSE IF(MT.GE.600 .AND. MT.LE.649) THEN
         JZA=IZA+IZI-1001
       ELSE IF(MT.GE.650 .AND. MT.LE.699) THEN
@@ -1416,6 +1597,18 @@ C*        --Discrete levels (z,n') cross section
         ELSE IF(JZA  .EQ. IZA+IZI-1001) THEN
 C*       --Discrete levels (z,p') cross section
            MT =600
+           IF(MEQ.GT.0) MT =0
+        ELSE IF(JZA  .EQ. IZA+IZI-1002) THEN
+C*       --Discrete levels (z,d') cross section
+           MT =650
+           IF(MEQ.GT.0) MT =0
+        ELSE IF(JZA  .EQ. IZA+IZI-1003) THEN
+C*       --Discrete levels (z,p') cross section
+           MT =700
+           IF(MEQ.GT.0) MT =0
+        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
+C*       --Discrete levels (z,He3') cross section
+           MT =750
            IF(MEQ.GT.0) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-2004) THEN
 C*        --Discrete levels (z,a') cross section
@@ -1570,6 +1763,7 @@ C-Description:
 C-D  POUT  Outgoing particle (input)
 C-D  PTST  Reaction string (input)
 C-D  IZI   Incident particle ZA designation (input)
+C-D  IZA   Outgoing particle ZA designation (output)
 C-D  MT    Assigned reaction number, meaning:
 C-D        =0 reaction is undefined
 C-D        <0 reaction was found but outgoing particle was not matched;
@@ -1959,15 +2153,15 @@ C*        -- First proton emission
      &           (MT.GE.600 .AND. MT.LE.649) ) THEN
             QQ=QQ-DBLE(BEN(2,I))*1000000
             IF(MT.EQ.103.OR.(MT.GE.600 .AND. MT.LE.649)) GO TO 100
-          ELSE IF(MT.EQ.104) THEN
+          ELSE IF(MT.EQ.104 .OR. (MT.GE.650 .AND. MT.LE.699)) THEN
 C*        -- First deuteron emission
             QQ=QQ-DBLE(BEN(4,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.105) THEN
+          ELSE IF(MT.EQ.105 .OR. (MT.GE.700 .AND. MT.LE.749)) THEN
 C*        -- First triton emission
             QQ=QQ-DBLE(BEN(5,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.106) THEN
+          ELSE IF(MT.EQ.106 .OR. (MT.GE.750 .AND. MT.LE.799)) THEN
 C*        -- First He-3 emission
             QQ=QQ-DBLE(BEN(6,I))*1000000
             GO TO 100
@@ -2215,16 +2409,19 @@ C* Outgoing protons
 C* Outgoing deuterons
         IF(MT.EQ.  5) YI=0
         IF(MT.EQ. 11 .OR. MT.EQ. 32 .OR. MT.EQ. 35 .OR.
-     &     MT.EQ.104 .OR. MT.EQ.115 .OR. MT.EQ.117) YI=1
+     &     MT.EQ.104 .OR. MT.EQ.115 .OR. MT.EQ.117 .OR.
+     &    (MT.GE.650 .AND. MT.LE.699)) YI=1
       ELSE IF(KZAP.EQ.1003) THEN
 C* Outgoing tritons
         IF(MT.EQ.  5) YI=0
         IF(MT.EQ. 33 .OR. MT.EQ. 36 .OR. MT.EQ.105 .OR.
-     &     MT.EQ.113 .OR. MT.EQ.116) YI=1
+     &     MT.EQ.113 .OR. MT.EQ.116 .OR.
+     &    (MT.GE.700 .AND. MT.LE.749)) YI=1
       ELSE IF(KZAP.EQ.2003) THEN
 C* Outgoing He-3
         IF(MT.EQ. 5) YI=0
-        IF(MT.EQ.34 .OR. MT.EQ.106) YI=1
+        IF(MT.EQ.34 .OR. MT.EQ.106 .OR.
+     &    (MT.GE.750 .AND. MT.LE.799)) YI=1
       ELSE IF(KZAP.EQ.2004) THEN
 C* Outgoing alphas
         IF(MT.EQ. 5) YI=0
@@ -2839,7 +3036,7 @@ C* Subtract light-ion cross sections from the base reactions
         ZAP=    1
         GO TO 120
       ELSE IF(REC(15:22).EQ.'protons ') THEN
-        ZAP= 1002
+        ZAP= 1001
         GO TO 120
       ELSE IF(REC(15:22).EQ.'deuteron') THEN
         ZAP= 1002
@@ -2990,6 +3187,9 @@ C* Base reaction is the one initially assigned from residual
       MEQ=0
       CALL EMTIZA(IZI,IZA,JZA,MT0,MEQ)
       IF(MT0.EQ.600) MT0=649
+      IF(MT0.EQ.650) MT0=699
+      IF(MT0.EQ.700) MT0=749
+      IF(MT0.EQ.750) MT0=799
       IF(MT0.EQ.800) MT0=849
 c...
 c...  if(ifound.eq.1) then
@@ -3183,6 +3383,9 @@ C*      -- Eliminate cross sections with less than 2 significant values
 C*      -- but not for discrete level reactions
         IF(MTH(I).GE. 50 .AND. MTH(I).LT. 91) NPT=NEN
         IF(MTH(I).GE.600 .AND. MTH(I).LT.649) NPT=NEN
+        IF(MTH(I).GE.650 .AND. MTH(I).LT.699) NPT=NEN
+        IF(MTH(I).GE.700 .AND. MTH(I).LT.749) NPT=NEN
+        IF(MTH(I).GE.750 .AND. MTH(I).LT.799) NPT=NEN
         IF(MTH(I).GE.800 .AND. MTH(I).LT.849) NPT=NEN
 C*
 C* Repack the array, removing All-zero cross section from the list
@@ -4003,17 +4206,33 @@ C*   ISPE Flag to mark that spectra other than (z,x) are given
       END DO
       XL0 =0
       XL  =0
+C*
       ELI1=0
-      ELA1=0
       ELP1=0
+      ELD1=0
+      ELT1=0
+      ELH1=0
+      ELA1=0
+C*
       QMI =0
-      QMA =0
       QMP =0
+      QMD =0
+      QMT =0
+      QMH =0
+      QMA =0
+C*
       QII =0
-      QIA =0
       QIP =0
+      QID =0
+      QIT =0
+      QIH =0
+      QIA =0
+C*
       JLI =0
       JLP =0
+      JLD =0
+      JLT =0
+      JLH =0
       JLA =0
 C*
 C* Search EMPIRE output for specific strings
@@ -4188,7 +4407,8 @@ C* Assign MT number from residual ZA (save MT into MTSV)
       IPOP=-1
 C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
       MT0=MT
-      IF(MT.EQ. 50 .OR. MT.EQ.600 .OR. MT.EQ.800) GO TO 350
+      IF(MT.EQ. 50 .OR. MT.EQ.600 .OR. MT.EQ.650 .OR.
+     &   MT.EQ.700 .OR. MT.EQ.750 .OR. MT.EQ.800) GO TO 350
 C* All other cross sections are processed in the same way
       GO TO 310
 C*
@@ -4205,6 +4425,9 @@ C* Assign MT number from residual ZA
 C*    -- no "decaying nucleus" --> no discrete levels
       IF(MT.EQ. 50) MT=  4
       IF(MT.EQ.600) MT=103
+      IF(MT.EQ.650) MT=104
+      IF(MT.EQ.700) MT=105
+      IF(MT.EQ.750) MT=106
       IF(MT.EQ.800) MT=107
       NOQV=1
       GO TO 311
@@ -4215,7 +4438,10 @@ C...
       IF(IPRG.NE.1) THEN 
         READ(REC(37:50),*) XSPG
         IF(XSPG.GT.0) THEN
-          WRITE(LTT,904) ' EMPEND ERROR - No coding for primary g.'
+          WRITE(LTT,891) ' '
+          WRITE(LTT,891) ' EMPEND WARNING - Coding may be incomple'
+     &                 //'te for primary gammas                   '
+          WRITE(LTT,902) '                      Cross section [mb]',XSPG
           IPRG=1
         END IF
       END IF
@@ -4275,7 +4501,8 @@ C*    -- Allow for isomer production without blank line delimiter
       IF(REC(13:35).EQ.'ground state population'     ) GO TO 220
       IF(REC(13:35).EQ.'isomer state population'     ) GO TO 224
       IF(REC(13:36).NE.'                        '    ) GO TO 218
-      IF(MT0.EQ.50 .OR. MT0.EQ.600 .OR. MT0.EQ.800) GO TO 351
+      IF(MT0.EQ. 50 .OR. MT0.EQ.600 .OR. MT0.EQ.650 .OR. 
+     &   MT0.EQ.700 .OR. MT0.EQ.750 .OR. MT0.EQ.800) GO TO 351
       GO TO 310
 C*
 C* Isomer production cross section - ground state
@@ -4540,6 +4767,12 @@ C* For incident neutrons allow ground state for other particles
       IF(IZI.EQ.   1 .AND. MT0.EQ. 50) JL=0
 C* For incident protons allow ground state for other particles
       IF(IZI.EQ.1001 .AND. MT0.EQ.600) JL=0
+C* For incident deuterons allow ground state for other particles
+      IF(IZI.EQ.1002 .AND. MT0.EQ.650) JL=0
+C* For incident tritons allow ground state for other particles
+      IF(IZI.EQ.1003 .AND. MT0.EQ.700) JL=0
+C* For incident helions allow ground state for other particles
+      IF(IZI.EQ.2003 .AND. MT0.EQ.750) JL=0
 C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.EQ.800) JL=0
 C* Loop reading discrete level cross sections
@@ -4621,6 +4854,21 @@ C*    -- Save the level energy of the first and last level
         QIP=QI
         QMP=QM
         JLP=1
+      ELSE IF(MT0.EQ.650) THEN
+        IF(JLD.EQ.0) ELD1=EL
+        QID=QI
+        QMD=QM
+        JLD=1
+      ELSE IF(MT0.EQ.700) THEN
+        IF(JLT.EQ.0) ELT1=EL
+        QIT=QI
+        QMT=QM
+        JLT=1
+      ELSE IF(MT0.EQ.750) THEN
+        IF(JLH.EQ.0) ELH1=EL
+        QIH=QI
+        QMH=QM
+        JLH=1
       ELSE IF(MT0.EQ.800) THEN
         IF(JLA.EQ.0) ELA1=EL
         QIA=QI
@@ -4736,7 +4984,7 @@ C...
 C* Skip continuum if its contribution is negligible
       IF(XS.LE.0) GO TO 110
 C* Add continuum to the list
-      IF(MT0.EQ. 50) THEN
+      IF     (MT0.EQ. 50) THEN
         MT= 91
         QI=QII
         QQ=QMI
@@ -4744,6 +4992,18 @@ C* Add continuum to the list
         MT=649
         QI=QIP
         QQ=QMP
+      ELSE IF(MT0.EQ.650) THEN
+        MT=699
+        QI=QID
+        QQ=QMD
+      ELSE IF(MT0.EQ.700) THEN
+        MT=749
+        QI=QIT
+        QQ=QMT
+      ELSE IF(MT0.EQ.750) THEN
+        MT=799
+        QI=QIH
+        QQ=QMH
       ELSE IF(MT0.EQ.800) THEN
         MT=849
         QI=QIA
@@ -4908,19 +5168,19 @@ C* (z,n+p+a), excluding (z,d+a)
       ELSE IF(MT.EQ.103 .OR. MT.EQ.600 .OR. MT.EQ.649) THEN
 C* (z,p)
         XS=XPOP(2)
-      ELSE IF(MT.EQ.104) THEN
+      ELSE IF(MT.EQ.104 .OR. MT.EQ.650 .OR. MT.EQ.699) THEN
 C* (z,d)
 C... XPOP(3) contains only the continuum - calculate from difference
         XS=XPOP(3)
 C...    XS=XSPROD-XPOP(2)
 C...    XS=MAX(XS,ZERO)
-      ELSE IF(MT.EQ.105) THEN
+      ELSE IF(MT.EQ.105 .OR. MT.EQ.700 .OR. MT.EQ.749) THEN
 C* (z,t)
 C... XPOP(4) contains only the continuum - calculate from difference
         XS=XPOP(4)
 C...    XS=XSPROD-XPOP(3)-XPOP(2)
 C...    XS=MAX(XS,ZERO)
-      ELSE IF(MT.EQ.106) THEN
+      ELSE IF(MT.EQ.106 .OR. MT.EQ.750 .OR. MT.EQ.799) THEN
 C* (z,h)
 C... XPOP(5) contains only the continuum - calculate from difference
         XS=XPOP(5)
@@ -5037,14 +5297,15 @@ C-D        -4  MXP limit exceeded'
 C-D        -5  MXR limit exceeded'
 C-
 C* No.of input angles MXA, fine grid angles MXZ, particles/reaction MXP
-      PARAMETER    (MXA=200, MXZ=400, MXP=200)
+      PARAMETER    (MXA=200, MXZ=400, MXP=200, MXGAM=200)
       CHARACTER*8   POUT(MXP),PTST
-      CHARACTER*40  FL92,FLPT,FLCU
+      CHARACTER*40  FL92,FLPT,FLCU,BLNK
       CHARACTER*136 REC
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
       DIMENSION     EIN(NE3),XSC(MXE,*),XSG(MXE,*)
      1             ,EIS(*),YLD(*),QQM(NXS),QQI(NXS)
+     1             ,EGAM(MXGAM),GXS(MXGAM)
      1             ,RWO(MXR),ANG(MXA),MTH(NXS)
       DIMENSION     IZAK(MXP),AWPK(MXP),ZANG(MXA),ZDST(MXA)
 C*
@@ -5054,7 +5315,8 @@ C* Maximum Legendre order
 C...  DATA LOMX/ 64 /
       DATA LOMX/ 60 /
 C* Test print filenames and logical file units
-      DATA FL92/'angdis.p92'/
+      DATA BLNK/'                                        '/
+     &     FL92/'angdis.p92'/
      &     FLCU/'angdis.cur'/
      &     FLPT/'angdis.pnt'/
       DATA L92,LCU,LPT/-30,31,32/
@@ -5128,6 +5390,15 @@ C* For discrete level reactions consider only neutrons, protons, alphas
         ELSE IF((-MT6.GE.600 .AND. -MT6.LE.649) .AND.
      1                        PTST.EQ.'protons ') THEN
           MTC=600
+        ELSE IF((-MT6.GE.650 .AND. -MT6.LE.699) .AND.
+     1                        PTST.EQ.'deuteron') THEN
+          MTC=650
+        ELSE IF((-MT6.GE.700 .AND. -MT6.LE.749) .AND.
+     1                        PTST.EQ.'tritons ') THEN
+          MTC=700
+        ELSE IF((-MT6.GE.750 .AND. -MT6.LE.799) .AND.
+     1                        PTST.EQ.'helions ') THEN
+          MTC=750
         ELSE IF((-MT6.GE.800 .AND. -MT6.LE.849) .AND.
      1                        PTST.EQ.'alphas  ') THEN
           MTC=800
@@ -5231,6 +5502,7 @@ c...      NE6N=0
       ETEF=0
       LTTE=1
       IFRST=0
+      IZAKK=IZAK(IK)
 C...
 C* Use tabular angular distributions for charged particles
 c...  IF(IZAK(IK).GE.1001) LTTE=3
@@ -5277,15 +5549,132 @@ C*      Count fission reactions
       GO TO 210
 C* Read the incident particle energy
   300 READ (REC(51:60),994) EE
+      EE=EE*1.E6
+C...
+C...  PRINT *,' ==============================='
+C...  PRINT *,' Reading energy',EE,(EE-ETH),-EE*SMALL,MT,mtc,mtx
+C...  PRINT *,' ==============================='
+C...
+      NGAM=0
       NFIS=0
       JFIS=0
-      EE=EE*1.E6
-      IF(EE.GT.E0 .AND. (EE-ETH).GT.-EE*SMALL) GO TO 210
+      IF(EE.GT.E0 .AND. (EE-ETH).GT.-EE*SMALL) GO TO 310
 C* Skip to next energy if current less or equal to previous point
   302 READ (LIN,891,END=700) REC
       IF(REC(1:10).NE.' REACTION '        ) GO TO 302
       E0=-1.
       GO TO 300
+C* Find the relevant reaction block - skip if not g or if MF=4
+  310 CONTINUE
+C...
+C...  GO TO 210
+C...  print *,'    MT,MTC,MT6,IZAKK',MT,MTC,MT6,IZAKK
+C...
+      IF(MT6  .LT.0) GO TO 210
+      IF(IZAKK.NE.0) GO TO 210
+      READ (LIN,891,END=700) REC
+      IF     (REC(1:14).EQ.'  Spectrum of '    ) THEN
+C*      -- Trap case where the right reaction data not found
+        GO TO 600
+C*    -- Identify the reaction
+      ELSE IF(REC(1:18).EQ.'  Decaying nucleus') THEN
+        READ (REC(20:29),802) JZ,CH,JA
+        IDCY= 1
+        JZA=JZ*1000+JA
+C*      -- Assign MT number from residual ZA (save MT into MTSV)
+        MEQ=0
+        CALL EMTIZA(IZI,IZA,JZA,MT,MEQ)
+        IF(MT.EQ.0) MT=10*JZA+5
+        MTX=MT
+        IF(MTX.EQ. 50) MTX= 91
+        IF(MTX.EQ.600) MTX=649
+        IF(MTX.EQ.650) MTX=699
+        IF(MTX.EQ.700) MTX=749
+        IF(MTX.EQ.750) MTX=799
+        IF(MTX.EQ.800) MTX=849
+C...
+C...    print *,'        Test MTX,MTC',MTX,MTC,' "',rec(1:60)
+C...
+C*      -- If not the right reaction search the next one
+        IF(MTX.EQ.MTC) THEN
+C...
+C...      print *,'Found MTX,MTC,IZAKK,NGAM'
+C... &                  ,MTX,MTC,IZAKK,NGAM,' "',rec(1:60)
+C...
+          GO TO 314
+        END IF
+C...
+C...    print *,'Incorrect match',MT,MTC,' - try next'
+C...
+      END IF
+C*    -- Continue searching data for this reaction
+      GO TO 310
+C*    -- Search and read the discrete gamma data
+  314 READ (LIN,891,END=700) REC
+      IF     (REC(1:14).EQ.'  Spectrum of '    ) THEN
+C*      -- Trap case where no discrete gammas given
+C...
+        print *,'WARNING - No discrete gammas for MT',MTC,' at E',EE
+C...
+        GO TO 600
+      ELSE IF(REC(1:36).EQ.'   Primary g  emission cross section') THEN
+c...
+C...    print *,'primary gammas E,MT,NGAM',ee,mt,NGAM
+c...
+        IF(NGAM.GT. 0) GO TO 314
+        DO I=1,5
+          READ (LIN,891,END=700) REC
+        END DO
+C...
+C...    sss=0
+C...
+  316   READ (LIN,891,END=700) REC
+        IF(REC(1:40).NE.BLNK) THEN
+          READ(REC,824) IDM,ELV,PAR,SPIN,GX,BRNC,EG
+          NGAM=NGAM+1
+          GXS(NGAM)=GX/1000
+          EGAM(NGAM)=-1.E6*EG
+C...
+C...      sss=sss+ gxs(ngam)
+C...      print *,'     ',ngam,gxs(ngam),sss
+C...
+          GO TO 316
+        END IF
+c*      -- Primary gammas read
+        NPRIM=NGAM
+c...
+C...    print *,'primary gammas E,MT,NGAM',ee,mt,NGAM
+C...    print *,'              ',egam(1),gxs(1)
+C...    print *,'              ',egam(NGAM),gxs(NGAM)
+c...
+      ELSE IF(REC(1:36).EQ.'   Discrete g emission cross section') THEN
+C       IF(NGAM.GT. 0) GO TO 210
+        DO I=1,5
+          READ (LIN,891,END=700) REC
+        END DO
+C...
+C...    sss=0
+C...
+  318   READ (LIN,891,END=700) REC
+        IF(REC(1:40).NE.BLNK) THEN
+          READ(REC,826) IDM,EG,GX
+          NGAM=NGAM+1
+          GXS(NGAM)=GX/1000
+          EGAM(NGAM)= 1.E6*EG
+C...
+C...      sss=sss+ gxs(ngam)
+C...      print *,'     ',ngam,gxs(ngam),sss
+C...
+          GO TO 318
+        END IF
+c...
+C...    print *,'Other discrete gammas E,MT,mtc,NGAM',ee,mt,mtc,NGAM
+c...    print *,'              ',egam(nprim+1),gxs(nprim+1)
+c...    print *,'              ',egam(NGAM),gxs(NGAM)
+c...
+        GO TO 210
+      END IF
+      GO TO 314
 C*
 C* Read the elastic angular distributions
   400 IF(MT6.NE.-2) GO TO 210
@@ -5310,8 +5699,8 @@ C* Define the general File-4 data (HEAD and TAB1 rec.) on first point
 c...
 C...  print *,'je3,ne6,xs3',je3,ne6,xs3
 c...
-      ZAP=1.
-      AWP=1.
+      ZAP=1
+      AWP=1
       NP =2
       LIP=0
       LAW=1
@@ -5585,6 +5974,9 @@ c...  print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
 c...
 C*
 C* Process correlated energy/angle distribution for this energy
+C...
+C...  PRINT *,'MT,EE,LB1',MT,EE,LB1
+C...
       L6 =LB1
       L64=L6 + 4
       NW =0
@@ -5606,17 +5998,21 @@ C...
       READ (LIN,891)
       CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MT6,ZAP,LTT,LER)
 c...
-c...      print *,'  Done rdangf outgoing E_points NEP=',NEP,' at Ein',EE
+C...      print *,'  Done rdangf MT',MT,' outgoing E_points NEP='
+C... &           ,NEP,' at Ein',EE,' NGAM',NGAM
 c...c...  if(nint(zap).eq.2004) then
-c...      if(nint(zap).eq.   1) then
-c...         print *,rec
-c...         print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
-c...c...      do j=1,nep
-c...          do j=1,10
-c...            print *,(rwo(l64+(j-1)*(nan+1)+k-1),k=1,5)
-c...          end do
-c...c...      if(ee.ge.36.e6) stop
-c...      end if
+c...C...  if(nint(zap).eq.   1) then
+C...      if(nint(zap).eq.   0) then
+C...        print *,rec
+C...        print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
+C...        kk=min(2*nan,6)
+C...C...    do j=1,nep
+C...        do j=1,10
+C...          print '(1p,6e10.3)',(rwo(l64+(j-1)*(nan+1)+k-1),k=1,kk)
+C...        end do
+C...C...    if(ee.ge.36.e6) stop
+C...C...    if(ee.ge. 1.e3) stop
+C...      end if
 c...
 C*
 C* Switch to tabular representation for anisotropic outgoing
@@ -5692,15 +6088,26 @@ C* Calculate the double-dfferential spectrum integral SPC
 C* Check the angle-integrated spectrum against the read-in spectrum
       CALL CHKSPC(LIN,LTT,LER,MT6,LHI,NEP,EE,SPC,RWO(L64),MXSC,RWO(LSC))
 c...
-c...  print *,'CHKSPC: JT6,IZAP,EE,XS3,SPC',JT6,IZAP,EE,XS3,SPC
-c... &       ,SPC*4.E-9*PI
+C...  print *,'CHKSPC: JT6,IZAP,EE,XS3,SPC,SPC4Pi',JT6,IZAP,EE,XS3,SPC
+C... &       ,SPC*4.E-9*PI
 c...
+C* Scale distribution integral by 4*Pi to get the cross section
+C* Scale by 1.E-9 to change mb/MeV into b/eV
+      SPC=SPC*4.E-9*PI
+C...  SPC=SPC*2.E-9*PI
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
         WRITE(LTT,914) JT6,IZAP,EE,XS3,SPC
         WRITE(LER,914) JT6,IZAP,EE,XS3,SPC
         IF(NE6.EQ.0) ETEF=MAX(ETEF,EE)
-        GO TO 210
+        IF(NGAM.EQ.0) THEN
+          GO TO 210
+        ELSE
+C*        --Only discrete lines present (add coding)
+          WRITE(LTT,*) 'Only discrete lines present,'
+     &                ,'Incomplete coding for MT',JT6
+          STOP 'Only discrete lines present (add coding)'
+        END IF
       END IF
 C* Normalise the distribution
       IF(LANG.EQ.1) THEN
@@ -5709,28 +6116,71 @@ C*      -- Normalise all Legendre coefficients
       ELSE IF(LANG.GT.10) THEN
 C*      -- Normalise the lead-term of the tabular distribution
         LO1=1
+c...
+c...      print *,'Norm. ',spc,(rwo(l64-1+j),j=1,5)
+c...      stop
+c...
       ELSE
         STOP 'REAMF6 ERROR - Invalid LANG'
       END IF
       L64=L6 +4
+C*    -- Sum the discrete level cross sections
+      XDSC=0
+      DO L=1,NGAM
+        XDSC=XDSC+GXS(L)
+      END DO
+C...  SPCC=SPC
+C...
+C...  SPCC=SPC*(XS3-XDSC)/XS3
+      SPCC=SPC+XDSC
+C...
+C...  PRINT *,'MT6,XS3,XDSC,SPC,SPCC',MT6,XS3,XDSC,SPC,SPCC
+C...
+C*    -- Convert from [mb/MeV/St] to [b] and normalize the continuum part
+C...
+C...  print *,'Process continuum part'
+C...
+      LL=L64
       DO I=1,NEP
         DO L=1,LO1
-          RWO(L64+L)=RWO(L64+L)/SPC
+          RWO(LL+L)=RWO(LL+L)*4.E-9*PI/SPCC
         END DO
+        LL=LL+1+LO1
+      END DO
+C*    -- Shift the continuum spectrum to make room for discrete lines
+      NN=NEP*(LO1+1)
+      L1=L64+ NEP*(LO1+1)
+      L2=L1 +NGAM*(LO1+1)
+      DO L=1,NN
+        RWO(L2-L)=RWO(L1-L)
+      END DO
+C*    -- Clear the array
+      NN=NGAM*(LO1+1)
+      DO L=1,NN
+        RWO(L64-1+L)=0
+      END DO
+C*    -- Insert the discrete lines
+      LL=L64
+      DO L=1,NGAM
+        RWO(LL  )=EGAM(L)
+        RWO(LL+1)= GXS(L)/SPCC
+C...
+C...    print *,L,RWO(LL),RWO(LL+1)
+C...
+        LL=LL+LO1+1
+      END DO
+C...
+C...        if(ngam.ge.0) print *,'                      '
+C...     &                       , NEP,NGAM,LO1,(rwo(l64+l),l=0,LO1*2)
+C...
 c...
 c...    IF(LANG.GT.10) THEN
 c...      print *,'Norm. ',spc,(rwo(l64-1+j),j=1,5)
 c...      stop
 c...    end if
 c...
-        L64=L64+LHI+2
-      END DO
-      LB1=L64
+      LB1=L64+(NEP+NGAM)*(LO1+1)
 C*
-C* Scale distribution integral by 4*Pi to get the cross section
-C* Scale by 1.E-9 to change mb/MeV into b/eV
-      SPC=SPC*4.E-9*PI
-C...  SPC=SPC*2.E-9*PI
 C* In case of gammas, replace the spectrum integral by the
 C* previously stored gamma production cross section.
 C* Test gamma yield consistency, but exclude reactions
@@ -5753,7 +6203,10 @@ C* Move first energy to lower boundary, if necessary
       RWO(L6    )=EE
 C* Put the size indices into the array
       RWO(L6 + 1)=LHI
-      RWO(L6 + 2)=NEP*(LHI+2)
+C*    -- Total length of the list (NW)
+      RWO(L6 + 2)=(NEP+NGAM)*(LHI+2)
+C*    -- Number of points describing the continuum spectrum
+C*       (number of discrete lines - if any - is implicit)
       RWO(L6 + 3)=NEP
 c...
 c...  IF(LANG.GT.10) THEN
@@ -5782,6 +6235,9 @@ C...  print *,'Inserting the incident particle threshold energy'
 C...  print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
 c...
       INSE=0
+C...
+C...  print *,'ne6,ee,eth',ne6,ee,eth
+C...
       IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
         INSE=1
         EINS=ETH
@@ -5790,9 +6246,9 @@ C*        -- Scale the gamma yield by the ratio of total
 C*           available energy and the available energy at threshold
           EAVE=-QQI(IT)+ EE*AWR/(AWR+AWI)
           EAV0=-QQI(IT)+ETH*AWR/(AWR+AWI)
-          YINS=(EAV0/EAVE)*(SPC/XS3)
+          YINS=(EAV0/EAVE)*(SPCC/XS3)
 c...
-c...      print *,'yins,noe1',yins,spc/xs3
+C...      print *,'yins,eav0,eave,spcc',yins,eav0,eave,spcc,xs3,spcc/xs3
 c...
 c...      YINS=            (SPC/XS3)
 C*        -- Check that yield is positive
@@ -5806,13 +6262,14 @@ C*        -- Check that yield is positive
       END IF
   630 IF(INSE.NE.0) THEN
         IF(IZAP.EQ.0 .AND.
-     &    (MT.EQ.91 .OR. MT.EQ.649 .OR. MT.EQ. 849)) THEN
+     &    (MT.EQ. 91 .OR. MT.EQ.649 .OR. MT.EQ. 699 .OR.
+     &     MT.EQ.749 .OR. MT.EQ.799 .OR. MT.EQ. 849)) THEN
 C*        Duplicate existing points for continuum reactions
 C*        for outgoing gammas
 c...
 c...      print *,'duplicating energy',rwo(l6),' to',EINS
 c...
-          NW =4+NEP*(LHI+2)
+          NW =4+(NEP+NGAM)*(LHI+2)
           LB1=L6+NW+NW
           IF(LB1.GT.MXR) THEN
             PRINT *,'REAMF6 ERROR - MXR limit exceeded'
@@ -5826,7 +6283,7 @@ C*          Insert the duplicate distribution
           IF(INSE.LT.0) L6 =L6+NW
           RWO(L6  )=EINS
           RWO(L6+1)=LHI
-          RWO(L6+2)=NEP*(LHI+2)
+          RWO(L6+2)=(NEP+NGAM)*(LHI+2)
           RWO(L6+3)=NEP
           IF(INSE.GT.0) L6 =L6+NW
         ELSE
@@ -5846,7 +6303,7 @@ C*            Shift the existing points forward by NSH words
 c...        
 C...        print *,'inserting Eth before energy',rwo(l6),' Eth',EINS
 c...        
-            NW =4+NEP*(LHI+2)
+            NW =4+(NEP+NGAM)*(LHI+2)
             LB1=L6+NW+NSH
 c...
 C...        print *,'rwo(first,last)',rwo(l6),rwo(l6+nw-1),l6,lb1-1,nsh
@@ -5899,6 +6356,9 @@ C*        Save the energy and the yield
         NE6=NE6+1
         EIS(NE6)=EINS
         YLD(NE6)=YINS
+C...
+C...    print *,'E,Yield',EINS,YINS
+C...
         E1=ETH
       END IF
 c...
@@ -5927,7 +6387,7 @@ c...
 C*      -- Redefine the upper energy at threshold
 C...    DELTAE=(EE*AWR/(AWR+AWI)+QQI(IT))*((AWR+AWI-AWP)/(AWR+AWI))
         IF(ZAP.EQ.0) THEN
-          YINS=(SPC/XS3)
+          YINS=(SPCC/XS3)
         ELSE
           YINS=0
         END IF
@@ -5967,7 +6427,7 @@ c...
 c...        print *,'mt,izap,ee,spc,xs3,yld'
 c... &              ,mt,izap,ee,spc,xs3,spc/xs3
 c...
-            YLD(NE6)=(SPC/XS3)
+            YLD(NE6)=(SPCC/XS3)
           ELSE
             YLD(NE6)=1
           END IF
@@ -5979,7 +6439,7 @@ C*      -- Move first energy to lower boundary, if necessary
         YLD(NE6)=(SPC/XS3)
         ZSX=0
 c...
-c..    print *,' ne6,E,izap',ne6,ee,izap,nxs
+c..     print *,' ne6,E,izap',ne6,ee,izap,nxs
 c..
         DO I=1,NXS
 c...
@@ -6186,6 +6646,9 @@ C*
   809 FORMAT(9X,8F15.0)
   821 FORMAT(4F11.0,2I11,F4.2)
   822 FORMAT(6I11,I4)
+  824 FORMAT(I12,F10.0,F5.0,F8.0,F15.0,F7.0,F11.0)
+  825 FORMAT(I12,2F15.0,)
+  826 FORMAT(I10,2F15.0,)
   891 FORMAT(A136)
   909 FORMAT(' EMPEND WARNING - MT',I4,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
@@ -7096,9 +7559,9 @@ C...  DATA DLVL/5.E2/
 C*   Increase tolerance in the version matching levels by sequence
       DATA DLVL/2.0E3/
 C*
-      DATA ZRO/0./
       DATA PTST/'        '/
 C*
+      ZRO=0
       LCT=ABS(LCT0)
       IF(LCT.GT.2) LCT=2
 C*
@@ -7107,9 +7570,15 @@ C* Find the appropriate discrete level MT number
       IF(MT6.EQ. 91 .OR.
      1   MT6.EQ.  5) MT=MAX(MT, 50)
       IF(MT6.EQ.649) MT=MAX(MT,600)
+      IF(MT6.EQ.699) MT=MAX(MT,650)
+      IF(MT6.EQ.749) MT=MAX(MT,700)
+      IF(MT6.EQ.799) MT=MAX(MT,750)
       IF(MT6.EQ.849) MT=MAX(MT,800)
       IF(IZI.EQ.   1 .AND. MT.EQ. 50) MT=MT+1
       IF(IZI.EQ.1001 .AND. MT.EQ.600) MT=MT+1
+      IF(IZI.EQ.1002 .AND. MT.EQ.650) MT=MT+1
+      IF(IZI.EQ.1003 .AND. MT.EQ.700) MT=MT+1
+      IF(IZI.EQ.2003 .AND. MT.EQ.750) MT=MT+1
       IF(IZI.EQ.2004 .AND. MT.EQ.800) MT=MT+1
 C...
 C...  print *,'MT6,IZI,mt',MT6,IZI,mt
@@ -7134,7 +7603,7 @@ c...
 C*      -- No data given, assume purely isotropic
         LI=1
         CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,  0, 0, 0)
-        CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR,LI,LCT, 0,NM)
+        CALL WRCONT(LOU,MAT,MF,MT,NS,ZRO,AWR,LI,LCT, 0,NM)
         J2=1
         GO TO 50
       END IF
@@ -7345,10 +7814,11 @@ c...      PRINT *,'IEP-1,LVL,EIN,E1,E2,EOU',IEP-1,LVL,EIN,E1,E2,EOU
 c...
           IF(IEP.LT.LVL+1 .AND. IEP.LT.NEP) GO TO 32
           DEE=ABS(EOU-E2)
+          DER=200*(DEE)/(EOU+E2)
 C*        -- Check for a strong mismatch in the calculated E_out
           IF(DEE.GT.TST .AND. NA1.GT.1) THEN
-            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
-            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
+            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU,DER
+            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU,DER
           END IF
 C*        -- Move coefficients to the output field
           CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
@@ -7569,7 +8039,7 @@ C* All discrete levels processed - nothing to write
   911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Qi/Eout'
      &      ,I3,I4,1P,E10.3E1,3E12.5E1/
      &       '                  Calculated : ',50X
-     &       , E12.5E1)
+     &       , E12.5E1,' Dif.%',0P,F6.1)
   912 FORMAT(' WRIMF4 ERROR - Illegal first particle',I8)
       END
       
@@ -7611,9 +8081,15 @@ C*
 C* Find the appropriate discrete level MT number
       IF(MT6.EQ. 91) MT=MAX(MT, 50)
       IF(MT6.EQ.649) MT=MAX(MT,600)
+      IF(MT6.EQ.699) MT=MAX(MT,650)
+      IF(MT6.EQ.749) MT=MAX(MT,700)
+      IF(MT6.EQ.799) MT=MAX(MT,750)
       IF(MT6.EQ.849) MT=MAX(MT,800)
       IF(IZI.EQ.   1 .AND. MT.EQ. 50) MT=MT+1
       IF(IZI.EQ.1001 .AND. MT.EQ.600) MT=MT+1
+      IF(IZI.EQ.1002 .AND. MT.EQ.650) MT=MT+1
+      IF(IZI.EQ.1003 .AND. MT.EQ.700) MT=MT+1
+      IF(IZI.EQ.2003 .AND. MT.EQ.750) MT=MT+1
       IF(IZI.EQ.2004 .AND. MT.EQ.800) MT=MT+1
 C...
 C...  print *,'mt6,mt,lvl,lct0',mt6,mt,lvl,lct0
@@ -7868,10 +8344,11 @@ c...      PRINT *,'IEP-1,LVL,EIN,E1,E2,EOU',IEP-1,LVL,EIN,E1,E2,EOU
 c...
           IF(IEP.LT.LVL+1 .AND. IEP.LT.NEP) GO TO 32
           DEE=ABS(EOU-E2)
+          DER=200*(DEE)/(EOU+E2)
 C*        -- Check for a strong mismatch in the calculated E_out
           IF(DEE.GT.TST .AND. NA1.GT.1) THEN
-            WRITE(LTT,911) MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
-            WRITE(LER,911) MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
+            WRITE(LTT,911)MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU,DER
+            WRITE(LER,911)MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU,DER
           END IF
 C*        -- Move coefficients to the output field
           CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
@@ -8009,7 +8486,7 @@ C* All discrete levels processed - nothing to write
   911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Qi/Eout'
      &      ,I3,I4,1P,E10.3E1,3E12.5E1/
      &       '                  Calculated : ',50X
-     &       , E12.5E1)
+     &       , E12.5E1,' Dif.%',0P,F6.1)
   912 FORMAT(' WRMF6D ERROR - Illegal first particle',I8)
       END
       
@@ -8240,9 +8717,10 @@ C*
 C-Title  : WRIMF6 Subroutine
 C-Purpose: Write energy/angle (file-6) data in ENDF-6 format
       DIMENSION    RWO(*),NBT(1),INR(1)
-      DATA ZRO/0./
 C*
 C* Write file MF6 (energy/angle distributions)
+      ZRO =0
+      EMIN=ZRO
       MF =6
       ZA =IZA
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, 0,LCT,NK, 0)
@@ -8266,7 +8744,7 @@ c...
         LAE=LL+6
         LAG=LAE+NP
         LA1=LAG+NP
-        RWO(LAE)=ELO
+        RWO(LAE)=MAX(EMIN,ELO)
         CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
      &             ,NR,NP,NBT,INR,RWO(LAE),RWO(LAG))
         LANG  =RWO(LA1   )+0.1
@@ -8275,19 +8753,25 @@ c...
         NE    =RWO(LA1+ 3)+0.1
         NBT(1)=RWO(LA1+ 4)+0.1
         INR(1)=RWO(LA1+ 5)+0.1
-        CALL WRTAB2(LOU,MAT,MF,MT,NS,0.,0.,LANG,LEP
+        CALL WRTAB2(LOU,MAT,MF,MT,NS,ZRO,ZRO,LANG,LEP
      &             ,NR,NE,NBT,INR)
         LL=LL+12+2*NP
 C* Loop over the incident particle energies
         IF(NE.GT.0) THEN
-          RWO(LL)=ELO
+          RWO(LL)=MAX(EMIN,ELO)
           DO IE=1,NE
-            ND  =0
             EIN =RWO(LL  )
             NA  =RWO(LL+1)+0.1
             NW  =RWO(LL+2)+0.1
-            NEP =RWO(LL+3)+0.1
+C*          -- NEPC counts the points in the continuum spectrum
+C*             NEP  counts all points, the difference are discrete lines
+            NEPC=RWO(LL+3)+0.1
+            NEP =NW/(NA+2)
+            ND  =NEP-NEPC
             LL  =LL+4
+c...
+C...        print *,'nd,na,nw,nep,zap,ein',nd,na,nw,nep,nint(zap),ein
+c...
             CALL WRLIST(LOU,MAT,MF,MT,NS,0.,EIN,ND,NA,NW,NEP,RWO(LL))
             LL  =LL+NW
           END DO
@@ -8386,6 +8870,12 @@ C*        -- Assign MT number from residual ZA
             MT=  4
           ELSE IF(MT.EQ.600) THEN
             MT=103
+          ELSE IF(MT.EQ.650) THEN
+            MT=104
+          ELSE IF(MT.EQ.700) THEN
+            MT=105
+          ELSE IF(MT.EQ.750) THEN
+            MT=106
           ELSE IF(MT.EQ.800) THEN
 C*          -- Differentiate between (z,a) and (z,2n+2p)
             IF(MTH(I)-JZA*10 .LT. 5) THEN
