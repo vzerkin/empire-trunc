@@ -325,7 +325,7 @@ end subroutine ROGCC
 
 
 
-real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2
+real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
    !!c   *********************************************************************
    !!c   *                                                         class:ppu *
    !!c   *                     R O _ F E R M I                               *
