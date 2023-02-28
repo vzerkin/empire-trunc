@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2023-02-21 23:31:52 +0100 (Di, 21 Feb 2023) $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2023-02-28 19:22:00 +0100 (Di, 28 Feb 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6647,8 +6647,8 @@ C*
   821 FORMAT(4F11.0,2I11,F4.2)
   822 FORMAT(6I11,I4)
   824 FORMAT(I12,F10.0,F5.0,F8.0,F15.0,F7.0,F11.0)
-  825 FORMAT(I12,2F15.0,)
-  826 FORMAT(I10,2F15.0,)
+  825 FORMAT(I12,2F15.0)
+  826 FORMAT(I10,2F15.0)
   891 FORMAT(A136)
   909 FORMAT(' EMPEND WARNING - MT',I4,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
