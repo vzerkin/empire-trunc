@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-02-28 19:22:00 +0100 (Di, 28 Feb 2023) $
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2023-03-01 15:26:02 +0100 (Mi, 01 Mär 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -170,6 +170,8 @@ C-M        NOTE: one optional extra input record.
 C-M  23/02 Process discrete gamma lines from all reactions including
 C-M        primary gammas from capture.
 C-M        Process discrete levels of (n,d), (n,t), (n,He3).
+C-M  23/03 Do not suppress small reaction cross sections when
+C-M        isomers are also given.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3360,16 +3362,23 @@ C*
       DO I=1,NXS
         NPT=0
         XMX=0
+C*      -- ZA and isomer
+        MZA=MTH(I)/10
+        MIS=MTH(I)-10*MZA
+C...
+C...    PRINT *,'MZA,MIS',MZA,MIS
+C...
         DO J=1,NEN
           XX=XSC(J,I)
-          IF(XX.GT.XSMAL) THEN
-C*          -- Count non-zero cross sections
+          IF(XX.GT.XSMAL .OR. MIS.GT.0) THEN
+C*          -- Count non-zero cross sections and isomers
             NPT=NPT+1
             XMX=MAX(XMX,XX)
           ELSE
 C*          -- If cross section returns to zero, eliminate
 C*             spurious values at lower energies
-            IF(NPT.GT.0 .AND. NPT.LT.3 .AND. XMX.LT.1.E-6) THEN
+            IF(NPT.GT.0 .AND. NPT.LT.3 .AND.
+     &         MIS.EQ.0 .AND. XMX.LT.1.E-6) THEN
               DO K=1,NPT
                 XSC(J-K,I)=0
                 NPT=0
@@ -3378,6 +3387,10 @@ C*             spurious values at lower energies
             END IF
           END IF
         END DO
+C...
+C...    WRITE(LTT,*) 'MZA,MIS,NPT',MZA,MIS,NPT
+C...    WRITE(LER,*) 'MZA,MIS,NPT',MZA,MIS,NPT
+C...
 C*      -- Eliminate cross sections with less than 2 significant values
         IF(NPT.LE.2 .AND. MTH(I).NE.9151 ) NPT=0
 C*      -- but not for discrete level reactions
@@ -8925,12 +8938,13 @@ C...      M5=0
         L=IWO(LRC-1+J)
         MM=MTH(L)
         IWO(LZA-1+J)=MM
-C...        MM=MM-10*(MM/10)
-C...        IF(MM.EQ.0) M0=1
-C...        IF(MM.EQ.5) M5=1
+C*
+        MM=MM-10*(MM/10)
+        IF(MM.EQ.0) M0=1
+        IF(MM.EQ.5) M5=1
       END DO
-C...C* If LFS=0 and LFS=5 (total) are present, remove the later
-C...      IF(M0.EQ.1 .AND. M5.EQ.1) JX1=JXS-1
+C* If LFS=0 and LFS=5 (total) are present, remove the later
+      IF(M0.EQ.1 .AND. M5.EQ.1 .AND. JXS.GT.2) JX1=JXS-1
 C*
 C* Write file MF8 data
       IF(MF.EQ.8) THEN
