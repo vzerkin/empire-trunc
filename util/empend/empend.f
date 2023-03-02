@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2023-03-01 15:26:02 +0100 (Mi, 01 Mär 2023) $
+Ccc   * $Date: 2023-03-02 20:58:04 +0100 (Do, 02 Mär 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -170,8 +170,10 @@ C-M        NOTE: one optional extra input record.
 C-M  23/02 Process discrete gamma lines from all reactions including
 C-M        primary gammas from capture.
 C-M        Process discrete levels of (n,d), (n,t), (n,He3).
-C-M  23/03 Do not suppress small reaction cross sections when
-C-M        isomers are also given.
+C-M  23/03 - Do not suppress small reaction cross sections when
+C-M          isomers are also given.
+C-M        - Reverse the order to "descending" for discrete photons
+C-M          in MF 6.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -6175,8 +6177,8 @@ C*    -- Clear the array
 C*    -- Insert the discrete lines
       LL=L64
       DO L=1,NGAM
-        RWO(LL  )=EGAM(L)
-        RWO(LL+1)= GXS(L)/SPCC
+        RWO(LL  )=EGAM(NGAM+1-L)
+        RWO(LL+1)= GXS(NGAM+1-L)/SPCC
 C...
 C...    print *,L,RWO(LL),RWO(LL+1)
 C...
