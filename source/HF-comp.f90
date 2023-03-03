@@ -1,6 +1,6 @@
-!cc   * $Rev: 5404 $
+!cc   * $Rev: 5448 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-12-05 03:21:45 +0100 (Mo, 05 Dez 2022) $
+!cc   * $Date: 2023-03-03 01:27:45 +0100 (Fr, 03 Mär 2023) $
 
 !cc   ********************************************************************
 !cc   *                                                                  *
@@ -108,6 +108,7 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
       if(Nnuc==1 .and. Nejc==0 .and. Iec==NEX(1)) primaryGamma = .true.
       eemi = excnq - ELV(il , Nnur)
       if(eemi<0)return
+      if(NPRim_g>0 .and. primaryGamma) ENPg(il) = eemi   ! Primary gamma energy
       pop1 = Xnor*SCRtl(il , Nejc)
       if(pop1>0)then
          POPlv(il , Nnur) = POPlv(il , Nnur) + pop1   ! Add contribution to discrete level population
@@ -124,7 +125,6 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
             icsl = min(INT(xcse) , NDECSE - 1)        ! Lower energy bin for the gamma transition
             icsh = icsl + 1                           ! Upper energy bin for the gamma transition
             if(NPRim_g>0 .and. primaryGamma)then      ! Primary gamma to be considered
-               ENPg(il) = eemi
                CSEpg(il) = CSEpg(il) + pop1
             else                                      ! Typical path (not a primary gamma)
                if(icsl<nspec)then
