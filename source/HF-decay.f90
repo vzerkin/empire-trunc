@@ -52,7 +52,7 @@ contains
 
         primeResidue = .false.
         if (nnuc == mt91 .or. nnuc == mt649 .or. &
-            ! nnuc == mt699 .or. nnuc == mt749 .or. nnuc == mt799 .or. &
+            nnuc == mt699 .or. nnuc == mt749 .or. nnuc == mt799 .or. &
             nnuc == mt849) primeResidue = .true.
 
         if (nnuc == 1) call printCompoudHeader(nnuc)
@@ -898,7 +898,8 @@ contains
         if (nnuc == mt699) ftmp_disc = CSDirlev(1, 4)
         if (nnuc == mt749) ftmp_disc = CSDirlev(1, 5)
         if (nnuc == mt799) ftmp_disc = CSDirlev(1, 6)
-        if ((CSPrd(nnuc) - CSPopul(nnuc) - ftmp_disc) > 0) then
+        ! if ((CSPrd(nnuc) - CSPopul(nnuc) - ftmp_disc) > 0) then
+        if (ENDf(nnuc) == 2 ) then
             CSInc(nnuc) = max(CSPrd(nnuc) - CSPopul(nnuc) - ftmp_disc, 0.d0)
             write (12, '(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6, &
                   &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc) - CSPopul(nnuc) - ftmp_disc, REAction(nnuc)
