@@ -1,4 +1,4 @@
-ccc   * $Rev: 5416 $
+ccc   * $Rev: 5450 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -3117,8 +3117,8 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 99007 FORMAT (' ',12(6X,A2,3x))
 99008 FORMAT (' ',12(4X,I2,A2,3x))
 99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F8.3)
-99011 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F8.3)
-99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F8.3)
+99011 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F8.4)
+99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F8.4)
 99016 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F8.3)
 99012 FORMAT (1X,12(F10.6,1x))
 99013 FORMAT (1X,12(F10.6,1x))
