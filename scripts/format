@@ -1,5 +1,5 @@
 #!/bin/bash
-#script to format EMPIRE II output
+#script to format EMPIRE III output
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -71,7 +71,6 @@ $file-e.endf
 $MATid
 -1
 LABLABLABL EVAL-${tDat} AUTHORAUTHORAUTHORAUTHORAUTHORAUT
-2
 849
 EOF
 
