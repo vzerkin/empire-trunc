@@ -1,4 +1,4 @@
-ccc   * $Rev: 5450 $
+ccc   * $Rev: 5453 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -3672,7 +3672,7 @@ C
       CHARACTER*120 inline
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,
-     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j, i812
+     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j, i812, inpFile
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver, emp_def
@@ -3857,8 +3857,12 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) 'Discrete levels were taken from the RIPL-3+        '
       WRITE (12,*) 'library based on the 2015 version of ENSDF.        '
       irun = 0
+C
+C----- Start of reading input parameters
+C
+      inpFile = 5
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A)',END=150,ERR=160) inline
+      READ (inpFile,'(A)',END=150,ERR=160) inline
       itmp = len_trim(inline)
       IF (inline(1:1).EQ.'*' .OR. inline(1:1).EQ.'#' .OR.
      &    inline(1:1).EQ.'!' .OR. inline(1:1).EQ.'$') GOTO 100
@@ -3870,6 +3874,22 @@ C       WRITE (*,*) 'DEFAULT TITLE'
         write( 8,*)'*** ',inline(2:itmp)
         WRITE( 8,*)'***************************************************'
         GOTO 100  ! next line
+      ENDIF
+
+      IF(inline(1:1).eq.'>') THEN
+         inpFile = 555
+         OPEN (inpFile,FILE = 'common.inp',STATUS = 'OLD') ! switch reading to the common.inp instead of standard input file *.inp
+         GOTO 100
+      ELSEIF(inline(1:1).eq.'<') THEN
+         if(inpFile .EQ. 5) then 
+            write( 8,*)'Improper use of "<" in optional input'
+            write( 8,*)'Must be used only at the endf of common.inp'
+            write( 8,*)'Disposition ignored' 
+            GOTO 100
+         endif
+         close (inpFile)
+         inpFile = 5
+         GOTO 100  ! return to the standard INPUT_SPEC
       ENDIF
 
       ios = parse_line(inline(1:itmp),name,val,i1,i2,i3,i4)
