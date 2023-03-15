@@ -1,6 +1,6 @@
-# $Rev: 5437 $
+# $Rev: 5454 $
 # $Author: mwherman $
-# $Date: 2023-02-16 03:46:18 +0100 (Do, 16 Feb 2023) $
+# $Date: 2023-03-15 20:30:29 +0100 (Mi, 15 Mär 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5341,9 +5341,9 @@ proc ::pspdfView {filename} {
         }
 }
 #############################################################################
-## Procedure:  RepWriter
+## Procedure:  RepEdit
 
-proc ::RepWriter {filename} {
+proc ::RepEdit {filename} {
         ## make empire flexible enough to handle opening files
         ## on various platforms. C.Mattoon, Nov 13 2008
         if {$::RepWriter == ""} {
@@ -5352,17 +5352,17 @@ proc ::RepWriter {filename} {
 
         if {$::tcl_platform(os)=="Darwin"} {
                 if [regexp {\.app} $::RepWriter] {
-                        exec open -a $::RepWriter Documentation/$filename &
+                        exec open -a $::RepWriter ../Documentation/$filename &
                 } else {
                         # hopefully command is recognized:
-                        exec $::RepWriter Documentation/$filename &
+                        exec $::RepWriter ../Documentation/$filename &
                 }
         } elseif {$::tcl_platform(os)=="Linux"} {
-                exec $::RepWriter Documentation/$filename &
+                exec $::RepWriter ../Documentation/$filename &
         } else {
                 # most likely windows, I don't know how to handle this yet
                 # need a windows machine to test with
-                exec $::RepWriter Documentation/$filename &
+                exec $::RepWriter ../Documentation/$filename &
         }
 }
 #############################################################################
@@ -8862,7 +8862,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     menu $site_3_0.men70 \
         -tearoff 0 
     $site_3_0.men70 add command \
-        -command { RepWriter $file.lyx } -font {} -label Report 
+        -command { RepEdit Notes.md } -font {} -label Report 
     $site_3_0.men70 add command \
         \
         -command {exec xterm -bg darkorange -title WARNINGS -e less $file.war &} \
