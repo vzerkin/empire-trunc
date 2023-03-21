@@ -46,6 +46,7 @@ cp -f $file.c4 $dir 2>>/dev/null
 cp -f $file-log.plotc4 2>>/dev/null
 cp -rf $file-tl $dir 2>>/dev/null
 cp -f $file-zvv.yml $dir 2>>/dev/null
+cp -f common.inp $dir 2>>/dev/null
 
 echo 'Copied ' $file ' input files and Tls '
 
