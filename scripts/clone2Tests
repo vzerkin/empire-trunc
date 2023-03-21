@@ -1,0 +1,68 @@
+#! /bin/sh -
+# Script to move essential input files to enable various test calculations without 
+# overwritting files in the main project directory.
+# Usage:
+# clone2Tests root
+# where:
+#    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp 
+
+
+dir="Tests"
+if [ $# = 1 ]; then
+   file=$1
+else
+   echo " Script to move essential input files to enable various test calculations without" 
+   echo " overwritting files in the main project directory."
+   echo " Usage:"
+   echo " "
+   echo " clone2Tests root [path_to_directory]"
+   echo " "
+   echo " where:"
+   echo "    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp" 
+   echo " By default target directory is 'Tests' inside the local dir. This can be overwritten with" 
+   echo " the second argument to this script."
+   echo " WARNING: script will overwrite files in the target dir if names of the files coincide. "
+fi
+
+
+
+if [ -d $dir ]; then
+   echo 'O.K. directory:'  $dir ' exists'
+   else
+   mkdir $dir              
+#   touch $dir/ho
+   echo 'Have created directory:'  $dir
+fi                          
+
+
+cp -f $file-lev.col $dir 2>>/dev/null
+cp -f $file-omp.ripl $dir 
+cp -f $file.lev $dir
+cp -f $file-omp.dir $dir  
+cp -f $file.inp $dir      
+cp -f $file-inp.fis $dir 2>>/dev/null      
+cp -f $file.xsc $dir
+cp -f $file.c4 $dir 2>>/dev/null
+cp -f $file-log.plotc4 2>>/dev/null
+cp -rf $file-tl $dir 2>>/dev/null
+cp -f $file-zvv.yml $dir 2>>/dev/null
+
+echo 'Copied ' $file ' input files and Tls '
+
+cat > $dir/Readme.md <<EOF
+<Title>
+===
+
+Purpose of the run
+===
+
+Results
+===
+
+Plots
+===
+
+EOF
+
+exit
+
