@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5424 $
+Ccc   * $Rev: 5458 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-01-13 04:52:20 +0100 (Fr, 13 Jän 2023) $
+Ccc   * $Date: 2023-03-28 04:43:20 +0200 (Di, 28 Mär 2023) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3124,7 +3124,7 @@ C
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis), recorr
       DOUBLE PRECISION csmtot,csm1
-      INTEGER icsp, ie, il, irec, j, na, nexrt, next, istart
+      INTEGER icsp, ie, il, irec, j, na, nexrt, next
 
       IF (NEX(Nnuc).LT.1) THEN
          WRITE (8,*) ' HM! THERE MUST BE SOMETHING WRONG '
@@ -3143,31 +3143,16 @@ C-----
          excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
-      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE+1.0001),1),ndecsed) 
-C     Continuum increased by one to fill the hole in MSD calculation
-C     IF(MSD.GT.0) nexrt = nexrt + 1      
+      nexrt = MIN(MAX(INT((excnq - ECUt(Nnur))/DE+1.0001),1),ndecsed) 
+C     Spectrum E(n)=(n-1)*DE => E(1)=0, E(2)=DE, E(3)=2DE,...
+C     Eres = excnq - E(n) = excnq - (n-1)*DE  excnq = (n-1)*DE  excnq/DE +1 = n 
 C-----total number of bins
       next  = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed) 
-
-C     Assuming PE calculates over discrete levels' region as well
-C     IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = MIN(next,ndecsed)
-
-      somj = CSMsd(Nejc)
-C
-C     We need statements below as long as discrete data are calculated in MSD
-C     MH: Not really, nexrt must run only over continuum
-C
-!      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 )
-!     & nexrt = next
-!      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 )
-!     & nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
       IF (nexrt.GT.0) THEN
-C
          IF( IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  
-C
 C           Distribution of the continuum neutron or proton MSD contribution -
 C           proportional to the 1p-1h (n=2) spin distribution shifted by the target
 C           target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
@@ -3240,6 +3225,7 @@ C--------used for ENDF exclusive spectra
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
                pops = CSEmsd(icsp,Nejc)
+               if(ie.eq.nexrt) pops = pops*0.5  ! the nexrt point is shared with discrete levels
                IF(pops>0) THEN
 C                 Commented on Dec 2011 by RCN, to keep integral of spectra = XS
 C                 if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
@@ -3250,10 +3236,7 @@ C                 if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
                         POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
      &                  POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
                      ENDIF
-C---------------     Correct last bin (not needed for POP as for this it is done at the end)
-C                    IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
-C    &                  = POPcse(ie,Nejc,icsp,INExc(Nnur))
-C    &                  - 0.5*CSEmsd(icsp,Nejc)
+C
 C---------------     DDX 
                      POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
 C                    equivalent to POPcseaf when only the 1st emission is anisotropic
@@ -3356,12 +3339,16 @@ C
       ENDIF
 C-----distribution of the MSD/PCROSS contribution to discrete levels
 C-----
-      csm1 = 0.d0
-      istart = nexrt + 1
-      DO ie = istart, next
-        csm1 = csm1 + CSEmsd(ie,Nejc)*DE
-      enddo
-      IF(csm1.le.1.d-6) RETURN
+         csmsdl = 0.d0
+         DO ie = nexrt, next
+           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
+         ENDDO
+C        Correction for boundaries
+         csmsdl = csmsdl-0.5*DE*CSEmsd(nexrt,Nejc)
+         csmsdl = csmsdl-0.5*DE*CSEmsd(next,Nejc)      
+         csm1 = csmsdl
+         IF(csm1.le.1.d-6) RETURN
+
 
       
       IF(Nejc.eq.NPRoject) then
@@ -3374,11 +3361,7 @@ C------  noninteger spin nuclei) using arbitrary weights (most to 2+ and very
 C------  little to 4+). Angular distributions for these levels are those
 C------  provided by TRISTAN or PCROSS at the closest bin.
 C
-         csmsdl = 0.d0
-         DO ie = istart, next
-           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-         ENDDO
-         !   csmsdl = csmsdl + 0.5*DE*(CSEmsd(istart,Nejc)+CSEmsd(next,Nejc))
+
 C
 C        Inelastic channel
 C
@@ -3386,7 +3369,7 @@ C
          DO il = 2, NLV(Nnur)
            wght(il) = 0.0
            eemi = excnq - ELV(il,Nnur)
-           IF (eemi.LT.0.0D0) CONTINUE
+           IF (eemi.LT.0.0D0) EXIT
    !  This commented part contains original weights for distributing MSD
    !  contribution over discrete levels - mostly 2+, 3- and 4+  
    !       IF (ABS(XJLv(il,Nnur) - 2.D0).LT.0.6D0 .AND. LVP(il,Nnur).EQ.1)
@@ -3448,7 +3431,7 @@ C
        csmtot = 0.d0
        DO il = 2, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) CONTINUE
+         IF (eemi.LT.0.0D0) EXIT
          csmtot = csmtot + csmsdl*wght(il)
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*wght(il)
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*wght(il)
@@ -3475,7 +3458,7 @@ C           Deleting the corresponding angular distribution
 C      Deleting the corresponding XS from the continuum
 C      as it is moved to discrete spectra
        IF(ENDF(1).GT.0) then
-          DO ie = istart, next
+          DO ie = nexrt+1, next
              CSEmsd(ie,Nejc) = 0.d0
 C            Deleting the corresponding angular distribution
              do na=1,NDAng 
@@ -3491,20 +3474,20 @@ C
        xnor = 0.d0
        DO il = 2,NLV(Nnur)           ! finding number of possible levels
          eemi = excnq - ELV(il,Nnur)
-         xnor = il
-         IF (eemi.LT.0.0D0) THEN
-            xnor = il-1
+         IF (eemi.GT.0.0D0) THEN
+            xnor = xnor + 1.0
+         else
             EXIT
          ENDIF
        ENDDO
 C
 C      Assigning angular distribution of the first continuum bin
 C      "istart" to the angular distribution of the discrete levels
-       IF(CSEmsd(istart,Nejc).LT.1.0D-10) THEN
+       IF(CSEmsd(nexrt,Nejc).LT.1.0D-10) THEN
           ddxs = 0.0D0
        ELSE
           do na=1,NDAng
-            ddxs(na) = CSEa(istart,na,Nejc)/(CSEmsd(istart,Nejc)*DE)
+            ddxs(na) = CSEa(nexrt,na,Nejc)/(CSEmsd(nexrt,Nejc)*DE)
           enddo
        ENDIF
 
