@@ -80,7 +80,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: mompar                       !! moment of inertia with respect to the symmetry axis
    real*8 :: momort                       !! moment of inertia with respect to the orthogonal to the symmetry axis
    real*8 :: seff2                        !! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
-   real*8 :: T                            !! nuclear temperature (not constant temperature)
+   real*8 :: T                            !! nuclear temperature (not constant temperature!)
    real*8 :: ratio(1:2) = 0.5             !! parity ratio
    real*8 :: eMatch = 0.0D0               !! upper energy boundary for CT  
    real*8 :: ro_u = 0.0D0                 !! level density at the low-energy side of the matching point ??? 
@@ -323,8 +323,6 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 end subroutine ROGCC
 
 
-
-
 real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
    !!c   *********************************************************************
    !!c   *                                                         class:ppu *
@@ -373,7 +371,6 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
 end function ro_fermi
 
 
-
 real*8 function j_fermi(J, seff2)
    implicit none
    !!c   *********************************************************************
@@ -395,6 +392,7 @@ real*8 function j_fermi(J, seff2)
    return
 end function j_fermi
 
+
 real*8 function ro_ct(E, Tct, eo)
    implicit none
    !!c   *********************************************************************
@@ -414,8 +412,4 @@ real*8 function ro_ct(E, Tct, eo)
 
    return
 end function ro_ct
-
-
-
-
 
