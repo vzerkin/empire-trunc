@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5458 $
+Ccc   * $Rev: 5461 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-03-28 04:43:20 +0200 (Di, 28 Mär 2023) $
+Ccc   * $Date: 2023-03-31 22:57:23 +0200 (Fr, 31 Mär 2023) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -211,7 +211,6 @@ C    &        NINT((EXCn-Q(nejcec,1)-ECUt(nnurec))/DE + 1.0001),NDEcse)
             STOP 'ERROR IN WR1 WR2 DIMENSIONS IN TRISTAN'
          ENDIF
 CCCCCC
-         REWIND (15)
          REWIND (16)
 CCCCCC
          IC1x = L1maxm/KEX3 + 1
