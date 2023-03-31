@@ -1,6 +1,6 @@
-# $Rev: 5454 $
+# $Rev: 5464 $
 # $Author: mwherman $
-# $Date: 2023-03-15 20:30:29 +0100 (Mi, 15 Mär 2023) $
+# $Date: 2023-03-31 23:11:46 +0200 (Fr, 31 Mär 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5413,20 +5413,21 @@ proc ::ViewAll {} {
 
    set suf(View:) " "
    set suf(inputs) .inp
-   set suf(warnings) .war
-   set suf(PLOTC4-log) -log.plotc4
-   set suf(X4TOC4-log) -log.x4toc4
-   set suf(EMPEND-log) -log.empend
+   set suf(coll-levels) -lev.col
    set suf(dir-omp) -omp.dir
    set suf(RIPL-omp) -omp.ripl
-   set suf(levels) .lev
-   set suf(coll-levels) -lev.col
-   set suf(EXFORs) .exf
-   set suf(C4s) .c4
    set suf(ENDFs) .endf
+   set suf(levels) .lev
+   set suf(C4s) .c4
+   set suf(Yamls) -zvv.yml
    set suf(short-outputs) .out
    set suf(full-outputs) .lst
+   set suf(EXFORs) .exf
+   set suf(PLOTC4-log) -log.plotc4
    set suf(PLOTC4-plots) .ps
+   set suf(X4TOC4-log) -log.x4toc4
+   set suf(EMPEND-log) -log.empend
+   set suf(warnings) .war
 
 
 
@@ -8035,7 +8036,7 @@ close $mulfile} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef -command {runlist $stablist $mulstname} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkred \
-        -highlightbackground #dcdcdc -text {Run list} 
+        -highlightbackground #dcdcdc -text {1. Run list} 
     vTcl:DefineAlias "$site_12_0.but76" "Button143" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but76 "$site_12_0.but76 Button $top all _vTclBalloon"
     bind $site_12_0.but76 <<SetBalloon>> {
@@ -8046,14 +8047,32 @@ close $mulfile} \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef -command {editFile common.inp} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkred \
-        -highlightbackground #dcdcdc -text {Edit common.inp} 
-    vTcl:DefineAlias "$site_12_0.but176" "Button143" vTcl:WidgetProc "Toplevel1" 1
+        -highlightbackground #dcdcdc -text {0. Edit common.inp} 
+    vTcl:DefineAlias "$site_12_0.but176" "Button146" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_12_0.but176 "$site_12_0.but176 Button $top all _vTclBalloon"
     bind $site_12_0.but176 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit common part of the list input files}
     }
-
-
+    button $site_12_0.but177 \
+        -activebackground #eccceccceccc -activeforeground red \
+        -background #efefef -command {exec xterm -e mergeDistribute} \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkred \
+        -highlightbackground #dcdcdc -text {2. Merge & Distribute} 
+    vTcl:DefineAlias "$site_12_0.but177" "Button147" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.but177 "$site_12_0.but177 Button $top all _vTclBalloon"
+    bind $site_12_0.but177 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Costruct ENDF file with all isotopes (plotting) and copy files from the elemental to respective isotopic directories}
+    }
+    button $site_12_0.but178 \
+        -activebackground #eccceccceccc -activeforeground red \
+        -background #efefef -command {exec xterm -e plotYaml} \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkred \
+        -highlightbackground #dcdcdc -text {3. Make plots} 
+    vTcl:DefineAlias "$site_12_0.but178" "Button147" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.but178 "$site_12_0.but178 Button $top all _vTclBalloon"
+    bind $site_12_0.but178 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Make Yaml guided plots. WARNING: you might want to review/edit -zvv.yml file. }
+    }
     pack $site_12_0.but77 \
         -in $site_12_0 -anchor center -expand 0 -fill x -side top 
     pack $site_12_0.ent77 \
@@ -8062,32 +8081,39 @@ close $mulfile} \
         -in $site_12_0 -anchor center -expand 0 -fill x -pady 5 -side top 
     pack $site_12_0.but79 \
         -in $site_12_0 -anchor center -expand 0 -fill x -side top 
-    pack $site_12_0.but76 \
-        -in $site_12_0 -anchor center -expand 0 -fill x -side bottom 
-
     pack $site_12_0.but176 \
         -in $site_12_0 -anchor center -expand 0 -fill x -side top
-        
+    pack $site_12_0.but76 \
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
+
+    pack $site_12_0.but177 \
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
+    pack $site_12_0.but178 \
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
+
+
     ::iwidgets::optionmenu $site_11_0.opt86 \
         -activeforeground limegreen -command ViewAll -font {Helvetica -12 } \
         -background #d9d9d9 -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {} 
     vTcl:DefineAlias "$site_11_0.opt86" "Optionmenu3" vTcl:WidgetProc "Toplevel1" 1
     $site_11_0.opt86 insert 1 {View:}
     $site_11_0.opt86 insert 2 {inputs}
-    $site_11_0.opt86 insert 3 {warnings}
-    $site_11_0.opt86 insert 4 {PLOTC4-log}
-    $site_11_0.opt86 insert 5 {X4TOC4-log}
-    $site_11_0.opt86 insert 6 {EMPEND-log}
-    $site_11_0.opt86 insert 7 {dir-omp}
-    $site_11_0.opt86 insert 8 {RIPL-omp}
-    $site_11_0.opt86 insert 9 {levels}
-    $site_11_0.opt86 insert 10 {coll-levels}
-    $site_11_0.opt86 insert 11 {EXFORs}
-    $site_11_0.opt86 insert 12 {C4s}
-    $site_11_0.opt86 insert 13 {ENDFs}
-    $site_11_0.opt86 insert 14 {short-outputs}
-    $site_11_0.opt86 insert 15 {full-outputs}
-    $site_11_0.opt86 insert 17 {PLOTC4-plots}
+    $site_11_0.opt86 insert 3 {Yamls}
+    $site_11_0.opt86 insert 4 {dir-omp}
+    $site_11_0.opt86 insert 5 {RIPL-omp}
+    $site_11_0.opt86 insert 6 {coll-levels}
+    $site_11_0.opt86 insert 7 {ENDFs}
+    $site_11_0.opt86 insert 8 {levels}
+    $site_11_0.opt86 insert 9 {C4s}
+    $site_11_0.opt86 insert 10 {short-outputs}
+    $site_11_0.opt86 insert 11 {full-outputs}
+    $site_11_0.opt86 insert 12 {EXFORs}
+    $site_11_0.opt86 insert 13 {PLOTC4-log}
+    $site_11_0.opt86 insert 14 {X4TOC4-log}
+    $site_11_0.opt86 insert 15 {EMPEND-log}
+    $site_11_0.opt86 insert 16 {PLOTC4-plots}
+    $site_11_0.opt86 insert 17 {warnings}
+
     ::iwidgets::checkbox $site_11_0.che79 \
         -background #d9d9d9 \
         -labelfont -Adobe-Helvetica-Bol-R-Normal--*-120-*-*-*-*-*-* \
@@ -8228,10 +8254,10 @@ ddlist} \
     button $site_13_0.but78 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {ArchiveList $archdir $stablist $mulstname
+        -command {exec xterm -e storeInArchive $archdir 
 adjourn .top75} \
         -cursor hand2 -font {Helvetica -12 } -foreground darkgreen \
-        -highlightbackground #dcdcdc -text {Store list results} 
+        -highlightbackground #dcdcdc -text {4. Store list results} 
     vTcl:DefineAlias "$site_13_0.but78" "Button150" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
     bind $site_13_0.but78 <<SetBalloon>> {
