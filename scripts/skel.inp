@@ -1,5 +1,5 @@
-  0.001              ;INCIDENT ENERGY (IN LAB)
-xxx.   xx.           ;TARGET  A , Z 
+  0.001              ;INCIDENT ENERGY (MeV IN LAB)
+xxx.   xx.           ;TARGET  A , Z (NEED TO BE SPECIFIED!)
   1    0             ;PROJECTILE A, Z
 2                    ;NUMBER OF NEUTRONS  TO BE EMITTED
 1                    ;NUMBER OF PROTONS   TO BE EMITTED
@@ -7,72 +7,59 @@ xxx.   xx.           ;TARGET  A , Z
 1                    ;NUMBER OF DEUTERONS TO BE EMITTED
 0                    ;NUMBER OF TRITONS   TO BE EMITTED
 0                    ;NUMBER OF He-3      TO BE EMITTED
-0  0. 0.             ; reserved
+0  0. 0.             ;reserved
 *************************************************************************************************************
-*   Optional input starts here, FREE format, lines starting with *,#,! are comments
+*   Optional input starts here, FREE format, lines starting with *,#,! are comments,
+*   @ allows to enter a title line; in options below 0 = no, 1,2,3,... = yes unless stated otherwise 
 *************************************************************************************************************
-@ TITLE: This is a default EMPIRE-3.2.3 input
-IOUT       3.                                               
-NEX      080.                           ! Number of points in the outgoing energy grid
-ENDF       0.                           ! No ENDF formatting by default (much faster runs)
-RECOIL     0.                           ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
-*KALMAN    1.                           ! Sensitivity calculation requested 
-***                                  
-* HAUSER-FESHBACH INPUT               
-*                                    
+@ Replace this text with a title 
+IOUT       3.                           ! 0 through 6 level of details in the output
+NEX      100.                           ! Number of points in the continuum energy grid
+ENDF       3.                           ! 0 - no ENDF; 1,2,3,. for ENDF formatting (number of exclusive nuclei)
+KALMAN     0.                           ! 1 - for sensitivity calculations
+RECOIL     0.                           ! 1 - for recoils' calculations
+
+**** INCIDENT CHANNEL / DIRECT ******************
+@ Refined Capote-Soukhovitskii dispersive potential
+DIRPOT   610.                           ! Incident channel OM potential (RIPL3 #)
+DIRECT     1.                           ! CC TLs for the incident channel + DWBA (uncoupled)
+*
+**** OPTICAL MODEL OUTGOING CHANNELS ***** (uncomment & modify as needed)
+*
+*
+**** COMPOUND NUCLEUS *********
+*
+WFCORR     2.                           ! Width fluctuation: 1 - HRTW original, 2 -  HRTW with Kawano nu, 3 - Moldauer, 4 - Moldauer with Kawano nu  
+ETLJ       3.                           ! ETLJ defines the maximum energy up to which WFCORR are calculated
+CNANGD     1.                           ! 1 - calculates proper (anisotropic) CN angular distributions for discrete states
+*                                       !    Requires WF correction (Default: isotropic CN angular distributions)
+*                                       !    WF corrections are automatically set off if calculated Compound elastic is lower than 1 mb.
+INTERF     0.                           ! Engelbrecht- Weidenmuller transformation: 0 - CN and direct x-sec  added incoherently (default), 1 CN and direct interference 
+*                                       ! considered by Engelbrecht- Weidenmuller transformation. Collective levels must be present and DIRECT > 0
+GSTRFN     1.                           ! 1 - 6 - Gamma ray strength function (Plujko MLO1 RIPL-2)
+MAXMUL     2.                           ! Max multipolarity of gamma transitions
+**** LEVEL DENSITIES *********
 FITLEV     0.                           ! FITLEV>0 is recommended for 1st run to compare vs NLD exp.data
-LEVDEN     0.                           ! EMPIRE NLD (EGSM RIPL-3) as default
-*LEVDEN     1.                           ! Refitted GSM model (Ignatyuk) NLD (future option)  
-*LEVDEN     2.                           ! Refitted Gilbert & Cameron NLD (future option)  
-*LEVDEN     3.                           ! RIPL-3 HFB parity dependent NLD 
-*LEVDEN     4.                           ! EMPIRE 2.18 Gilbert & Cameron NLD  
-*ATILNO    1.05   Z0   A0               ! Level density parameter of nucleus(Z0,A0) increased by 5%            
-WFCORR     1.                           ! Width fluctuation method: HRTW original
-*WFCORR     2.                           ! Width fluctuation method: HRTW with Kawano-Talou degres of freedom (nu)
-*WFCORR     3.                           ! Width fluctuation method: Moldauer original
-*WFCORR     4.                           ! Width fluctuation method: Moldauer with Kawano-Talou degres of freedom (nu)
-ETLJ       8.                           ! ETLJ defines the maximum energy up to which WFCORR are calculated 
-*CNANGD    1.                           ! Calculates proper (anisotropic) CN angular distributions foo discrete states 
-*                                       !    Requires WF correction (Default: isotropic CN angular distributions)     
-*                                       ! WF corrections are automatically set off if calculated Compound elastic is lower than 1 mb.
-*HRTW       8.                           ! Obsolete: Use WFCORR and ETLJ
-*TUNE      0.90   Z0    A0    0         ! Gamma width  of nucleus(Z0,A0) decreeased by 10%
-GSTRFN     1.                           ! Default gamma ray strength function (Plujko MLO RIPL-2)
-***                                                    
-* OPTICAL MODEL INPUT                      
+LEVDEN     0.                           ! 0 - EGSM, 1 - GSM, 2 - GC (goes to 4), 3 - HFB, 4 - GC(Ilinov), 5 - CT+EGSM (GCC)
+*ECONT      0.773 Z0   A0               ! Continum starts at 0.773 MeV for nucleus Z=73 and A=181         
+*ATILNO    1.05   Z0   A0               ! Level density parameter of nucleus(Z0,A0) increased by 5% (uncomment to activate!)
+*TUNE      0.90   Z0   A0    0          ! Gamma width  of nucleus(Z0,A0) decreeased by 10%  (uncomment to activate!)
+GSTRFN     1.                           ! Gamma ray strength function:  0 - EGLO, 1 - MLO1 (default),  2 - MLO2,  3 - MLO3, 4 - EGLO (RIPL), 5 - GFL, 6 - SLO
+*GAMPRN    1.                           ! Output n,xng cross sections. Requires ENDF=0 calculation (uncomment to activate!)
 *
-* for A <= 220
-*OMPOT   2405.       1                  ! OMP for the inverse neutron channel  - Koning & Delaroche
-*OMPOT   5405.       2                  ! OMP for the inverse proton channel   - Koning & Delaroche
-* for A > 220
-*OMPOT   2408.       1                  ! OMP for the inverse neutron channel  - Actinides
-*OMPOT   5408.       2                  ! OMP for the inverse neutron channel  - Actinides
-* Other particles                        
-*OMPOT   9600.       3                  ! OMP for the inverse alpha channel    - Avrigeanu et al
-*OMPOT   6200.       4                  ! OMP for the inverse deuteron channel - Haixia et al
-*OMPOT   7100.       5                  ! OMP for the inverse triton channel   - Becchetti & Greenless
-*OMPOT   8100.       6                  ! OMP for the inverse He-3 channel     - Becchetti & Greenless
 *
-* for A <= 220
-*DIRECT     0.                          ! Spherical optical model by default for A<=220
-* for A > 220
-*DIRECT     1.                          ! CC TLs for the incident channel + DWBA (uncoupled)  
+***** Prequilibrium models *******
 *
-*DIRECT     2.                          ! CC TLs for the incident and outgoing channel + DWBA (uncoupled)
-*DIRECT     3.                          ! DWBA calculation for all collective levels
-*DIRPOT  2408.                          ! OMP for the scattering on collective levels if DIRECT>0 (CC/DWBA)
-***                                                    
-* Prequilibrium models                     
-*                                    
-MSD        0.                           ! Quantum statistical Multi-Step-Direct model
-MSC        0.                           ! Quantum statistical Multi-Step-Compound model
-PCROSS    1.5                           ! Exciton model with default 1.5 MFP parameter  
-HMS        0.                           ! Monte Carlo Hybrid (DDHMS)preequilibrium model 
-*GTILNO    1.1    Z0    A0    1         ! Single particle LD for neutron PE emission increased by 10%          
+MSD        1.                           ! Quantum statistical Multi-Step-Direct model
+MSC        2.                           ! Quantum statistical Multi-Step-Compound model
+PCROSS     1.5                          ! 0 - no exciton model; if > 0 exciton model (here with MFP parameter times 1.5)
+HMS        0.                           ! 0 - no Monte Carlo Hybrid (DDHMS)preequilibrium model, 1 - with DDHMS
+*GTILNO    1.1    Z0    A0    1         ! Single particle LD for neutron PE emission increased by 1.1 factor (uncomment to activate!)
 *
-*GAMPRN    1.                           ! Output n,xng cross sections. Requires ENDF=0 calculation
-GO                                                  
-@ Running title may be given in any line starting with @ 
+**** FISSION *****************
+**** PFNS ********************
+GO
+@ Running title may be given in any line starting with @
 0.002
 0.005
 0.007
@@ -129,33 +116,101 @@ GO
 * replaced by the actual atomic and mass numbers). Below are some more
 * frequently used keywords (see GUI Help or manual for the full list)
 *
-* Fission inputs 
+*Some (very incomplete) excerpts from the input manual available from GUI 
+*========================================================================
+
+IOUT       1 input data and essential results (all cross sections) (default),
+           2 as IOUT=1 plus fusion spin distribution, yrast state population,γ-transition parameters, fusion barrier, inclusive spectra,
+           3 as IOUT=2 + γ and particle spectra + discrete levels’ decay + double differential cross sections (if MSD>0),
+           4 as IOUT=2 + ORION output + residual nuclei continuum population (up to spin 12),
+           5 as IOUT=2 + ORION output + transmission coefficients (up to l=12),
+           6 as IOUT=2 + ORION output + level densities (up to spin 12). Should be used to get ZVV level density plots.
+
+PRGAMM     Controls calculation of primary gammas: 
+            0 Primary gammas are not printed (default), 
+           >1 Primary gammas are printed.
+           If keyword ENDF=0 is given in the input, then primary gammas are not printed independently of the keyword PRGAMM.
+
+GAMPRN     Controls printing of gamma production cross sections (n,xng): 
+            0 - Gamma production cross sections are not printed (default)
+           >0 - Gamma production cross sections files and plots are produced.
+           
+FISSPE     Controls calculation of prompt fission neutron spectra (PFNS):
+            0 - PFNS are not calculated (default),
+            1 - PFNS are calculated using Los Alamos model, 
+            2 - PFNS are calculated using Kornilov parameterization.
+
+RANDOM     Controls randomization of input parameters that were input with uncertainty
+            0 - no random sampling is allowed (default)
+           >0 - random sampling based on normal (Gaussian) distribution with the given 1-sigma parameter uncertainty
+
+NOUT        MSC calculation output control set to VAL (default: 0)
+
+TRGLEV      Excited level of the target is set to VAL (e.g., VAL=3 for the 2nd excited state; default: 1 (ground state)).
+
+CALCTL      Controls use of calculated transmission coefficients for both projectile and ejectiles.
+             0 - Transmission coefficients calculated during the first run are stored, and reused in subsequent EMPIRE runs (default),
+            >0 - Transmission coefficients are calculated for each run even if they were calculated before and respective files exist. 
+                 This option is useful to calculate some quantities that are only used if TL are not already present (e.g. Bass fusion 
+                 barrier in HI induced reactions). NOTE: this option slows down the execution of the code in sub- sequent runs by up to 
+                 a factor of 10 (additional time is needed to calculate TLs again; reading them is much faster)
+
+EcDWBA     Automatically selects all discrete levels to be used in DWBA calculations for uncoupled collective levels. VAL parameter 
+           redefines the cut-off energy, and the parameter I1 sets the maximum spin.
+
+DEFNUC     Deformation of the target nucleus set to VAL. The threshold value to assume that the nucleus is deformed is 0.1 If you
+           want to force the assumption of sphericity for a given nucleus you can use this parameter with a value less than 0.1 this 
+           parameter also affects the deformation used in MSD calculations.
+
+ECONT      The energy at which continuum for the nucleus with Z=I1 and A=I2 starts given by VAL in MeV.
+           This parameter overwrites the continuum cut-off energy defined in the default RIPL levels file  for a given nucleus 
+           (or even the value given in the local LEVELS file). If no nucleus is given, the disposition is ignored.
+           
+
+The parameters below are the same as those above but are in a format that can be cut and paste in the input above.
+==================================================================================================================
+
+
+DIRECT     2.                          ! CC TLs for the incident and outgoing channel + DWBA (uncoupled)
+DIRECT     3.                          ! DWBA calculation for all collective levels
+* for A <= 220
+DIRECT     0.                          ! Spherical optical model by default for A<=220
+* for A > 220
+DIRECT     1.                          ! CC TLs for the incident channel + DWBA (uncoupled)
+
+*
+*
+* Fission inputs
+* ==============
 *
 FISMOD     0.                        ! Single-mode fission (default), Multimodal fission (1-2)
-*FISMOD     1.                       ! Multimodal fission (2 modes: SL and ST1)
-*FISMOD     2.                       ! Multimodal fission (3 modes: SL, ST1 and ST2)
+FISMOD     1.                        ! Multimodal fission (2 modes: SL and ST1)
+FISMOD     2.                        ! Multimodal fission (3 modes: SL, ST1 and ST2)
 FISOPT     0.                        ! Independent barriers (full damping approximation)
-*FISOPT     1.                       ! Optical model for fission (partial damping with absorption)
-*FISBAR     0.                       ! Internal EMPIRE library of fission barriers (\data)
+FISOPT     1.                        ! Optical model for fission (partial damping with absorption)
+FISBAR     0.                        ! Internal EMPIRE library of fission barriers (\data)
 FISBAR     1.                        ! RIPL empirical fission barriers
-*FISBAR     2.                       ! Parabolic approximation of HFB numerical barriers
-*FISBAR     3.                       ! RIPL-3 HFB numerical barriers
-*FISDIS     0.                       ! No fission discrete states considered above the barrier
-FISDIS     1.                        ! RIPL fission discrete states above the barrier         
+FISBAR     2.                        ! Parabolic approximation of HFB numerical barriers
+FISBAR     3.                        ! RIPL-3 HFB numerical barriers
+FISDIS     0.                        ! No fission discrete states considered above the barrier
+FISDIS     1.                        ! RIPL fission discrete states above the barrier
 FISDEN     0.                        ! EGSM level density used at saddle points
-*FISDEN     3.                       ! HFB  level density used at saddle points
-FISSHI     0.      zz  aaa           ! Fission of light projectiles  (default for A>220)
-*FISSHI    1.      zz  aaa           ! HI induced fission (high angular mom. transferred)
-*FISSHI    2.      zz  aaa           ! Fission neglected
+FISDEN     3.                        ! HFB  level density used at saddle points
+FISSHI     0.      zz  aaa           ! Fission of induced by light projectiles  (default for A>220) WARNING: replace zz and aaa with actual numbers! 
+FISSHI     1.      zz  aaa           ! HI induced fission (high angular mom. transferred) WARNING: replace zz and aaa with actual numbers!
+FISSHI     2.      zz  aaa           ! Fission blocked.  WARNING: replace zz and aaa with actual numbers!
 *
-* Parameters for optical model parameter fitting. 
-* The first value is an absolute (not a percentage) displacement from the current 
-* value of the parameter in the *-omp.dir file. The second is the absolute value 
+* Parameters for optical model parameter fitting.
+*
+* The first value is an absolute (not a percentage) displacement from the current
+* value of the parameter in the *-omp.dir file. The second is the absolute value
 * (times 100) that defines the range of parameter variation. The third parameter
 * indicate the position of the parameter in the RIPL-2 format.
 FITOMP     1.                                    !manual omp fit
-#depths
 FITOMP     2.                                    !perform automatic omp search
+FITITR     6.08                                  !increase number of iterations (default 3.05)
+FITGRD                                           !autmatic incident energy grid in omp fit
+#depths
 FITRVV     0.     500    1                       !fit real volume depth (+- 5 MeV)
 FITRVV     0.      10    2                       !fit real volume depth (+- 5 MeV)
 FITRVV     0.     200    7                       !fit real volume depth (+- 5 MeV)
@@ -165,14 +220,10 @@ FITIVV     0.      50    2                       !fit imaginary volume depth (+-
 FITISV     0.     100    1                       !fit imaginary surface depth (+- 1 MeV)
 FITISV     0.      20    2                       !fit imaginary surface depth (+- 1 MeV)
 FITISV     0.     300    7                       !fit imaginary surface depth (+- 1 MeV)
-FITITR     6.08                                  !increase number of iterations (default 3.05)
 #geometry
-FITOMP     2.                                    !perform automatic omp search
 FITRVR     0.      10    1                       !fit real volume radius (+- 0.1 fm)
 FITIVR     0.      10    1                       !fit imaginary volume radius (+- 0.1 fm)
 FITISR     0.      10    1                       !fit imaginary surface radius (+- 0.1 fm)
 FITRVD     0.      10    1                       !fit real volume diffuseness (+- 0.1 fm)
 FITIVD     0.       5    1                       !fit imaginary volume diffuseness (+- 0.05 fm)
 FITISD     0.       5    1                       !fit imaginary surface diffuseness (+- 0.05 fm)
-FITGRD                                           !autmatic incident energy grid in omp fit
-FITITR     6.08                                  !increase number of iterations (default 3.05)
