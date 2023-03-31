@@ -22,7 +22,7 @@ Version: Original code March 2001
  
    The double differential data in an ENDF file MF 6 can be
    represented in various forms, including Legendre coefficients,
-   Kalback-Mann formalism, pointwise representation, CM or Lab
+   Kalbach-Mann formalism, pointwise representation, CM or Lab
    frame of reference, etc. This may make subsequent handling of
    the files rather difficult. The purpose of SIXTAB is to convert
    MF 6 data into pointwise representation in the Lab system
