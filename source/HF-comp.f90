@@ -1,45 +1,59 @@
-!cc   * $Rev: 5448 $
+!cc   * $Rev: 5465 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2023-03-03 01:27:45 +0100 (Fr, 03 Mär 2023) $
+!cc   * $Date: 2023-04-09 02:51:49 +0200 (So, 09 Apr 2023) $
 
-!cc   ********************************************************************
-!cc   *                                                                  *
-!cc   * These routines are called after HF decay of each J-pi state      *
-!cc   * at each continuum energy. This differs HF-comp routines from     *
-!cc   * from those in the HF-decay module that are targeting whole       *
-!cc   * nuclei, rather than individual cells in the continuum.           *
-!cc   * Thus HF-decay comes on the level above HF-comp.                  *
-!cc   *                                                                  *
-!cc   ********************************************************************
+! c   ********************************************************************
+!!c   *                                                                  *
+!!c   *            H F - c o m p   m o d u l e                           *
+!!c   *                                                                  *
+!!c   *                                                                  *
+!!c   * HF decay of each J-pi state at each continuum energy.            *
+!!c   * This differs HF-comp routines from those in the HF-decay         *
+!!c   * module that are dealing with whole nuclei, rather than individual*
+!!c   * cells in the continuum.                                          *
+!!c   * Thus HF-decay comes on the level above HF-comp.                  *
+!!c   *                                                                  *
+!!c   * DECAY* subroutines perform actual HF decay of a J-pi state in    *
+!!c   * different combinations such as  continuum to contimuum,          *
+!!c   * contimuum to discrete levels and discrete to discrete levels.    *
+!!c   *                                                                  *
+!!c   * EXCLUSIVE* subroutines calculate exclusive spectra for           *
+!!c   * population of continuum  and discrete levels.                    *
+!!c   *                                                                  *
+!!c   * FIS**** subroutines are related to fission.                      *
+!!c   *                                                                  *
+!!c   * ACCUM subroutine performs normalization with the HF denominator. *
+!!c   *                                                                  *
+! c   ********************************************************************
 
 subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:mpu*
-   !cc   *                         A C C U M                                *
-   !cc   *                                                                  *
-   !cc   * Normalizes scratch arrays SCRT and SCRTL with the population     *
-   !cc   * divided by the H-F denominator and accumulates the result on the *
-   !cc   * population array POP for a given nucleus NNUR                    *
-   !cc   *                                                                  *
-   !cc   * input:Iec  - energy index of the decaying state                  *
-   !cc   *       Nnuc - index of the decaying nucleus                       *
-   !cc   *       Nnur - index of the residual nucleus                       *
-   !cc   *       Nejc - index of the ejectile (0 for gamma)                 *
-   !cc   *       Xnor - normalization factor (POP*STEP/DENHF)               *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * calls:EXCLUSIVEC                                                 *
-   !cc   *       EXCLUSIVEL                                                 *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:mpu*
+   !!c   *                         A C C U M                                *
+   !!c   *                                                                  *
+   !!c   * Normalizes scratch arrays SCRT and SCRTL with the population     *
+   !!c   * divided by the H-F denominator and accumulates the result on the *
+   !!c   * population array POP for a given nucleus NNUR                    *
+   !!c   *                                                                  *
+   !!c   * input:Iec  - energy index of the decaying state                  *
+   !!c   *       Nnuc - index of the decaying nucleus                       *
+   !!c   *       Nnur - index of the residual nucleus                       *
+   !!c   *       Nejc - index of the ejectile (0 for gamma)                 *
+   !!c   *       Xnor - normalization factor (POP*STEP/DENHF)               *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * calls:EXCLUSIVEC                                                 *
+   !!c   *       EXCLUSIVEL                                                 *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
 
    implicit none
    include 'dimension.h'
@@ -137,7 +151,7 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
                popll = popl                           !we also need popl not multiplied by 2
                if(icsl==1)popl = 2.0*popl
                !
-               !  Addition of continuum to discrete gamma to spectra
+               !  Addition of continuum-to-discrete gamma to spectra
                !
                if(popll>0)then
                   CSE(icsl , Nejc , Nnuc) = CSE(icsl , Nejc , Nnuc) + popl
@@ -176,33 +190,32 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
 end subroutine ACCUM
 
 
-
 subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:mpu*
-   !cc   *                   E X C L U S I V E F                            *
-   !cc   *                                                                  *
-   !cc   *      DOES NOTHING, CURRENTLY NOT BEING USED !!!                  *
-   !cc   *                                                                  *
-   !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
-   !cc   * model into spectra for individual reactions (exclusive) as       *
-   !cc   * requested by the ENDF format. EXCLUSIVEF is for transitions      *
-   !cc   * to continuum.                                                    *
-   !cc   *                                                                  *
-   !cc   * input:Iec  - energy index of the decaying state                  *
-   !cc   *       Nnuc - index of the decaying nucleus                       *
-   !cc   *       Popt - x-sec/MeV for the transition from the initial       *
-   !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
-   !cc   *              This cross section is directly added to the spectrum*
-   !cc   *              and Popt*DE is used to define a portion of the      *
-   !cc   *              feeding spectrum that has to be moved.              *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:mpu*
+   !!c   *                   E X C L U S I V E F                            *
+   !!c   *                                                                  *
+   !!c   *      DOES NOTHING, CURRENTLY NOT BEING USED !!!                  *
+   !!c   *                                                                  *
+   !!c   * Deconvolutes inclusive spectra calculated by the statistical     *
+   !!c   * model into spectra for individual reactions (exclusive) as       *
+   !!c   * requested by the ENDF format. EXCLUSIVEF is for transitions      *
+   !!c   * to continuum.                                                    *
+   !!c   *                                                                  *
+   !!c   * input:Iec  - energy index of the decaying state                  *
+   !!c   *       Nnuc - index of the decaying nucleus                       *
+   !!c   *       Popt - x-sec/MeV for the transition from the initial       *
+   !!c   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+   !!c   *              This cross section is directly added to the spectrum*
+   !!c   *              and Popt*DE is used to define a portion of the      *
+   !!c   *              feeding spectrum that has to be moved.              *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
    implicit none
    include 'dimension.h'
    include 'global.h'
@@ -234,7 +247,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
    xnor = Popt*DE/POPbin(Iec , Nnuc)
    do ie = 1 , NDECSE
       do iejc = 0 , NDEJC
-         if(POPcse(Iec , iejc , ie , INExc(Nnuc))>0)CSEfis(ie , iejc , Nnuc) = CSEfis(ie , iejc , Nnuc)                          &
+         if(POPcse(Iec , iejc , ie , INExc(Nnuc))>0)CSEfis(ie , iejc , Nnuc) = CSEfis(ie , iejc , Nnuc)  &
           & + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor
       enddo
    enddo
@@ -243,38 +256,38 @@ end subroutine EXCLUSIVEF
 
 
 subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:mpu*
-   !cc   *                   E X C L U S I V E C                            *
-   !cc   *                                                                  *
-   !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
-   !cc   * model into spectra for individual reactions (exclusive) as       *
-   !cc   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
-   !cc   * to continuum.                                                    *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * input:Iec  - energy index of the decaying state                  *
-   !cc   *       Ief  - energy index of the final state                     *
-   !cc   *       Nejc - index of the ejectile                               *
-   !cc   *       Nnuc - index of the decaying nucleus                       *
-   !cc   *       Nnur - index of the final nucleus                          *
-   !cc   *       Popt - x-sec/MeV for the transition from the initial       *
-   !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
-   !cc   *              This cross section is directly added to the spectrum*
-   !cc   *              and Popt*DE is used to define a portion of the      *
-   !cc   *              feeding spectrum that has to be moved.              *
-   !cc   *                                                                  *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:mpu*
+   !!c   *                   E X C L U S I V E C                            *
+   !!c   *                                                                  *
+   !!c   * Deconvolutes inclusive spectra calculated by the statistical     *
+   !!c   * model into spectra for individual reactions (exclusive) as       *
+   !!c   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
+   !!c   * to continuum.                                                    *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * input:Iec  - energy index of the decaying state                  *
+   !!c   *       Ief  - energy index of the final state                     *
+   !!c   *       Nejc - index of the ejectile                               *
+   !!c   *       Nnuc - index of the decaying nucleus                       *
+   !!c   *       Nnur - index of the final nucleus                          *
+   !!c   *       Popt - x-sec/MeV for the transition from the initial       *
+   !!c   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+   !!c   *              This cross section is directly added to the spectrum*
+   !!c   *              and Popt*DE is used to define a portion of the      *
+   !!c   *              feeding spectrum that has to be moved.              *
+   !!c   *                                                                  *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
    use empcess , ONLY:POPcsea
    implicit none
    include 'dimension.h'
@@ -365,41 +378,40 @@ subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
 end subroutine EXCLUSIVEC
 
 
-
 SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt) 
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:mpu*
-   !cc   *                   E X C L U S I V E L                            *
-   !cc   *                                                                  *
-   !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
-   !cc   * model into spectra for individual reactions (exclusive) as       *
-   !cc   * requested by the ENDF format. EXCLUSIVEL is for transitions to   *
-   !cc   * discrete levels (will store population spectra on POPcse(0,.,.,.)*
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * input:Iec  - energy index of the decaying state                  *
-   !cc   *       Ie  -  index of the spectrum bin                           *
-   !cc   *       Nejc - index of the ejectile                               *
-   !cc   *       Nnuc - index of the decaying nucleus                       *
-   !cc   *       Nnur - index of the final nucleus                          *
-   !cc   *       Il   - index of the populated discrete level               *
-   !cc   *       Popt - x-sec/MeV for the transition from the initial       *
-   !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
-   !cc   *              This cross section is directly added to the spectrum*
-   !cc   *              and Popt*DE is used to define a portion of the      *
-   !cc   *              feeding spectrum that has to be moved.              *
-   !cc   *                                                                  *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:mpu*
+   !!c   *                   E X C L U S I V E L                            *
+   !!c   *                                                                  *
+   !!c   * Deconvolutes inclusive spectra calculated by the statistical     *
+   !!c   * model into spectra for individual reactions (exclusive) as       *
+   !!c   * requested by the ENDF format. EXCLUSIVEL is for transitions to   *
+   !!c   * discrete levels (will store population spectra on POPcse(0,.,.,.)*
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * input:Iec  - energy index of the decaying state                  *
+   !!c   *       Ie  -  index of the spectrum bin                           *
+   !!c   *       Nejc - index of the ejectile                               *
+   !!c   *       Nnuc - index of the decaying nucleus                       *
+   !!c   *       Nnur - index of the final nucleus                          *
+   !!c   *       Il   - index of the populated discrete level               *
+   !!c   *       Popt - x-sec/MeV for the transition from the initial       *
+   !!c   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+   !!c   *              This cross section is directly added to the spectrum*
+   !!c   *              and Popt*DE is used to define a portion of the      *
+   !!c   *              feeding spectrum that has to be moved.              *
+   !!c   *                                                                  *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
    use empcess , ONLY:POPcsea
 
    implicit none
@@ -489,41 +501,41 @@ end subroutine EXCLUSIVEL
 
 
 subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:PPu*
-   !cc   *                         D E C A Y                                *
-   !cc   *                (function to function version)                    *
-   !cc   *                                                                  *
-   !cc   * Calculates decay of a continuum state in nucleus NNUC into       *
-   !cc   * continuum and discrete states of the residual nucleus NNUR       *
-   !cc   * through the emission of the ejectile NEJC.                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * input:NNUC - decaying nucleus index                              *
-   !cc   *       IEC  - energy index of the decaying state                  *
-   !cc   *       JC   - spin index of the decaying state                    *
-   !cc   *       IPC  - parity of the decaying state                        *
-   !cc   *       NNUR - residual nucleus index                              *
-   !cc   *       NEJC - ejectile index                                      *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:SUM - SUM of transmission coefficients over all outgoing  *
-   !cc   *              channels for the requested decay (partial sums are  *
-   !cc   *              stored in SCRT and SCRTL arrays for continuum and   *
-   !cc   *              discrete levels respectively. SUMs for all ejectiles*
-   !cc   *              combine to the total Hauser-Feshbach denominator.   *
-   !cc   *              Inverse of the latter multiplied by the population  *
-   !cc   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
-   !cc   *              SCRT and SCRTL matrices to give residual nucleus    *
-   !cc   *              population.                                         *
-   !cc   *                                                                  *
-   !cc   * calls:TLLOC                                                      *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:PPu*
+   !!c   *                         D E C A Y                                *
+   !!c   *                (function to function version)                    *
+   !!c   *                                                                  *
+   !!c   * Calculates decay of a continuum state in nucleus NNUC into       *
+   !!c   * continuum and discrete states of the residual nucleus NNUR       *
+   !!c   * through the emission of the ejectile NEJC.                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * input:NNUC - decaying nucleus index                              *
+   !!c   *       IEC  - energy index of the decaying state                  *
+   !!c   *       JC   - spin index of the decaying state                    *
+   !!c   *       IPC  - parity of the decaying state                        *
+   !!c   *       NNUR - residual nucleus index                              *
+   !!c   *       NEJC - ejectile index                                      *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:SUM - SUM of transmission coefficients over all outgoing  *
+   !!c   *              channels for the requested decay (partial sums are  *
+   !!c   *              stored in SCRT and SCRTL arrays for continuum and   *
+   !!c   *              discrete levels respectively. SUMs for all ejectiles*
+   !!c   *              combine to the total Hauser-Feshbach denominator.   *
+   !!c   *              Inverse of the latter multiplied by the population  *
+   !!c   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
+   !!c   *              SCRT and SCRTL matrices to give residual nucleus    *
+   !!c   *              population.                                         *
+   !!c   *                                                                  *
+   !!c   * calls:TLLOC                                                      *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
 
    implicit none
    include 'dimension.h'
@@ -788,510 +800,39 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
    return
 end subroutine DECAY
 
-
-subroutine DECAYD(Nnuc)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:ppu*
-   !cc   *                       D E C A Y D                                *
-   !cc   *                                                                  *
-   !cc   *  Calculates gamma decay of discrete levels according to          *
-   !cc   *  the decay scheme contained in the IBR matrix. Prints out        *
-   !cc   *  the results and updates gamma spectrum matrix CSE(.,0,NNUC)     *
-   !cc   *  Must be called after all particle emission is done.             *
-   !cc   *  NOTE: no particle emission from discrete levels is considered   *
-   !cc   *                                                                  *
-   !cc   * input:NNUC - nucleus index (position) in the table               *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   
-
-   implicit none
-   include 'dimension.h'
-   include 'global.h'
-
-   type gamma_type
-      real*8 :: Eg
-      real*8 :: gXsc
-   end type gamma_type
-   
-
-   integer, intent(in) :: Nnuc
-   real*8 :: egd , gacs , gacs_noicc , popl
-   integer :: i , icse , j , j1 , l , nejc, igamma
-   integer :: INT , NINT
-   type(gamma_type) :: discrGamma(1:250)  ! List of discrete gammas emitted in transitions between levels in Nnuc) 
-
-   discrGamma(:)%Eg = 0.0d0
-   discrGamma(:)%gXsc = 0.0d0
-   igamma = 0
-
-   nejc = 0
-   if(Nnuc==MT91)then
-      nejc = 1
-   elseif(Nnuc==MT649)then
-      nejc = 2
-   elseif(Nnuc==MT849)then
-      nejc = 3
-   elseif(Nnuc==MT699)then
-      nejc = 4
-   elseif(Nnuc==MT749)then
-      nejc = 5
-   elseif(Nnuc==MT799)then
-      nejc = 6
-   endif
-
-   if(IOUt>2)write(8 , 99005)
-   99005 format(1x , / , 1x , 27('*') , / , 1x , 'Discrete gamma transitions ' , / , 1x , 27('*'))
-
-   do i = 1 , NLV(Nnuc) - 1
-      l = NLV(Nnuc) - i + 1
-      popl = POPlv(l , Nnuc)
-      if(popl>0)then
-         if(BR(l , 1 , 2 , Nnuc)==0. .and. ISIsom(l , Nnuc)==0)then
-            !
-            !-----------Normal level without branching ratios
-            !
-            if(IOUt>2)write(8 , 99010)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
-            99010 format(1x , / , 5x , 'Level of energy  ' , f8.4 , ' MeV' , ' and spin ' , f6.1 , ' with population ' , g13.5 , &
-                  &' mb has no brenchings - g.s. transition assumed')
-            !-----------Well... let it go down to the ground state
-            !  gacs = POPlv(l,Nnuc)
-            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + popl
-            POPlv(l , Nnuc) = 0.D0
-            egd = ELV(l , Nnuc)
-            !  icse = min(INT(2.0001 + egd/DE),ndecse)
-            icse = min(INT(1.0001 + egd/DE) , NDECSE)
-            CSE(icse , 0 , Nnuc) = CSE(icse , 0 , Nnuc) + popl/DE
-            CSEt(icse , 0) = CSEt(icse , 0) + popl/DE
-                                                   ! Jan 2011
-            CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
-            if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Prime option active
-               igamma = igamma+1
-               discrGamma(igamma)%Eg = egd
-               discrGamma(igamma)%gXsc = popl
-            elseif(ENDf(Nnuc)==1)then           ! Add transition to the exclusive or inclusive gamma spectrum
-               POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + popl/DE
-            else
-               CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + popl/DE
-            endif
-         elseif(ISIsom(l , Nnuc)==1 .and. nejc>0)then
-            !
-            !-----------Isomer state in the residue after n,p, or alpha, d, t, or He3 emission
-            !-----------No gamma-decay of the isomeric state imposed
-            !-----------Add gamma cascade population to the direct population
-            !
-            POPlv(l , Nnuc) = popl + CSDirlev(l , nejc)
-            if(IOUt>2)write(8 , 99012)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , POPlv(l , Nnuc)
-            !-----------We add it to the ground state to have correct total cross section
-            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + POPlv(l , Nnuc)
-         elseif(ISIsom(l , Nnuc)==1)then
-            !
-            !-----------Isomer state in any other nucleus
-            !-----------No gamma-decay of the isomeric state imposed
-            !
-            if(IOUt>2)write(8 , 99012)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
-            !-----------We add it to the ground state to have correct total cross section
-            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + popl
-         else
-            !
-            !-----------Normal level with branching ratios
-            !
-            if(IOUt>2)write(8 , 99015)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
-            99015 format(1x/ , 5x , 'Decay of  ' , f7.4 , ' MeV  ' , f5.1 , ' level with final population ' , g13.5 , ' mb' , / , &
-                  & 5x , 'level populated ' , 5x , 'Egamma ' , 3x , 'intensity (cross sect.)')
-            do j = 1 , NDBR
-               if(BR(l , j , 2 , Nnuc)<=0.D0)cycle
-               j1 = NINT(BR(l , j , 1 , Nnuc))
-               if(j1==0)cycle
-               if(j1>=l)then
-                  write(8 , 99020)
-                  99020 format(10x , 'WARNING: error in discrete level decay data' , / , 10x ,                                   &
-                        &'WARNING: final level above the initial one' , / , 10x , 'WARNING: further decay not considered ')
-                  write(8 , '(10X,''WARNING: nucleus '',I3,''-'',A2,'' level '', I3)') INT(A(Nnuc)) , SYMb(Nnuc) , l
-                  return
-               endif
-               gacs = popl*BR(l , j , 2 , Nnuc)
-               POPlv(j1 , Nnuc) = POPlv(j1 , Nnuc) + gacs
-
-               gacs_noicc = gacs                          ! no int. conversion
-               gacs = gacs/(1.D0 + BR(l , j , 3 , Nnuc))  !    int. conversion
-
-               egd = ELV(l , Nnuc) - ELV(j1 , Nnuc)
-               !  icse = min(INT(2.0001 + egd/DE),ndecse)
-               icse = min(INT(1.0001 + egd/DE) , NDECSE)
-               if(icse==1)icse = 2  ! TEMPORARY; shift low energy gammas to the second bin
-               CSE(icse , 0 , Nnuc) = CSE(icse , 0 , Nnuc) + gacs/DE
-               CSEt(icse , 0) = CSEt(icse , 0) + gacs/DE
-               CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
-               !-------------Add transition to the exclusive gamma spectrum
-               !-------------NOTE: internal conversion taken into account
-               if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Prime option active
-                  igamma = igamma+1
-                  discrGamma(igamma)%Eg = egd
-                  discrGamma(igamma)%gXsc = gacs               
-               elseif(ENDf(Nnuc)==1)then
-                  POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + gacs/DE
-               else
-                  CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + gacs/DE
-               endif
-               if(IOUt>2)write(8 , 99025)ELV(j1 , Nnuc) , LVP(j1 , Nnuc)*XJLv(j1 , Nnuc) , egd , gacs
-               99025 format(5x , f7.4 , 2x , f5.1 , 5x , f7.4 , 5x , g13.5 , ' mb')
-
-               if(NNG_xs>0 .and. ENDf(Nnuc)<=1)then
-                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc))==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')4 , NINT(A(Nnuc)) , l , &
-                   & j1 , egd , EINl , gacs_noicc , gacs , popl
-                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 1==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')16 , NINT(A(Nnuc)) , &
-                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
-                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 2==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')17 , NINT(A(Nnuc)) , &
-                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
-                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 3==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')37 , NINT(A(Nnuc)) , &
-                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
-               endif
-            enddo  !over branching ratios
-         endif   
-      endif  !over popl>0
-   enddo  !over levels
-   if (NPRim_g > 0) call printDiscreteGammas(igamma,discrGamma(:))
-   return
-   99012 format(1x , / , 5x , 'Level of energy  ' , f8.4 , ' MeV' , ' and spin ' , f6.1 , ' with final population ' , g13.5 ,     &
-            &' mb is an isomer')
-end subroutine DECAYD
-
-
-
-subroutine printDiscreteGammas(imax, discretGamma)
-
-   implicit none
-   type gamma_type
-      real*8 :: Eg
-      real*8 :: gXsc
-   end type gamma_type
-   
-   type(gamma_type), dimension(1:250) :: discretGamma
-   type(gamma_type)  tmp
-   integer, intent(in) :: imax
-   integer :: i
-   logical :: sorted = .true.
-   real*8 :: sumGamma
-
-   ! Sort discrete gammas according to increasing energy
-   do
-     sorted = .true. 
-     do i = 1, imax
-        if(discretGamma(i)%Eg > discretGamma(i+1)%Eg) then
-           tmp = discretGamma(i)
-           discretGamma(i) = discretGamma(i+1)
-           discretGamma(i+1) = tmp
-           sorted = .false.
-        end if
-     end do
-     if(sorted) exit
-   end do
-
-   sumGamma = SUM(discretGamma(1:imax)%gXsc)
-
-   ! Print discrete gammas to *.out file for ENDF-6 formatting
-   
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
-   write(12, '(3x,"Discrete g emission cross section ",G10.5)') sumGamma
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
-   write(12, '(9x,''i'',7x,''Egam         Disc.g CS'')')
-   write(12, '('' '')')
-   do i = 2, imax+1
-      write(12, '(i10,2G15.6)') i-1, discretGamma(i)%Eg, discretGamma(i)%gXsc
-   end do 
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
-
-   return
-end subroutine printDiscreteGammas
-
-
-
-subroutine DECAYD_DIR(Nnuc , Nejc)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:ppu*
-   !cc   *                       D E C A Y D _ D I R                        *
-   !cc   *                                                                  *
-   !cc   *  Calculates gamma decay of discrete levels according to          *
-   !cc   *  the decay scheme contained in the IBR matrix. Special version   *
-   !cc   *  to process direct population of discrete levels by a neutron,   *
-   !cc   *  proton or alpha without adding gamma-transitions to spectra.    *
-   !cc   *  Must be called after the decay of the first CN bin is done.     *
-   !cc   *                                                                  *
-   !cc   * input:Nnuc - nucleus  index (position) in the table              *
-   !cc   *       Nejc - ejectile index (position) in the table              *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:none                                                      *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
-
-   implicit none
-   include 'dimension.h'
-   include 'global.h'
-
-   integer :: Nejc , Nnuc
-   intent (in) Nejc , Nnuc
-   real*8 :: gacs , popl
-   integer :: i , j , j1 , l
-   integer :: NINT
-
-   do i = 1 , NLV(Nnuc) - 1 !, gacs_noicc, egd
-      l = NLV(Nnuc) - i + 1
-      popl = CSDirlev(l , Nejc)
-      if(popl<=0.D0)cycle
-      if(BR(l , 1 , 2 , Nnuc)>0)then
-         do j = 1 , NDBR
-            j1 = NINT(BR(l , j , 1 , Nnuc))
-            if(j1==0)cycle
-            if(j1>=l)return
-            gacs = popl*BR(l , j , 2 , Nnuc)
-            CSDirlev(j1 , Nejc) = CSDirlev(j1 , Nejc) + gacs
-            !  gacs_noicc = gacs                      ! no int. conversion
-            gacs = gacs/(1.D0 + BR(l , j , 3 , Nnuc)) ! int. conversion
-            CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
-         enddo
-      else
-         !-----------Well... let it go down to the ground state
-         !  gacs = CSDirlev(l,nejc)
-         !  CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
-         !  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-         CSDirlev(1 , Nejc) = CSDirlev(1 , Nejc) + popl
-         CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
-      endif
-   enddo
-end subroutine DECAYD_DIR
-
-
-subroutine TL_GAMMA(Nnuc , Iec , Jc , Ipc)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:PPu*
-   !cc   *                         T L G A M M A                            *
-   !cc   *                                                                  *
-   !cc   * Calculates gamma decay of a continuum state in nucleus NNUC into *
-   !cc   * continuum and discrete states in the same nucleus NNUC for       *
-   !cc   * E1 transitions to be used in ECIS CN calculation                 *
-   !cc   *                                                                  *
-   !cc   * input:NNUC - decaying nucleus index                              *
-   !cc   *       IEC  - energy index of the decaying state                  *
-   !cc   *       JC   - spin index of the decaying state                    *
-   !cc   *       IPC  - parity of the decaying state                        *
-   !cc   *                                                                  *
-   !cc   * output:                                                          *
-   !cc   *       gamm_tr(nfiss_tr), nfiss_tr                                *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !
-
-   implicit none
-   include 'dimension.h'
-   include 'global.h'
-
-   integer :: Iec , Ipc , Jc , Nnuc
-   intent (in) Iec , Ipc , Jc
-   real*8 :: cee , cme , eg , etmp , ha , hscrtl , scrtneg , scrtpos , xjc , xjr
-   real*8 :: E1 , E2 , XM1
-   real :: FLOAT
-   integer :: i , ier , ineg , iodd , ipar , ipos , j , jmax , jmin , jr , lamb , lambmax , lambmin , lhighest , lmax , lmin
-   integer :: IABS , MAX0 , MIN0
-   real*8 , dimension(10) :: xle , xlm
-
-   !----MAXmult - maximal gamma-ray multipolarity
-   !  maximal value (.LT.10) of gamma-ray multipolarity (L) in
-   !  calculations of gamma-transitions both between states in
-   !  continuum and from continuum states to discrete levels.
-   !  A default value of 'MAXmult' is set to 2 in 'input.f'
-   !  but can be adjusted in the input.
-   !
-   !  The radiative strength functions of higher multipole orders
-   !  (f_EL, f_ML) are calculated using the relationships between
-   !  single-particle radiative strength functions in the Weisskopf form.
-   !
-   !    Electric transitions:
-   !    f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,
-   !    cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)
-   !    xle(i) = f_Ei
-   !
-   !    Magnetic transitions:
-   !    f_M(L+1)/f_E(L+1) = cme,
-   !    cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)
-   !    xlm(i) = f_Mi
-   !
-   !
-   xle = 0.D0
-   xlm = 0.D0
-   if(MAXmult>2)then
-      ha = A(Nnuc)**0.666666666666D0
-      cee = 3.7D-5*ha
-      cme = 0.307D0/ha
-   endif
-
-   jmin = 1
-   !p jmin = MAX0(1, Jc - MAXmult)
-   jmax = MIN0(NLW , Jc + MAXmult)
-
-   xjc = FLOAT(Jc) + HIS(Nnuc)
-   !-----IPOS is a parity-index of final states reached by gamma
-   !-----transitions which do not change parity (E2 and M1)
-   !-----INEG is a parity-index of final states reached by gamma
-   !-----transitions which do change parity (E1)
-   if(Iec<1)return
-
-   if(Ipc>0)then
-      ipos = 1
-      ineg = 2
-   else
-      ipos = 2
-      ineg = 1
-   endif
-   !-----
-   !-----decay to the continuum
-   !-----
-   do ier = Iec - 1 , 1 , -1 !-----do loop over c.n. energies (loops over spins and parities expanded
-      etmp = EX(ier , Nnuc)
-      eg = EX(Iec , Nnuc) - etmp
-      xle(1) = E1(Nnuc , eg , TNUc(ier , Nnuc) , etmp)*TUNe(0 , Nnuc)
-      xlm(1) = XM1(eg)*TUNe(0 , Nnuc)
-      xle(2) = E2(eg)*TUNe(0 , Nnuc)
-      xlm(2) = xle(2)*cme
-      if(MAXmult>2)then
-         do i = 3 , MAXmult
-            xle(i) = xle(i - 1)*eg**2*cee*((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
-            xlm(i) = xle(i)*cme
-         enddo
-      endif
-
-      lhighest = 0
-      do jr = 1 , jmax
-         xjr = FLOAT(jr) + HIS(Nnuc)
-         lambmin = MAX0(1 , IABS(Jc - jr))
-         lambmax = int(xjc + xjr + 0.001)
-         lambmax = MIN0(lambmax , MAXmult)
-         if(lambmin<=lambmax)then
-            NGAmm_tr = max(lambmax , NGAmm_tr)
-            scrtpos = 0.0
-            scrtneg = 0.0
-            do lamb = lambmin , lambmax
-               if(lamb/2*2==lamb)then
-                  scrtpos = scrtpos + xle(lamb)
-                  scrtneg = scrtneg + xlm(lamb)
-               else
-                  scrtpos = scrtpos + xlm(lamb)
-                  scrtneg = scrtneg + xle(lamb)
-               endif
-            enddo
-            GAMm_tr(lamb) = GAMm_tr(lamb) + scrtpos*RO(ier , jr , ipos , Nnuc) + scrtneg*RO(ier , jr , ineg , Nnuc)
-
-         endif
-      enddo
-   enddo
-   !-----do loop over c.n. energies ***done***
-   !-----decay to the continuum ----** done***-----------------------
-   !  write(*,*) ' CONTINUUM Lmax=',ngamm_tr
-   !  do lamb=1,MAXMULT
-   !    write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
-   !  enddo
-   !-----
-   !-----DECAY TO DISCRETE LEVELS
-   !-----
-   !-----do loop over discrete levels -----------------------------------
-   do i = 1 , NLV(Nnuc)
-      lmin = INT(ABS(xjc - XJLv(i , Nnuc)) + 0.001)
-      lmax = INT(xjc + XJLv(i , Nnuc) + 0.001)
-      lambmin = MAX0(1 , lmin)
-      lambmax = MIN0(lmax , MAXmult)
-      if(lambmin<=lambmax)then
-         NGAmm_tr = max(lambmax , NGAmm_tr)
-         eg = EX(Iec , Nnuc) - ELV(i , Nnuc)
-         ipar = (1 + LVP(i , Nnuc)*Ipc)/2
-         iodd = 1 - ipar
-         xle(1) = E1(Nnuc , eg , TNUc(1 , Nnuc) , UEXcit(1 , Nnuc))*TUNe(0 , Nnuc)
-         xlm(1) = XM1(eg)*TUNe(0 , Nnuc)
-         xle(2) = E2(eg)*TUNe(0 , Nnuc)
-         if(lambmax>2)then
-            xlm(2) = xle(2)*cme
-            do j = 3 , lambmax
-               xle(j) = xle(j - 1)*eg**2*cee*((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
-               xlm(j) = xle(j)*cme
-            enddo
-         endif
-         hscrtl = 0.0D0
-         do lamb = lambmin , lambmax
-            if(lamb/2*2==lamb)then
-               hscrtl = hscrtl + xle(lamb)*ipar + xlm(lamb)*iodd
-            else
-               hscrtl = hscrtl + xlm(lamb)*ipar + xle(lamb)*iodd
-            endif
-            GAMm_tr(lamb) = GAMm_tr(lamb) + hscrtl
-         enddo
-      endif
-   enddo
-   !  write(*,*) ' DISCRETE  Lmax=',ngamm_tr,' Jcn=', jc,' pi=',ipc
-   !  do lamb=1,MAXMULT
-   !    write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
-   !  enddo
-   !
-   !-----do loop over discrete levels --------- done --------------------
-   return
-end subroutine TL_GAMMA
-
-
 subroutine DECAYG(Nnuc , Iec , Jc , Ipc , Sum)
    !
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:PPu*
-   !cc   *                         D E C A Y G                              *
-   !cc   *                (function to function version)                    *
-   !cc   *                                                                  *
-   !cc   * Calculates gamma decay of a continuum state in nucleus NNUC into *
-   !cc   * continuum and discrete states in the same nucleus NNUC           *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * input:NNUC - decaying nucleus index                              *
-   !cc   *       IEC  - energy index of the decaying state                  *
-   !cc   *       JC   - spin index of the decaying state                    *
-   !cc   *       IPC  - parity of the decaying state                        *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:SUM - SUM of transmission coefficients over all outgoing  *
-   !cc   *              channels for the requested decay (partial sums are  *
-   !cc   *              stored in SCRT and SCRTL arrays for continuum and   *
-   !cc   *              discrete levels respectively. SUMs for all ejectiles*
-   !cc   *              combine to the total Hauser-Feshbach denominator.   *
-   !cc   *              Inverse of the latter multiplied by the population  *
-   !cc   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
-   !cc   *              SCRT and SCRTL matrices to give residual nucleus    *
-   !cc   *              population.                                         *
-   !cc   *                                                                  *
-   !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:PPu*
+   !!c   *                         D E C A Y G                              *
+   !!c   *                (function to function version)                    *
+   !!c   *                                                                  *
+   !!c   * Calculates gamma decay of a continuum state in nucleus NNUC into *
+   !!c   * continuum and discrete states in the same nucleus NNUC           *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * input:NNUC - decaying nucleus index                              *
+   !!c   *       IEC  - energy index of the decaying state                  *
+   !!c   *       JC   - spin index of the decaying state                    *
+   !!c   *       IPC  - parity of the decaying state                        *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:SUM - SUM of transmission coefficients over all outgoing  *
+   !!c   *              channels for the requested decay (partial sums are  *
+   !!c   *              stored in SCRT and SCRTL arrays for continuum and   *
+   !!c   *              discrete levels respectively. SUMs for all ejectiles*
+   !!c   *              combine to the total Hauser-Feshbach denominator.   *
+   !!c   *              Inverse of the latter multiplied by the population  *
+   !!c   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
+   !!c   *              SCRT and SCRTL matrices to give residual nucleus    *
+   !!c   *              population.                                         *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
 
    implicit none
    include 'dimension.h'
@@ -1462,33 +1003,508 @@ subroutine DECAYG(Nnuc , Iec , Jc , Ipc , Sum)
 end subroutine DECAYG
 
 
+subroutine DECAYD(Nnuc)
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:ppu*
+   !!c   *                       D E C A Y D                                *
+   !!c   *                                                                  *
+   !!c   *  Calculates gamma decay of discrete levels according to          *
+   !!c   *  the decay scheme contained in the IBR matrix. Prints out        *
+   !!c   *  the results and updates gamma spectrum matrix CSE(.,0,NNUC)     *
+   !!c   *  Must be called after all particle emission is done.             *
+   !!c   *  NOTE: no particle emission from discrete levels is considered   *
+   !!c   *                                                                  *
+   !!c   * input:NNUC - nucleus index (position) in the table               *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   
+
+   implicit none
+   include 'dimension.h'
+   include 'global.h'
+
+   type gamma_type
+      sequence
+      real*8 :: Eg
+      real*8 :: gXsc
+   end type gamma_type
+   
+
+   integer, intent(in) :: Nnuc
+   real*8 :: egd , gacs , gacs_noicc , popl
+   integer :: i , icse , j , j1 , l , nejc, igamma
+   integer :: INT , NINT
+   type(gamma_type) :: discrGamma(1:250)  ! List of discrete gammas emitted in transitions between levels in Nnuc) 
+
+   discrGamma(:)%Eg = 0.0d0
+   discrGamma(:)%gXsc = 0.0d0
+   igamma = 0
+
+   nejc = 0
+   if(Nnuc==MT91)then
+      nejc = 1
+   elseif(Nnuc==MT649)then
+      nejc = 2
+   elseif(Nnuc==MT849)then
+      nejc = 3
+   elseif(Nnuc==MT699)then
+      nejc = 4
+   elseif(Nnuc==MT749)then
+      nejc = 5
+   elseif(Nnuc==MT799)then
+      nejc = 6
+   endif
+
+
+
+   if(IOUt>2)write(8 , 99005)
+   99005 format(1x , / , 1x , 27('*') , / , 1x , 'Discrete gamma transitions ' , / , 1x , 27('*'))
+
+   do i = 1 , NLV(Nnuc) - 1
+      l = NLV(Nnuc) - i + 1
+      popl = POPlv(l , Nnuc)
+      if(popl>0)then
+         if(BR(l , 1 , 2 , Nnuc)==0. .and. ISIsom(l , Nnuc)==0)then
+            !
+            !-----------Normal level without branching ratios
+            !
+            if(IOUt>2)write(8 , 99010)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
+            99010 format(1x , / , 5x , 'Level of energy  ' , f8.4 , ' MeV' , ' and spin ' , f6.1 , ' with population ' , g13.5 , &
+                  &' mb has no brenchings - g.s. transition assumed')
+            !-----------Well... let it go down to the ground state
+            !  gacs = POPlv(l,Nnuc)
+            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + popl
+            POPlv(l , Nnuc) = 0.D0
+            egd = ELV(l , Nnuc)
+            !  icse = min(INT(2.0001 + egd/DE),ndecse)
+            icse = min(INT(1.0001 + egd/DE) , NDECSE)
+            CSE(icse , 0 , Nnuc) = CSE(icse , 0 , Nnuc) + popl/DE
+            CSEt(icse , 0) = CSEt(icse , 0) + popl/DE
+                                                   ! Jan 2011
+            CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
+            if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Primary option active
+               igamma = igamma+1
+               discrGamma(igamma)%Eg = egd
+               discrGamma(igamma)%gXsc = popl
+            elseif(ENDf(Nnuc)==1)then           ! Add transition to the exclusive gamma spectrum
+               POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + popl/DE
+            else
+               CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + popl/DE ! Add transition to the inclusive gamma spectrum
+            endif
+         elseif(ISIsom(l , Nnuc)==1 .and. primeResidue) then ! HERE
+            !
+            !-----------Isomer state in the residue after n,p, alpha, d, t, or He3 emission
+            !-----------No gamma-decay of the isomeric state imposed
+            !-----------Add gamma cascade population to the direct population
+            !
+            POPlv(l , Nnuc) = popl + CSDirlev(l , nejc)
+            if(IOUt>2)write(8 , 99012)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , POPlv(l , Nnuc)
+            !-----------We add it to the ground state to have correct total cross section
+            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + POPlv(l , Nnuc)
+         elseif(ISIsom(l , Nnuc)==1)then
+            !
+            !-----------Isomer state in any other nucleus
+            !-----------No gamma-decay of the isomeric state imposed
+            !
+            if(IOUt>2)write(8 , 99012)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
+            !-----------We add it to the ground state to have correct total cross section
+            POPlv(1 , Nnuc) = POPlv(1 , Nnuc) + popl
+         else
+            !
+            !-----------Normal level with branching ratios
+            !
+            if(IOUt>2)write(8 , 99015)ELV(l , Nnuc) , LVP(l , Nnuc)*XJLv(l , Nnuc) , popl
+            99015 format(1x/ , 5x , 'Decay of  ' , f7.4 , ' MeV  ' , f5.1 , ' level with final population ' , g13.5 , ' mb' , / , &
+                  & 5x , 'level populated ' , 5x , 'Egamma ' , 3x , 'intensity (cross sect.)')
+            do j = 1 , NDBR
+               if(BR(l , j , 2 , Nnuc)<=0.D0)cycle
+               j1 = NINT(BR(l , j , 1 , Nnuc))
+               if(j1==0)cycle
+               if(j1>=l)then
+                  write(8 , 99020)
+                  99020 format(10x , 'WARNING: error in discrete level decay data' , / , 10x ,                                   &
+                        &'WARNING: final level above the initial one' , / , 10x , 'WARNING: further decay not considered ')
+                  write(8 , '(10X,''WARNING: nucleus '',I3,''-'',A2,'' level '', I3)') INT(A(Nnuc)) , SYMb(Nnuc) , l
+                  return
+               endif
+               gacs = popl*BR(l , j , 2 , Nnuc)
+               POPlv(j1 , Nnuc) = POPlv(j1 , Nnuc) + gacs
+
+               gacs_noicc = gacs                          ! no int. conversion
+               gacs = gacs/(1.D0 + BR(l , j , 3 , Nnuc))  !    int. conversion
+
+               egd = ELV(l , Nnuc) - ELV(j1 , Nnuc)
+               !  icse = min(INT(2.0001 + egd/DE),ndecse)
+               icse = min(INT(1.0001 + egd/DE) , NDECSE)
+               if(icse==1)icse = 2  ! TEMPORARY; shift low energy gammas to the second bin
+               CSE(icse , 0 , Nnuc) = CSE(icse , 0 , Nnuc) + gacs/DE
+               CSEt(icse , 0) = CSEt(icse , 0) + gacs/DE
+               CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
+               !-------------Add transition to the exclusive gamma spectrum
+               !-------------NOTE: internal conversion taken into account
+               if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Prime option active
+                  igamma = igamma+1
+                  discrGamma(igamma)%Eg = egd
+                  discrGamma(igamma)%gXsc = gacs               
+               elseif(ENDf(Nnuc)==1)then
+                  POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + gacs/DE
+               else
+                  CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + gacs/DE
+               endif
+               if(IOUt>2)write(8 , 99025)ELV(j1 , Nnuc) , LVP(j1 , Nnuc)*XJLv(j1 , Nnuc) , egd , gacs
+               99025 format(5x , f7.4 , 2x , f5.1 , 5x , f7.4 , 5x , g13.5 , ' mb')
+
+               if(NNG_xs>0 .and. ENDf(Nnuc)<=1)then
+                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc))==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')4 , NINT(A(Nnuc)) , l , &
+                   & j1 , egd , EINl , gacs_noicc , gacs , popl
+                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 1==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')16 , NINT(A(Nnuc)) , &
+                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
+                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 2==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')17 , NINT(A(Nnuc)) , &
+                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
+                  if(Z(Nnuc)==Z(0) .and. NINT(A(Nnuc)) + 3==NINT(A(0)))write(104 , '(1X,4I5,1X,5(G12.5,1X))')37 , NINT(A(Nnuc)) , &
+                   & l , j1 , egd , EINl , gacs_noicc , gacs , popl
+               endif
+            enddo  !over branching ratios
+         endif   
+      endif  !over popl>0
+   enddo  !over levels
+   if (NPRim_g > 0) call printDiscreteGammas(igamma,discrGamma)
+   return
+   99012 format(1x , / , 5x , 'Level of energy  ' , f8.4 , ' MeV' , ' and spin ' , f6.1 , ' with final population ' , g13.5 ,     &
+            &' mb is an isomer')
+end subroutine DECAYD
+
+
+subroutine DECAYD_DIR(Nnuc , Nejc)
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:ppu*
+   !!c   *                       D E C A Y D _ D I R                        *
+   !!c   *                                                                  *
+   !!c   *  Special version of DECAYD to process discrete levels populated  *
+   !!c   *  directly from CN capture state by a single particle emission.   *
+   !!c   *  Related to ENDF-6 formatting that stores such transitions in    *
+   !!c   *  MT = 51+, 600+, 650+, ... therefore, to avoid double-counting,  *
+   !!c   *  they should not be added to gamma emission spectra.             *  
+   !!c   *  This subroutine performs gamma decay for the sole purpose of    *
+   !!c   *  calculating isomeric cross sections related to such transitions,* 
+   !!c   *  gamma spectra are not updated.                                  *
+   !!c   *                                                                  *
+   !!c   * input:Nnuc - nucleus  index (position) in the table              *
+   !!c   *       Nejc - ejectile index (position) in the table              *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:none                                                      *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
+
+   implicit none
+   include 'dimension.h'
+   include 'global.h'
+
+   integer :: Nejc , Nnuc
+   intent (in) Nejc , Nnuc
+   real*8 :: gacs , popl
+   integer :: i , j , j1 , l
+   integer :: NINT
+
+   do i = 1 , NLV(Nnuc) - 1 !, gacs_noicc, egd
+      l = NLV(Nnuc) - i + 1
+      popl = CSDirlev(l , Nejc)
+      if(popl<=0.D0)cycle
+      if(BR(l , 1 , 2 , Nnuc)>0)then
+         do j = 1 , NDBR
+            j1 = NINT(BR(l , j , 1 , Nnuc))
+            if(j1==0)cycle
+            if(j1>=l)return
+            gacs = popl*BR(l , j , 2 , Nnuc)
+            CSDirlev(j1 , Nejc) = CSDirlev(j1 , Nejc) + gacs
+            !  gacs_noicc = gacs                      ! no int. conversion
+            gacs = gacs/(1.D0 + BR(l , j , 3 , Nnuc)) ! int. conversion
+            CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
+         enddo
+      else
+         !-----------Well... let it go down to the ground state
+         !  gacs = CSDirlev(l,nejc)
+         !  CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
+         !  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+         CSDirlev(1 , Nejc) = CSDirlev(1 , Nejc) + popl
+         CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
+      endif
+   enddo
+end subroutine DECAYD_DIR
+
+
+subroutine printDiscreteGammas(imax, discGamma)
+
+   implicit none
+   type gamma_type
+      sequence
+      real*8 :: Eg
+      real*8 :: gXsc
+   end type gamma_type
+   
+   type(gamma_type) :: discGamma(1:250)
+   type(gamma_type)  tmp
+   integer, intent(in) :: imax
+   integer :: i
+   logical :: sorted = .true.
+   real*8 :: sumGamma
+
+   ! Sort discrete gammas according to increasing energy
+   do
+     sorted = .true. 
+     do i = 1, imax
+        if(discGamma(i)%Eg > discGamma(i+1)%Eg) then
+           tmp = discGamma(i)
+           discGamma(i) = discGamma(i+1)
+           discGamma(i+1) = tmp
+           sorted = .false.
+        end if
+     end do
+     if(sorted) exit
+   end do
+
+   sumGamma = SUM(discGamma(1:imax)%gXsc)
+
+   ! Print discrete gammas to *.out file for ENDF-6 formatting
+   
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+   write(12, '(3x,"Discrete g emission cross section ",G10.5)') sumGamma
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+   write(12, '(9x,''i'',7x,''Egam         Disc.g CS'')')
+   write(12, '('' '')')
+   do i = 2, imax+1
+      write(12, '(i10,2G15.6)') i-1, discGamma(i)%Eg, discGamma(i)%gXsc
+   end do 
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+
+   return
+end subroutine printDiscreteGammas
+
+
+subroutine TL_GAMMA(Nnuc , Iec , Jc , Ipc)
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:PPu*
+   !!c   *                         T L G A M M A                            *
+   !!c   *                                                                  *
+   !!c   * Calculates gamma decay of a continuum state in nucleus NNUC into *
+   !!c   * continuum and discrete states in the same nucleus NNUC for       *
+   !!c   * E1 transitions to be used in ECIS CN calculation                 *
+   !!c   *                                                                  *
+   !!c   * input:NNUC - decaying nucleus index                              *
+   !!c   *       IEC  - energy index of the decaying state                  *
+   !!c   *       JC   - spin index of the decaying state                    *
+   !!c   *       IPC  - parity of the decaying state                        *
+   !!c   *                                                                  *
+   !!c   * output:                                                          *
+   !!c   *       gamm_tr(nfiss_tr), nfiss_tr                                *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * calls:none                                                       *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !
+
+   implicit none
+   include 'dimension.h'
+   include 'global.h'
+
+   integer :: Iec , Ipc , Jc , Nnuc
+   intent (in) Iec , Ipc , Jc
+   real*8 :: cee , cme , eg , etmp , ha , hscrtl , scrtneg , scrtpos , xjc , xjr
+   real*8 :: E1 , E2 , XM1
+   real :: FLOAT
+   integer :: i , ier , ineg , iodd , ipar , ipos , j , jmax , jmin , jr , lamb , lambmax , lambmin , lhighest , lmax , lmin
+   integer :: IABS , MAX0 , MIN0
+   real*8 , dimension(10) :: xle , xlm
+
+   !----MAXmult - maximal gamma-ray multipolarity
+   !  maximal value (.LT.10) of gamma-ray multipolarity (L) in
+   !  calculations of gamma-transitions both between states in
+   !  continuum and from continuum states to discrete levels.
+   !  A default value of 'MAXmult' is set to 2 in 'input.f'
+   !  but can be adjusted in the input.
+   !
+   !  The radiative strength functions of higher multipole orders
+   !  (f_EL, f_ML) are calculated using the relationships between
+   !  single-particle radiative strength functions in the Weisskopf form.
+   !
+   !    Electric transitions:
+   !    f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,
+   !    cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)
+   !    xle(i) = f_Ei
+   !
+   !    Magnetic transitions:
+   !    f_M(L+1)/f_E(L+1) = cme,
+   !    cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)
+   !    xlm(i) = f_Mi
+   !
+   !
+   xle = 0.D0
+   xlm = 0.D0
+   if(MAXmult>2)then
+      ha = A(Nnuc)**0.666666666666D0
+      cee = 3.7D-5*ha
+      cme = 0.307D0/ha
+   endif
+
+   jmin = 1
+   !p jmin = MAX0(1, Jc - MAXmult)
+   jmax = MIN0(NLW , Jc + MAXmult)
+
+   xjc = FLOAT(Jc) + HIS(Nnuc)
+   !-----IPOS is a parity-index of final states reached by gamma
+   !-----transitions which do not change parity (E2 and M1)
+   !-----INEG is a parity-index of final states reached by gamma
+   !-----transitions which do change parity (E1)
+   if(Iec<1)return
+
+   if(Ipc>0)then
+      ipos = 1
+      ineg = 2
+   else
+      ipos = 2
+      ineg = 1
+   endif
+   !-----
+   !-----decay to the continuum
+   !-----
+   do ier = Iec - 1 , 1 , -1 !-----do loop over c.n. energies (loops over spins and parities expanded
+      etmp = EX(ier , Nnuc)
+      eg = EX(Iec , Nnuc) - etmp
+      xle(1) = E1(Nnuc , eg , TNUc(ier , Nnuc) , etmp)*TUNe(0 , Nnuc)
+      xlm(1) = XM1(eg)*TUNe(0 , Nnuc)
+      xle(2) = E2(eg)*TUNe(0 , Nnuc)
+      xlm(2) = xle(2)*cme
+      if(MAXmult>2)then
+         do i = 3 , MAXmult
+            xle(i) = xle(i - 1)*eg**2*cee*((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
+            xlm(i) = xle(i)*cme
+         enddo
+      endif
+
+      lhighest = 0
+      do jr = 1 , jmax
+         xjr = FLOAT(jr) + HIS(Nnuc)
+         lambmin = MAX0(1 , IABS(Jc - jr))
+         lambmax = int(xjc + xjr + 0.001)
+         lambmax = MIN0(lambmax , MAXmult)
+         if(lambmin<=lambmax)then
+            NGAmm_tr = max(lambmax , NGAmm_tr)
+            scrtpos = 0.0
+            scrtneg = 0.0
+            do lamb = lambmin , lambmax
+               if(lamb/2*2==lamb)then
+                  scrtpos = scrtpos + xle(lamb)
+                  scrtneg = scrtneg + xlm(lamb)
+               else
+                  scrtpos = scrtpos + xlm(lamb)
+                  scrtneg = scrtneg + xle(lamb)
+               endif
+            enddo
+            GAMm_tr(lamb) = GAMm_tr(lamb) + scrtpos*RO(ier , jr , ipos , Nnuc) + scrtneg*RO(ier , jr , ineg , Nnuc)
+
+         endif
+      enddo
+   enddo
+   !-----do loop over c.n. energies ***done***
+   !-----decay to the continuum ----** done***-----------------------
+   !  write(*,*) ' CONTINUUM Lmax=',ngamm_tr
+   !  do lamb=1,MAXMULT
+   !    write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+   !  enddo
+   !-----
+   !-----DECAY TO DISCRETE LEVELS
+   !-----
+   !-----do loop over discrete levels -----------------------------------
+   do i = 1 , NLV(Nnuc)
+      lmin = INT(ABS(xjc - XJLv(i , Nnuc)) + 0.001)
+      lmax = INT(xjc + XJLv(i , Nnuc) + 0.001)
+      lambmin = MAX0(1 , lmin)
+      lambmax = MIN0(lmax , MAXmult)
+      if(lambmin<=lambmax)then
+         NGAmm_tr = max(lambmax , NGAmm_tr)
+         eg = EX(Iec , Nnuc) - ELV(i , Nnuc)
+         ipar = (1 + LVP(i , Nnuc)*Ipc)/2
+         iodd = 1 - ipar
+         xle(1) = E1(Nnuc , eg , TNUc(1 , Nnuc) , UEXcit(1 , Nnuc))*TUNe(0 , Nnuc)
+         xlm(1) = XM1(eg)*TUNe(0 , Nnuc)
+         xle(2) = E2(eg)*TUNe(0 , Nnuc)
+         if(lambmax>2)then
+            xlm(2) = xle(2)*cme
+            do j = 3 , lambmax
+               xle(j) = xle(j - 1)*eg**2*cee*((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
+               xlm(j) = xle(j)*cme
+            enddo
+         endif
+         hscrtl = 0.0D0
+         do lamb = lambmin , lambmax
+            if(lamb/2*2==lamb)then
+               hscrtl = hscrtl + xle(lamb)*ipar + xlm(lamb)*iodd
+            else
+               hscrtl = hscrtl + xlm(lamb)*ipar + xle(lamb)*iodd
+            endif
+            GAMm_tr(lamb) = GAMm_tr(lamb) + hscrtl
+         enddo
+      endif
+   enddo
+   !  write(*,*) ' DISCRETE  Lmax=',ngamm_tr,' Jcn=', jc,' pi=',ipc
+   !  do lamb=1,MAXMULT
+   !    write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+   !  enddo
+   !
+   !-----do loop over discrete levels --------- done --------------------
+   return
+end subroutine TL_GAMMA
+
+
 subroutine FISSION(Nnuc , Iec , Jc , Sumfis)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:ppu*
-   !cc   *                         F I S S I O N                            *
-   !cc   *                                                                  *
-   !cc   *    Calculates fission of the nuclear state defined by NNUC,      *
-   !cc   *    IEC, and JC including two viscosity effects.                  *
-   !cc   *    Corrected trapezoidal integration rule used.                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * input:NNUC-decaying nucleus index                                *
-   !cc   *       IEC -decaying state excitation energy index                *
-   !cc   *       JC  -decaying state spin index                             *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:SUMFIS-integral of Tf*ro for the fission channel over     *
-   !cc   *            kinetic energy of fission fragments (to be added      *
-   !cc   *            to the Hauser-Feshbach denominator DENHF)             *
-   !cc   *                                                                  *
-   !cc   * calls:TLF                                                        *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !cc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:ppu*
+   !!c   *                         F I S S I O N                            *
+   !!c   *                                                                  *
+   !!c   *    Calculates fission of the nuclear state defined by NNUC,      *
+   !!c   *    IEC, and JC including two viscosity effects.                  *
+   !!c   *    Corrected trapezoidal integration rule used.                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * input:NNUC-decaying nucleus index                                *
+   !!c   *       IEC -decaying state excitation energy index                *
+   !!c   *       JC  -decaying state spin index                             *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:SUMFIS-integral of Tf*ro for the fission channel over     *
+   !!c   *            kinetic energy of fission fragments (to be added      *
+   !!c   *            to the Hauser-Feshbach denominator DENHF)             *
+   !!c   *                                                                  *
+   !!c   * calls:TLF                                                        *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!c
 
    implicit none
    include 'dimension.h'
@@ -1614,33 +1630,33 @@ end function TLF
 
 
 subroutine FISFIS(Nnuc , Iec , Ip , Jc , Sumfis , Mmod)
-   !cc
-   !cc   ********************************************************************
-   !cc   *                                                         class:ppu*
-   !cc   *                         F I S F I S                              *
-   !cc   *                                                                  *
-   !cc   *    Calculates fission of the nuclear state defined by NNUC,      *
-   !cc   *    IEC, IP and JC within optical model for fission               *
-   !cc   *    using double or triple humped barrier assumptions             *
-   !cc   *                                                                  *
-   !cc   * input:NNUC-decaying nucleus index                                *
-   !cc   *       IEC -decaying state excitation energy index                *
-   !cc   *       IP  -decaying state parity                                 *
-   !cc   *       JC  -decaying state spin index                             *
-   !cc   *       mmod-number of modes (multimodal fission)                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * output:SUMFIS - total fission transmission coefficient (to be
-   !cc                     added to the Hauser-Feshbach denominator DENHF)  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   * calls:...                                                        *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   ********************************************************************
-   !ccc
+   !!c
+   !!c   ********************************************************************
+   !!c   *                                                         class:ppu*
+   !!c   *                         F I S F I S                              *
+   !!c   *                                                                  *
+   !!c   *    Calculates fission of the nuclear state defined by NNUC,      *
+   !!c   *    IEC, IP and JC within optical model for fission               *
+   !!c   *    using double or triple humped barrier assumptions             *
+   !!c   *                                                                  *
+   !!c   * input:NNUC-decaying nucleus index                                *
+   !!c   *       IEC -decaying state excitation energy index                *
+   !!c   *       IP  -decaying state parity                                 *
+   !!c   *       JC  -decaying state spin index                             *
+   !!c   *       mmod-number of modes (multimodal fission)                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * output:SUMFIS - total fission transmission coefficient (to be
+   !!c                     added to the Hauser-Feshbach denominator DENHF)  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   * calls:...                                                        *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   *                                                                  *
+   !!c   ********************************************************************
+   !!
    implicit none
    include 'dimension.h'
    include 'global.h'
