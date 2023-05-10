@@ -1,6 +1,6 @@
-! $Rev: 5457 $
+! $Rev: 5472 $
 ! $Author: mwherman $
-! $Date: 2023-03-27 19:31:35 +0200 (Mo, 27 Mär 2023) $
+! $Date: 2023-05-10 19:26:41 +0200 (Mi, 10 Mai 2023) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -90,7 +90,7 @@
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&
-     &        DYNam, COLfile, CN_isotropic
+     &        DYNam, COLfile, CN_isotropic, primeResidue
 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),            &
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),         &

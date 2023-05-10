@@ -19,7 +19,6 @@ MODULE HFdecay
     
     REAL*8, external :: GET_DDXS
     
-    Logical primeResidue
 
     Public HF_decay, XSECT
 
