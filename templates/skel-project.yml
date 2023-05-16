@@ -1,0 +1,16 @@
+---
+elementalEvaluation : True                                             # True/False
+elementSymbol : Pt                                                     # e.g. Fe
+targetZ : 78                                                           # e.g. 26
+targetA : [190 191 192 194 195 196 197 198]                            # e.g. 56 or [ 54 56 57 58 ] if elemental
+projectileA :  1                                                       # e.g. 1 for n or p, 12 for C-12
+projectileZ :  0                                                       # e.g. 0 for n, 1 for p, 6 for C-12
+projectName : [ Pt190 Pt191 Pt192 Pt194 Pt195 Pt196 Pt197 Pt198]       # SymbolA suggested (e.g. Fe56) or [ Fe54 Fe56 ...] if elemental
+#=====^above must be filled up^===_below can be done as necessary_======
+ENDFMAT :  [ 7825 7828 7831 7834 7837 7840 7843 7846 ]                 # e.g. 2631 or [ list of MAT numbers ] if elemental
+URR4self :  True                                                       # URR used for self-shielding only - True/False
+Qvalue103 :
+Qvalue104 :
+Qvalue105 :
+Qvalue106 :
+Qvalue107 :

@@ -1,0 +1,66 @@
+{
+      "script-runner.statusBar": true,
+      "script-runner.definitions": {
+
+         "commands": [
+            {
+               "identifier": "RunEMPIRE",
+               "description": "Run Empire (set workDir and RootName in project .vscode/setting.json) ",
+               "command": "runE $rootName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "Format",
+               "description": "ENDF formating",
+               "command": "format $rootName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "Verify",
+               "description": "Verify ENDF file",
+               "command": "verify $rootName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "Process",
+               "description": "Prepare ENDF file for ploting",
+               "command": "process $rootName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "YPlot",
+               "description": "Create yaml driven plots ",
+               "command": "drawPlots.py $rootName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "Archive",
+               "description": "Store results in the Archive",
+               "command": "memorize $rootName $dirName",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "elRun",
+               "description": "elem: Calculate isotopes & merge into element (elemntal ONLY!)",
+               "command": "01-elemRun",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "elYPlot",
+               "description": "elem: Create yaml driven plots",
+               "command": "02-elemPlotYaml",
+               "working_directory": "$workDir"
+            },
+            {
+               "identifier": "elArchive",
+               "description": "elem: Store results in the Archives",
+               "command": "03-elemArchive",
+               "working_directory": "$workDir"
+            }
+         ],
+         "variables": {
+           "$workDir": "/Users/herman/Desktop/work/evaluations/Pt/",
+           "$rootName": "Pt193"
+         }
+      }
+}

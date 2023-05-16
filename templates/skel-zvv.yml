@@ -1,0 +1,141 @@
+target: "{+AAA}Symbol"              # Target identification in the major title on zvd plot (e.g. {+195}Pt)
+material: "ZZZ-Symbol-AAA"          # Same but in the format used in the plotc4 list (e.g. 78-Pt-195)
+file: "rootName"                    # Root name used to identify EMPIRE projects (e.g. Pt195)
+legend_xy: 500 10                   # Position of the legend on a plot (respect to the left-bottom corner)
+extendedLegend: "False"             # Extend legend, e.g. including Chi**2
+shortLegend: "True"                 # Standard legend    
+epsPlots: "True"                    # If 'True' zvd and eps plots are created, if 'False' interactive zvd plots on the screen
+suffix: ""                          # Suffix might be included in the plot file name (any string)
+XSec2PlotMTs: ""                    # MTs to be plotted, set to null "" to skip (e.g. commented line below)
+# XSec2PlotMTs: 1  2  4 16 17 18 22 28 45 102 103 107
+myName: ""                          # Not used
+
+# Evaluated files to be plotted, string between mandatory '-' and ':' will be used as a line label
+compare:
+  - Set2 : "rootName-s.endf"             # e.g. Pt195-s.endf
+  - Set1 : "Archive/Set1/rootName-s.endf"  # e.g. Archive/Set1/Pt195-s.endf
+# - ENDF-8.0 :   "n-ZZZ_Symbol_AAA-s.endf"
+
+# List of entries to be plotted (sequential numbers from the right-hand side list in 'ZVV plots' GUI tab or .-log.plotc4 file)
+# hyphen indicates a range e.g., 5-8 expands into 5 6 7 8 (NO SPACE! around hyphen)
+listIndices: " 5-8 7 12"  
+
+# Adding inelastics to elastic (the first evaluation in compare only!) 
+# Energies (in eV!) of the inelastic levels
+# IMPORTANT: retain 9-character length as in the example below (it goes to the Fortran input!)
+#ElaDA2SumElev: " 6.2370E+3 1.3626E+5 1.5855E+5"
+ElaDA2SumElev: ""                                                  
+# Incident energies (in MeV!!!) at which each inelastic starts to sum up with elastic 
+EminInelastics: " 0.007 0.100 1.200  "
+
+reaction:                       # Settings for individual plots (options can be added but have to be propagated to the reading script drawPlots.py) 
+  total:                        # Reaction
+    name: ""                    # Reaction strings (inluding incident energies and final levels) will be generated internally if left ""
+    title_xy: 278 727           # Position of the title  on a plot (respect to the upper-left corner)
+    legend_xy: 500 10           # Position of the legend on a plot (respect to the upper-left corner)        
+    x_scale: log                # 'log' or 'lin'
+    y_scale: log                # 'log' or 'lin'
+    x_range: 0.04 20            # in MeV
+    y_range:  3 25              # in barns
+    x_units:  1e+06, (MeV)      # ZVView needs the numerical factor respect to eV and the (unit name)!
+    y_units:  barns             # y-axis units (if blanc ZVView will fill up)
+    sameSymbols:  "False"       # Use the same symbol for all experiments; enhances visibility of lines and cuts exp. legend to a single line!
+    ratioPlot:  "False"         # Plots ratio to the line under cursor    
+  elastic:                      # see above ^
+    name: ""
+    title_xy: 378 727 
+    legend_xy: 30 150
+    x_scale: log
+    y_scale: log
+    x_range:  0.015 20
+    y_range:  1.0 30
+    x_units:  1e+06, (MeV)
+    y_units:  barns
+    sameSymbols:  "False"   
+    ratioPlot:  "False"
+  capture:
+    name: ""
+    title_xy: 378 727 
+    legend_xy: 500 30
+    x_scale: log
+    y_scale: log
+    x_range:  0.003 4
+    y_range:  0.01 10
+    x_units:  1e+06, (MeV)
+    y_units:  barns
+    sameSymbols:  "False"
+    ratioPlot:  "False"
+  inelastic:
+    name: ""
+    title_xy: 378 727 
+    legend_xy: 500 20
+    x_scale: log
+    y_scale: lin
+    x_range:  "0.004 20.0"
+    y_range:  ""
+    x_units:  1e+06, (MeV)
+    y_units:  barns
+    sameSymbols: "False"
+    ratioPlot: "False"
+  fission:
+    name: ""
+    title_xy: 378 727 
+    legend_xy: 500 10
+    x_scale: lin
+    y_scale: log
+    x_range:  ""
+    y_range:  ""
+    x_units:  1e+06, (MeV)
+    y_units:  barns
+    sameSymbols: "False"
+    ratioPlot: "False"
+  other:
+    name: ""
+    title_xy: 378 727 
+#    legend_xy: 30 10  # left side
+    legend_xy: 500 10  # right side
+    x_scale: lin
+    y_scale: lin
+    x_range:  "7.0 20."
+    y_range:  ""
+    x_units:  1e+06, (MeV)
+    y_units:  barns
+    sameSymbols: "False"
+    ratioPlot: "False"
+  angDistr:
+    name: ""
+    title_xy: 120 727 
+    legend_xy: 500 150
+    x_scale: ""
+    y_scale: ""
+    x_range: 0 180
+    y_range: ""
+    x_units: "deg"
+    y_units: ""
+    sameSymbols: "False"
+    ratioPlot: "False"
+  spectra:
+    name: ""
+    title_xy: 120 727 
+    legend_xy: 100 550
+    x_scale: lin
+    y_scale: log
+    x_range: ""
+    y_range: 1.0E-10 1.0E-5
+    x_units: 1e+06, (MeV)
+    y_units: ""
+    sameSymbols: "False"
+    ratioPlot: "False"
+  g-spectra:
+    name: ""
+    title_xy: 320 727 
+    legend_xy: 100 550
+    x_scale: log
+    y_scale: log
+    x_range: "1.0 20."
+    y_range: 1.0E-12 1.0E-6
+    x_units: 1e+06, (MeV)
+    y_units: ""
+    sameSymbols: "False"
+    ratioPlot: "False"
+ 
