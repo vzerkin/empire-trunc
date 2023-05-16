@@ -1,4 +1,4 @@
-ccc   * $Rev: 5453 $
+ccc   * $Rev: 5478 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -469,6 +469,7 @@ C        Discrete levels not included in PCROSS calculation (default)
          PEQc = 1.5d0 ! default PE
          MFPp = 1.5d0
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
+         PESpfa = 0.0d0  ! PE spin sut off factor will be set to default 0.26 in MSD-tristan
 
 C        NPAirpe = 1  ! include pairing corrections in PCROSS
          NPAirpe = 0  ! default is to NOT include pairing corrections in PCROSS, 10/2019
@@ -1522,15 +1523,15 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IDNa(4,2) = 0
           ELSE
                IF (NPRoject.EQ.1) THEN   ! neutron projectile
-                 IDNa(1,2) = MSD-1       ! discrete levels only if MSD=2
+                 IDNa(1,2) = MSD-1       ! discrete levels, only if MSD=2
                  IDNa(2,2) = 1           ! continnum always if MSD>0
                ELSE ! (NPRoject.EQ.2)    ! proton projectile
-                 IDNa(3,2) = MSD-1       ! discrete levels only if MSD=2
+                 IDNa(3,2) = MSD-1       ! discrete levels, only if MSD=2
                  IDNa(4,2) = 1           ! continnum always if MSD>0
                ENDIF
                PESpin = 0
                WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
+     &          ' WARNING: PE spin cut-off for 1p-1h used (MSD is on)'
             ENDIF
          ENDIF
 
@@ -1542,7 +1543,7 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                WRITE (8,*) ''
                WRITE (8,*)
      &          ' WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
-               WRITE (8,*)
+               WRITE (8,*) 
      &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,3) = 0 ! MSC
                IDNa(2,3) = 0
@@ -1554,8 +1555,8 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                IF (GST.GT.0) IDNa(5,3) = 1
 C--------------stop MSC charge-exchange if DDHMS or PCROSS active
                IF (PEQc.GT.0 .or. LHMs.GT.0) THEN
-               ! HERE: IF (NPRoject.EQ.1)  IDNa(4,3) = 0 ! cont p
-                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0 ! cont n
+                 IF (NPRoject.EQ.1)  IDNa(4,3) = 0 ! cont p via PCROSS or GGHMS
+                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0 ! cont n via PCROSS or DDHMS
                ENDIF
             ENDIF
       ENDIF
@@ -4179,6 +4180,18 @@ C--------PCROSS input
      &'('' ERROR: PCROSS = '',F5.2,'' is outside valid range, '',
      &''which is 0.5 < PCROSS < 3.0'')') val
               STOP
+            ENDIF
+            GOTO 100
+         ENDIF
+C
+         IF (name.EQ.'PESPFA') THEN
+            PESpfa = 0
+            IF (val.GT.0) THEN
+              PESpfa = val
+              WRITE (8, '('' PE spin cut-off factor set to '', F5.3 )')
+     & PESpfa
+              WRITE (12,'('' PE spin cut-off factor set to '', F5.3 )')
+     & PESpfa
             ENDIF
             GOTO 100
          ENDIF

@@ -1,8 +1,8 @@
-! $Rev: 5472 $
+! $Rev: 5478 $
 ! $Author: mwherman $
-! $Date: 2023-05-10 19:26:41 +0200 (Mi, 10 Mai 2023) $
+! $Date: 2023-05-17 01:20:32 +0200 (Mi, 17 Mai 2023) $
 !
-!     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
+!     The global variable EMPIREDIR is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
 !     line to have access to the system directory, RCN, July 2009
 !
@@ -45,7 +45,7 @@
      &                 ECFis(NFHUMP),ECDamp(NFHUMP),                    &
      &                 EEFermi(0:ndejc,0:ndnuc),                        &
      &                 EFB(nfparab),EFDis(nftrans,nfparab),             &
-     &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)       
+     &                 EGDr1, EGDr2, EIN, EINl, EJMass(0:ndejc), PESpfa  
 
       DOUBLE PRECISION FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,        & 
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,        &
@@ -70,7 +70,7 @@
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
      &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc), IDDfig(3),    &
-     &        PESpin, NNG_xs, LHRtw, ENDfp(0:ndejc,0:ndnuc),            &
+     &        PESpin,  NNG_xs, LHRtw, ENDfp(0:ndejc,0:ndnuc),           &
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
@@ -267,7 +267,7 @@
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3, &
      &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,   &
      &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape,          &
-     &                 SUMlev_alf
+     &                 SUMlev_alf, PESpfa
 !
 !                      This array is only used in EXCLUSIVEL, commented &  
 !    &                 , POPcselv

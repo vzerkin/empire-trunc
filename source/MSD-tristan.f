@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5461 $
+Ccc   * $Rev: 5478 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-03-31 22:57:23 +0200 (Fr, 31 Mär 2023) $
+Ccc   * $Date: 2023-05-17 01:20:32 +0200 (Mi, 17 Mai 2023) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2551,7 +2551,7 @@ C
      &                 f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6),
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2,
-     &                 qq(5), rb12, s1, s2, s3, sg(3*(NDEx+25)), sigm,
+     &                 qq(5), rb12, s1, s2, s3, sg(3*(NDEx+25)), sigphm,
      &                 sn, sum, sumpx(3*(NDEx+25),2), x, x2, xl, xq, yl,
      &                 zz(15), f1(15), ftmp, dtmp, f4tmp
       REAL hhh
@@ -2960,16 +2960,16 @@ C99015          FORMAT (' THETA= ',F5.1,I5)
             DO ne = 1, Nbinx
                eout = eout - ESTep
                IF (ne.NE.1) THEN
-                  sigm = 0.5*(Crose(ne,na,k1) + Crose(ne,na,k2))
-                  IF (sigm.le.0) CYCLE
-                  ay = 50.*(Crose(ne,na,k1) - Crose(ne,na,k2))/sigm
+                  sigphm = 0.5*(Crose(ne,na,k1) + Crose(ne,na,k2))
+                  IF (sigphm.le.0) CYCLE
+                  ay = 50.*(Crose(ne,na,k1) - Crose(ne,na,k2))/sigphm
                   s1 = 0.5*(Crose(ne,na,1) + Crose(ne,na,k1 + 1))
                   s2 = 0.5*(Crose(ne,na,2) + Crose(ne,na,k1 + 2))
-                  a1 = 50.*(Crose(ne,na,1) - Crose(ne,na,k1 + 1))/sigm
-                  a2 = 50.*(Crose(ne,na,2) - Crose(ne,na,k1 + 2))/sigm
+                  a1 = 50.*(Crose(ne,na,1) - Crose(ne,na,k1 + 1))/sigphm
+                  a2 = 50.*(Crose(ne,na,2) - Crose(ne,na,k1 + 2))/sigphm
                   IF (KTRl(7).NE.0) THEN
                      s3 = 0.5*(Crose(ne,na,3) + Crose(ne,na,7))
-                     a3 = 50.*(Crose(ne,na,3) - Crose(ne,na,7))/sigm
+                     a3 = 50.*(Crose(ne,na,3) - Crose(ne,na,7))/sigphm
                   ENDIF
 
 C                 if(ne.eq.70 .and.
@@ -2984,7 +2984,7 @@ C                 endif
                      DO nad = 1, NFAc12
                         sn = FAC1d(nad)*s1 + FAC2d(nad)*s2
                         IF (KTRl(7).EQ.1) sn = sn + FAC3d(nad)*s3
-                        aynorm = sigm/sn
+                        aynorm = sigphm/sn
                         f1(nad) = sn
                         an = FAC1d(nad)*a1 + FAC2d(nad)*a2
                         IF (KTRl(7).EQ.1) an = an + FAC3d(nad)*a3
@@ -2992,20 +2992,20 @@ C                 endif
                      ENDDO
                   ENDIF
                   IF (IOUt.GT.3) THEN
-                     WRITE (8,99020) eout, s1, s2, s3, sigm, f11, a1,
+                     WRITE (8,99020) eout, s1, s2, s3, sigphm, f11, a1,
      &                               a2, a3, ay, f21
-C                    WRITE (66,99020) eout, s1, s2, sigm
+C                    WRITE (66,99020) eout, s1, s2, sigphm
                   ENDIF                                      
 C                 necs = Nbinx - ne + 2
 C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
-C                 sigm = sigm/2.0
+C                 sigphm = sigphm/2.0
 C-----------------store ddx to continuum
                   IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1) 
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
      &            THEN
-                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigm/2
+                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigphm/2
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
 C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
@@ -3013,7 +3013,7 @@ C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
      &                    necs.GT.(NEX(nnur)-1)) THEN
 C    &                    necs.GT.(NEX(nnur)  )) THEN
 C    &                    necs.GT.(NEX(nnur)+1)) THEN
-                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigm/2
+                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigphm/2
                   ENDIF
                ENDIF
             ENDDO  ! over ne
@@ -3122,7 +3122,7 @@ C
       DOUBLE PRECISION coeff, csmsdl, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis), recorr
-      DOUBLE PRECISION csmtot,csm1
+      DOUBLE PRECISION csmtot,csm1, sigph
       INTEGER icsp, ie, il, irec, j, na, nexrt, next
 
       IF (NEX(Nnuc).LT.1) THEN
@@ -3155,18 +3155,22 @@ C-----calculate spin distribution for 1p-1h states
 C           Distribution of the continuum neutron or proton MSD contribution -
 C           proportional to the 1p-1h (n=2) spin distribution shifted by the target
 C           target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
-C           SIG = n*0.26*A**(2.d0/3.d0) with n=2
-            SIG = 2*0.26*A(Nnur)**0.66666667
+C           sigph = n*0.26*A**(2.d0/3.d0) with n=2
+            sigph = 2*0.26*A(Nnur)**0.66666667
 C-----------ATTENTION! Ta181(n,a) isomer specific !!! 
-            SIG = 1.20*SIG ! gives best results for Ta181(n,a) isomers
+C            sigph = 1.20*sigph ! gives best results for Ta181(n,a) isomers
+            ! sigph = 0.14/0.26*sigph ! Pt(n,p) isomers
+C-----------The whole staff with PE spin-cut-off needs rethinking and redoing.
+C-----------It will be, however, not backward compatible thus these ad-hoc corrections above.
 
-            IF(PESpin.GT.0) SIG = PESpin
-
+            IF(PESpfa.GT.0) sigph = PESpfa/0.26*sigph
+            print *, "MSD: Nejc,  PESpfa, sigph", Nejc, PESpfa, sigph
+C            IF(PESpin.GT.0) sigph = PESpin
             somj = 0.0
             DO j = 1, NLW
-               xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
+               xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)   ! adding ground state spin as a base for a distribution around
                phdj(j) = 0.0
-               w = (xj + 1.0)*xj/2./SIG
+               w = (xj + 1.0)*xj/2./sigph
                IF (w.GT.50.D0) cycle
                phdj(j) = (2*xj + 1.)*DEXP( - w)
                somj = somj + phdj(j)
@@ -3176,10 +3180,7 @@ C-----------ATTENTION! Ta181(n,a) isomer specific !!!
                xnor = 0.5*phdj(j)/somj
                DO ie = 1, nexrt
                   pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
-C                 Population increased to preserve total flux
-C                 as calculated by PCROSS or MSD+MSC
-                  if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-                  POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+                  POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops  ! Population increased to preserve total flux by PCROSS or MSD+MSC
                   POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
                ENDDO
             ENDDO
@@ -3189,18 +3190,18 @@ C          Distribution of the PCROSS continuum particle or photon emissions
 C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
 C          shifted by the target ground state target spin XJLv(LEVtarg,0)
             DO ie = 1, nexrt
-               SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
+               sigph= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
      >            0.26d0*A(Nnur)**0.66666667
 
-C              if PESpin>0 then spin cut-off = PESpin
-               IF(PESpin.GT.0) SIG = PESpin
-               if(SIG.LE.0) CYCLE         
+               IF(PESpin.GT.0) sigph = PESpin
+               if(sigph.LE.0) CYCLE         
                somj = 0.d0
+               print *, "EXC: ie, PESpfa, sigph", ie, PESpfa, sigph
 
                DO j = 1, NLW
                   xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
                   phdj(j) = 0.0
-                  w = (xj + 1.0)*xj/2./SIG
+                  w = (xj + 1.0)*xj/2./sigph
                   IF (w.GT.50.D0) cycle
                   phdj(j) = (2*xj + 1.)*DEXP( - w)
                   somj = somj + phdj(j)
@@ -3480,7 +3481,7 @@ C
          ENDIF
        ENDDO
 C
-C      Assigning angular distribution of the first continuum bin
+C      Assigphning angular distribution of the first continuum bin
 C      "istart" to the angular distribution of the discrete levels
        IF(CSEmsd(nexrt,Nejc).LT.1.0D-10) THEN
           ddxs = 0.0D0
