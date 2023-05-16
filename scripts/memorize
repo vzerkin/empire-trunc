@@ -8,8 +8,22 @@
 #    dir - name of the directory (typical subdirectory of the working directory)
 #    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp 
 
-if [ $1 == '-h' ]; then
-   echo 'Usage: directory root-name'
+
+echo "Number of arguments" $#
+if [ $# = 2 ]; then
+   file=$1
+   dir="Archive/"$2
+elif [ $# = 1 ]; then
+   read -p "Enter name of the directory:"  dirName
+   dir="Archive/"$dirName
+else
+   echo "Script to move results of most recent calculations including all input files "
+   echo "necessary to repeat calculations as well as all eps plots to a specified directory. "
+   echo "The script can be copied from the empire/scripts directory to the working directory "
+   echo "and personalized e.g., to copy zvd files or to preserve them in the working directory."
+   echo "Two arguments need to be provided."
+   echo " "
+   echo "Usage: memorize 'directory_name' 'root_name'"
    exit
 fi
 
@@ -36,11 +50,10 @@ cp $file.inp $dir
 cp $file-inp.fis $dir 2>>/dev/null      
 cp $file.xsc $dir
 mv *.eps $dir
-# uncomment the next line to store also *Id*zvd  files
+# Have the next line uncommented to store also *Id*zvd  files
 # mv *Id*.zvd
-# comment the next line to preserve *Id*zvd files in the working directory
-rm *Id*.zvd
-echo 'Copied ' $file ' input files and ' $file '-s.endf file while all *.eps files were moved to ' $dir
+#rm *Id*.zvd 2>>/dev/null 
+echo 'Copied ' $file ' input files and ' $file '-s.endf file while all plot files were moved to ' $dir
 
 exit
 
