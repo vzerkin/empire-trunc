@@ -5,7 +5,7 @@
 # Usage:
 # memorize dir root
 # where:
-#    dir - name of the directory (typical subdirectory of the working directory)
+#    dir - name of the directory (subdirectory of the ./Archive directory)
 #    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp 
 
 
@@ -42,7 +42,7 @@ fi
 # $dir could be added to the file names for indetification e.g. cp $file.lev $dir/$file-$dir.lev
 cp $file-lev.col $dir 2>>/dev/null
 cp $file-omp.ripl $dir 
-# cp $file.endf $dir
+# cp $file.endf Archive/$dir
 cp $file.lev $dir
 cp $file-omp.dir $dir  
 cp $file-s.endf $dir   
@@ -51,9 +51,8 @@ cp $file-inp.fis $dir 2>>/dev/null
 cp $file.xsc $dir
 mv *.eps $dir
 # Have the next line uncommented to store also *Id*zvd  files
-# mv *Id*.zvd
-#rm *Id*.zvd 2>>/dev/null 
-echo 'Copied ' $file ' input files and ' $file '-s.endf file while all plot files were moved to ' $dir
+mv *Id*.zvd
+echo 'Copied ' $file ' input files and ' $file '-s.endf file while all plot files were moved to Archive/' $dir
 
 exit
 
