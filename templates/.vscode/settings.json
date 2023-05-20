@@ -1,66 +1,209 @@
 {
-      "script-runner.statusBar": true,
-      "script-runner.definitions": {
-
-         "commands": [
-            {
-               "identifier": "RunEMPIRE",
-               "description": "Run Empire (set workDir and RootName in project .vscode/setting.json) ",
-               "command": "runE $rootName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "Format",
-               "description": "ENDF formating",
-               "command": "format $rootName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "Verify",
-               "description": "Verify ENDF file",
-               "command": "verify $rootName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "Process",
-               "description": "Prepare ENDF file for ploting",
-               "command": "process $rootName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "YPlot",
-               "description": "Create yaml driven plots ",
-               "command": "drawPlots.py $rootName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "Archive",
-               "description": "Store results in the Archive",
-               "command": "memorize $rootName $dirName",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "elRun",
-               "description": "elem: Calculate isotopes & merge into element (elemntal ONLY!)",
-               "command": "01-elemRun",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "elYPlot",
-               "description": "elem: Create yaml driven plots",
-               "command": "02-elemPlotYaml",
-               "working_directory": "$workDir"
-            },
-            {
-               "identifier": "elArchive",
-               "description": "elem: Store results in the Archives",
-               "command": "03-elemArchive",
-               "working_directory": "$workDir"
-            }
-         ],
-         "variables": {
-           "$workDir": "/Users/herman/Desktop/work/evaluations/Pt/",
-           "$rootName": "Pt193"
+   "script-runner.statusBar": true,
+   "script-runner.definitions": {
+      "variables": {
+         "$elemDir": "/Users/herman/Desktop/work/evaluations/Pt/",
+         "$file": "Ta181",
+         "$mat": "7328",
+         "$dir": "/Users/herman/Desktop/work/evaluations/Ta/181/",
+         "$EXPDAT": "2",
+      },
+      "commands": [
+         {
+            "identifier": "RunEMPIRE",
+            "description": "Run Empire (set dir and file in project .vscode/setting.json) ",
+            "command": "runE $file",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "Format",
+            "description": "ENDF formating",
+            "command": "format $file",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "Verify",
+            "description": "Verify ENDF file",
+            "command": "verify $file",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "Process",
+            "description": "Prepare ENDF file for ploting",
+            "command": "process $file",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "YPlot",
+            "description": "Create yaml driven plots ",
+            "command": "drawPlots.py $file",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "Archive",
+            "description": "Store results in the Archive",
+            "command": "archive $file $dirName",
+            "working_directory": "$dir"
+         },
+         {
+            "identifier": "elRun",
+            "description": "elem: Calculate isotopes & merge into element (elemntal ONLY!)",
+            "command": "01-elemRun",
+            "working_directory": "$elemDir"
+         },
+         {
+            "identifier": "elYPlot",
+            "description": "elem: Create yaml driven plots",
+            "command": "02-elemPlotYaml",
+            "working_directory": "$elemDir"
+         },
+         {
+            "identifier": "elArchive",
+            "description": "elem: Store results in the Archives",
+            "command": "03-elemArchive",
+            "working_directory": "$elemDir"
+         },
+         {
+            "identifier": "kal0",
+            "description": "kal: Plot Sensitivity Matrix for: ",
+            "command": " $EMPIREDIR/scripts/zvvsenmat  $file $var1 $mat $EXPDAT",
+            "working_directory": "$dir",
+            "form": [
+               {
+                  "variable": "$var1",
+                  "question": "Select #: 1 (total), 2 (elastic), 4 (inelastic), 16 (n,2n), 17 (n,3n), 18 (fission), 22 (n,na), 102 (capture), 103 (n,p), 104 (n,d), 105 (n,t), 107 (n,a), 112 (n,pa), 115 (n,pd) ",
+                  "options": [
+                     "1",
+                     "2",
+                     "4",
+                     "16",
+                     "17",
+                     "18",
+                     "22",
+                     "102",
+                     "103",
+                     "104",
+                     "105",
+                     "107",
+                     "112",
+                     "115"
+                  ]
+               }
+            ]
+         },
+         {
+            "identifier": "kal1",
+            "description": "kal: run Kalman for: ",
+            "command": "$EMPIREDIR/scripts/kalman  $file $var2 $mat $EXPDAT}",
+            "working_directory": "$dir",
+            "form": [
+               {
+                  "variable": "$var2",
+                  "question": "Select #: 1 (total), 2 (elastic), 4 (inelastic), 16 (n,2n), 17 (n,3n), 18 (fission), 22 (n,na), 102 (capture), 103 (n,p), 104 (n,d), 105 (n,t), 107 (n,a), 112 (n,pa), 115 (n,pd), 0 (all MT)",
+                  "options": [
+                     "1",
+                     "2",
+                     "4",
+                     "16",
+                     "17",
+                     "18",
+                     "22",
+                     "102",
+                     "103",
+                     "104",
+                     "105",
+                     "107",
+                     "112",
+                     "115",
+                     "0"
+                  ]
+               }
+            ]
+         },
+         {
+            "identifier": "kal2",
+            "description": "kal: dirariance plot",
+            "command": "gnuplot $EMPIREDIR/util/kalman/corr.gp & ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal3",
+            "description": "kal: Clean previous Kalman files",
+            "command": " $EMPIREDIR/scripts/klean",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal4",
+            "description": "kal: Propagate Kalman output into Empire input (*.new)",
+            "command": " $EMPIREDIR/util/kalman/newinp $file &",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal5",
+            "description": "kal: Replace Empire input with *.new",
+            "command": " mv $file.inp $file-old.inp ; mv $file.new $file.inp ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal6",
+            "description": "kal: Manipulate C4 file for Kalman",
+            "command": " $EMPIREDIR/scripts/c4serv $file-kal & ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal7",
+            "description": "kal: Edit experimental data correlations (*-expCorr.kal)",
+            "command": " code $file-expCorr.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal8",
+            "description": "kal: Edit parameter uncertainties (*-parCorr.kal) ",
+            "command": " code $file-parCorr.kal  ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal9",
+            "description": "kal: Edit Kalman input (*-inp.kal)",
+            "command": " code $file-inp.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal10",
+            "description": "kal: View Kalaman output ",
+            "command": " code $file-out.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal11",
+            "description": "kal: View correlation matrices ",
+            "command": " code  $file-dir.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal12",
+            "description": "kal: View Kalaman x-sections ",
+            "command": " code $file-xsc.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal13",
+            "description": "kal: View Kalman adj. parameters ",
+            "command": " code $file-parCorrOut.kal ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal14",
+            "description": "kal: Edit sensitivity input ",
+            "command": " code $file-inp.sen ",
+            "working_directory": "$dir",
+         },
+         {
+            "identifier": "kal15",
+            "description": "kal: View/Edit sensitivity matrix ",
+            "command": " code  $file-mat.sen ",
+            "working_directory": "$dir",
          }
-      }
+      ]
+   }
 }
