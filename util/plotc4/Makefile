@@ -49,8 +49,8 @@ else
   FLG =
 endif
 
-plotc4: plotc4.f starplot.f ../dxsend/dxsend.o
-	$(FC) $(FFLAGS) -o $@ plotc4.f starplot.f ../dxsend/dxsend.o $(STATIC)
+plotc4: plotc4.f90 starplot.f90 ../dxsend/dxsend.o
+	$(FC) $(FFLAGS) -o $@ plotc4.f90 starplot.f90 ../dxsend/dxsend.o $(STATIC)
 
 ../dxsend/dxsend.o :
 	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)
