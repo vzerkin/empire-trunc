@@ -1,6 +1,6 @@
-#$Rev: 5349 $
+#$Rev: 5483 $
 #$Author: mwherman $
-#$Date: 2022-04-27 01:03:29 +0200 (Mi, 27 Apr 2022) $
+#$Date: 2023-05-22 20:35:36 +0200 (Mo, 22 Mai 2023) $
 
 # set default compilers:
 
@@ -35,9 +35,9 @@ ifeq ($(FC),gfortran)
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp 
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  #EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  EFLAGS = -O3 -w -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp 
+  OFLAGS = -O3 -w -ftree-vectorize -ffast-math -cpp 
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -137,8 +137,9 @@ all:
 	cd ../source-optman; $(MAKE) "FC=$(FC)"; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
-	rm -f .versionnumbers 2> /dev/null
-	svn info . 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+#	rm -f .versionnumbers 2> /dev/null
+#	svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+	~/spack/opt/spack/darwin-catalina-x86_64/apple-clang-12.0.0/subversion-1.14.0-gcac6ggwz2rcagivwggru6meckmt7qmc/bin/svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
 
 subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
