@@ -46,7 +46,7 @@ ifeq ($(FC),gfortran)
   #---------------------------------
   #----flags for production compilation with gfortran
   # FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
-  FFLAGS = -O2 -w -ffast-math -cpp
+  FFLAGS = -O2 -w -std=legacy -ffast-math -cpp
   ifeq ($(PARALLEL),OPENMP) 
     FFLAGS = $(FFLAGS) -fopenmp
   endif
