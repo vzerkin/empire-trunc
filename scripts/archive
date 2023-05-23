@@ -40,15 +40,15 @@ fi
 
 
 # $dir could be added to the file names for indetification e.g. cp $file.lev $dir/$file-$dir.lev
-cp $file-lev.col $dir 2>>/dev/null
-cp $file-omp.ripl $dir 
-# cp $file.endf Archive/$dir
-cp $file.lev $dir
-cp $file-omp.dir $dir  
-cp $file-s.endf $dir   
-cp $file.inp $dir      
-cp $file-inp.fis $dir 2>>/dev/null      
-cp $file.xsc $dir
+cp -p $file-lev.col $dir 2>>/dev/null
+cp -p $file-omp.ripl $dir 
+# cp -p $file.endf Archive/$dir
+cp -p $file.lev $dir
+cp -p $file-omp.dir $dir  
+cp -p $file-s.endf $dir   
+cp -p $file.inp $dir      
+cp -p $file-inp.fis $dir 2>>/dev/null      
+cp -p $file.xsc $dir
 mv *.eps $dir
 # Have the next line uncommented to store also *Id*zvd  files
 mv *Id*.zvd
