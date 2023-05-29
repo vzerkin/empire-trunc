@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2023-03-02 20:58:04 +0100 (Do, 02 Mär 2023) $
+Ccc   * $Date: 2023-05-29 08:30:37 +0200 (Mo, 29 Mai 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -2121,6 +2121,12 @@ C* Loop over all residuals
       IF(IMT.LE.0) RETURN
       DO I=1,IMT
         KZA=IZB(I)
+C...
+C...    if(mt/10 .eq. 71178 .or. mt/10.eq.71177) then
+C...      write(7,*) '    i,mt,kza,iza,izi,jza,qq'
+C... &                   ,i,mt,kza,iza,izi,jza,qq
+C...    end if
+C...
         IF(KZA.EQ.IZA+IZI) THEN
 C*        -- Add binding energy brought in by the projectile
           IF     (IZI.EQ.   0) THEN
@@ -2150,36 +2156,48 @@ C*        -- First neutron emission
      &       MT.EQ.91) THEN
             QQ=QQ-DBLE(BEN(1,I))*1000000
             IF(MT.EQ.91) GO TO 100
-C* (z,x+) direct particle emission reactions
+C*        (z,x+) direct particle emission reactions
 C*        -- First proton emission
           ELSE IF(MT.EQ.103 .OR. MT.EQ.111 .OR. MT.EQ. 112 .OR.
      &            MT.EQ.115 .OR. MT.EQ.116 .OR.
-     &           (MT.GE.600 .AND. MT.LE.649) ) THEN
+     &           (MT.GE.600 .AND. MT.LE.649) .OR.
+     &            JZA.EQ.IZA+IZI-1001) THEN
             QQ=QQ-DBLE(BEN(2,I))*1000000
             IF(MT.EQ.103.OR.(MT.GE.600 .AND. MT.LE.649)) GO TO 100
-          ELSE IF(MT.EQ.104 .OR. (MT.GE.650 .AND. MT.LE.699)) THEN
+          ELSE IF(MT.EQ.104 .OR. (MT.GE.650 .AND. MT.LE.699) .OR.
+     &            JZA.EQ.IZA+IZI-1002) THEN
 C*        -- First deuteron emission
             QQ=QQ-DBLE(BEN(4,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.105 .OR. (MT.GE.700 .AND. MT.LE.749)) THEN
+          ELSE IF(MT.EQ.105 .OR. (MT.GE.700 .AND. MT.LE.749) .OR.
+     &            JZA.EQ.IZA+IZI-1003) THEN
 C*        -- First triton emission
             QQ=QQ-DBLE(BEN(5,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.106 .OR. (MT.GE.750 .AND. MT.LE.799)) THEN
+          ELSE IF(MT.EQ.106 .OR. (MT.GE.750 .AND. MT.LE.799) .OR.
+     &            JZA.EQ.IZA+IZI-2003) THEN
 C*        -- First He-3 emission
+C...
+C...        write(7,*) ' -- First helion emission',mt,qq/1.e6,ben(6,i)
+C...
             QQ=QQ-DBLE(BEN(6,I))*1000000
             GO TO 100
           ELSE IF(MT.EQ.107 .OR. MT.EQ.108 .OR.
-     &      (MT.GE.800 .AND. MT.LE.849) ) THEN
+     &      (MT.GE.800 .AND. MT.LE.849) .OR.
+     &            JZA.EQ.IZA+IZI-2004) THEN
 C*        -- First alpha emission
+C...
+C...        write(7,*) ' -- First alpha emission',mt,qq/1.e6,ben(3,i)
+C...
             QQ=QQ-DBLE(BEN(3,I))*1000000
             IF(MT.NE.108) GO TO 100
           END IF
         ELSE IF(KZA.EQ.IZI+IZA-   1) THEN
-C* (z,n+x) reactions
+C*        (z,n+x) reactions
 C*        -- Neutron + second neutron emission
           IF(MT.EQ.16 .OR. MT.EQ.17 .OR. MT.EQ.24 .OR. MT.EQ. 25 .OR.
-     &       MT.EQ.30 .OR. MT.EQ.37 .OR. MT.EQ.41 .OR. MT.EQ.42) THEN
+     &       MT.EQ.30 .OR. MT.EQ.37 .OR. MT.EQ.41 .OR. MT.EQ. 42 .OR.
+     &            JZA.EQ.IZA+IZI-   2) THEN
             QQ=QQ-DBLE(BEN(1,I))*1000000
             IF(MT.EQ.16) GO TO 100
           ELSE IF(MT.EQ.28 .OR. MT.EQ.44 .OR. MT.EQ.45) THEN
@@ -2190,7 +2208,8 @@ C*        -- Neutron + proton emission
 C*        -- Neutron + deuteron emission
             QQ=QQ-DBLE(BEN(4,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.33) THEN
+          ELSE IF(MT.EQ.33 .OR.
+     &            JZA.EQ.IZA+IZI-1-1003) THEN
 C*        -- Neutron + triton emission
             QQ=QQ-DBLE(BEN(5,I))*1000000
             GO TO 100
@@ -2198,22 +2217,25 @@ C*        -- Neutron + triton emission
 C*        -- Neutron + He-3 emission
             QQ=QQ-DBLE(BEN(6,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.22) THEN
+          ELSE IF(MT.EQ.22 .OR.
+     &            JZA.EQ.IZA+IZI-1-2004) THEN
 C*        -- Neutron + alpha emission
             QQ=QQ-DBLE(BEN(3,I))*1000000
             GO TO 100
           END IF
         ELSE IF(KZA.EQ.IZI+IZA-   2) THEN
-C* (z,2n+x) reactions
+C*        (z,2n+x) reactions
 C*        -- Two-neutron + third neutron emission
-          IF(MT.EQ.11 .OR. MT.EQ.17 .OR. MT.EQ.37 .OR. MT.EQ.42) THEN
+          IF(MT.EQ.11 .OR. MT.EQ.17 .OR. MT.EQ.37 .OR. MT.EQ.42 .OR.
+     &            JZA.EQ.IZA+IZI-   3) THEN
             QQ=QQ-DBLE(BEN(1,I))*1000000
             IF(MT.EQ.17) GO TO 100
           ELSE IF(MT.EQ.41) THEN
 C*        -- Two neutron + proton emission
             QQ=QQ-DBLE(BEN(2,I))*1000000
             GO TO 100
-          ELSE IF(MT.EQ.24) THEN
+          ELSE IF(MT.EQ.24 .OR.
+     &            JZA.EQ.IZA+IZI-2-2004) THEN
 C*        -- Two neutron + alpha emission
             QQ=QQ-DBLE(BEN(3,I))*1000000
             GO TO 100
@@ -2231,7 +2253,7 @@ C*        -- Two neutron + He-3 emission
             GO TO 100
           END IF
         ELSE IF(KZA.EQ.IZI+IZA-   3) THEN
-C* (z,3n+x) reactions
+C*        (z,3n+x) reactions
 C*        -- Three-neutron + fourth neutron emission
 C...      IF(MT.EQ.37 .OR. MT/10.EQ.IZI+IZA-4) THEN
           IF(MT.EQ.37) THEN
@@ -2259,7 +2281,7 @@ C*        -- Three-neutron + He-3 emission
             GO TO 100
           END IF
         ELSE IF(KZA.EQ.IZI+IZA-1002) THEN
-C* (z,n+p+x) reactions
+C*        (z,n+p+x) reactions
 C*        -- Neutron + proton + second proton emission
           IF(MT.EQ.44) THEN
             QQ=QQ-DBLE(BEN(2,I))*1000000
@@ -2275,7 +2297,7 @@ C*        -- Approximate (z,d+a) by (z,n+p+a)
             GO TO 100
           END IF
         ELSE IF(KZA.EQ.IZI+IZA-1001) THEN
-C* (z,p+x) reactions
+C*        (z,p+x) reactions
 C*        -- Proton + second proton emission
           IF(MT.EQ.111) THEN
             QQ=QQ-DBLE(BEN(2,I))*1000000
@@ -2679,11 +2701,27 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
 C* Add contribution of reactions without differential data to MT5
 C* (identified by MT=10*ZA+LFS, LFS>=5).
       DO IX=1,NXS
-        MT=MTH(IX)
+        MT =MTH(IX)
+        MZA=MT/10
         M5=0
         IF(MT.LE.9999) CYCLE
-        M5=MT-10*(MT/10)
+        M5=MT-10*(MZA)
         IF(M5.LT.5) CYCLE
+C* LFS=5 is an alternative representation for radionuclide production
+C* Check if the regular entry LFS is present
+        IFOUND=0
+        DO MX=1,NXS
+          JZA=MTH(MX)/10
+          IF(ABS(JZA).EQ.ABS(MZA) .AND. MX.NE.IX) THEN
+            IFOUND=1
+C...
+C...        write(llg,*) '    Duplicate',mth(ix),mth(mx)
+C...
+            MTH(IX)=-ABS(MTH(IX))
+          END IF
+        END DO
+        IF(IFOUND.EQ.1) CYCLE
+C*
         ETH5=-1
         DO J=1,NPT
           XX=XSC(J,IX)
@@ -2699,11 +2737,11 @@ c...
         QQ=MAX(QQM(IX),QQM(I5))
         QQM(I5)=QQ
         QQI(I5)=QQ
-        KM=MT/10
+        AKM=MT/10
         WRITE(LTT,904) ' Added to MT5 the production of ZA/Q/E/X'
-     &                ,KM,QQ,ETH5,XTH5,INCL
+     &                ,AKM,QQ,ETH5,XTH5,INCL
         WRITE(LLG,904) ' Added to MT5 the production of ZA/Q/E/X'
-     &                ,KM,QQ,ETH5,XTH5,INCL
+     &                ,AKM,QQ,ETH5,XTH5,INCL
 C*
         IF(INCL.EQ.1) CYCLE
 C*      -- Check for inclusive particle production
@@ -2751,7 +2789,7 @@ c...
         end if
 c...
   100 RETURN
-  904 FORMAT(A,I6,1P,3E10.3,I4)
+  904 FORMAT(A,F8.1,1P,3E10.3,I4)
       END
       
       
@@ -3372,7 +3410,7 @@ C...    PRINT *,'MZA,MIS',MZA,MIS
 C...
         DO J=1,NEN
           XX=XSC(J,I)
-          IF(XX.GT.XSMAL .OR. MIS.GT.0) THEN
+          IF(XX.GT.XSMAL .OR. (MIS.GT.0 .AND. MIS.NE.5)) THEN
 C*          -- Count non-zero cross sections and isomers
             NPT=NPT+1
             XMX=MAX(XMX,XX)
@@ -4644,8 +4682,30 @@ C...    END IF
 C* Reconstruct Q-values from MT and the binding energies
   316 QQ0=QQ
       EL =QI-QQ
-      CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
+      IF(QQ.EQ.0 .AND. (MT.NE.9151 .AND. MT.NE.91 .AND. MT.NE.456)) THEN
+C*      If undefined, reconstruct Q-values from MT and binding energies
+        CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
+        WRITE(LER,*) 'WARNING - Q-val. for MT',MT,' calculated with QVAL'
+     &              ,' from particle binding energies QQ=',QQ
+      END IF
+C...
+C...  if(jza.eq.71178) then
+C...     WRITE(7,*) 'IMT,MT,IZA,IZI,JZA,qq,qq0'
+C... &              ,IMT,MT,IZA,IZI,JZA,qq,qq0
+C...     write(7,*) ' '
+C...  end if
+C...
       QI =QQ+EL
+C... There is something wrong with Q-values printed on "Decaying nucleus"
+C... If the difference from QQ0 is large, adopt QQ0
+C...  RQQ=1
+C...  IF(QQ0.NE.0) RQQ=QQ0/QQ-1
+C...  IF(ABS(RQQ).LT.1.E-5) THEN
+C...    WRITE(LER,*) '    Use MT',MT,' Q-value',QQ0,' instead of',QQ
+C... &              ,' (read from Decaying nucleus)'
+C...    QQ=QQ0
+C...  END IF
+C...
 C* Test if reaction is already registered
 C*  - ENDF MT-numbers <999
 C*  - 10*ZA+LFS for isomer production
@@ -4677,9 +4737,14 @@ C...
       IF(ABS(QQ0-QQ) .GT. ABS(QQ)/10000) THEN
         WRITE(LTT,'(A,I7,1P,E11.3,2(A,E11.4))')
      &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ, ' at E',EE
+        WRITE(LER,'(A,I7,1P,E11.3,2(A,E11.4))')
+     &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ, ' at E',EE
       END IF
       IXS=NXS
 C* Save Q-values and cross section for this reaction
+C...
+C...  write(ler,*) 'mt,qq0,qq,qi',mt,qq0,qq,qi
+C...
       MTH(IXS)=MT
       QQM(IXS)=QQ
       QQI(IXS)=QI
@@ -5313,6 +5378,7 @@ C-D        -5  MXR limit exceeded'
 C-
 C* No.of input angles MXA, fine grid angles MXZ, particles/reaction MXP
       PARAMETER    (MXA=200, MXZ=400, MXP=200, MXGAM=200)
+      CHARACTER*2   CH
       CHARACTER*8   POUT(MXP),PTST
       CHARACTER*40  FL92,FLPT,FLCU,BLNK
       CHARACTER*136 REC
@@ -5542,6 +5608,9 @@ C*        -- Find pseudo-threshold energy (if applicable)
             IF(XS3.GT.0) EXIT
             IF(EN3.GT.ETH) ETEF=EN3
           END DO
+c...
+C...      print *,'Found en3,xs3,etef',en3,xs3,etef
+c...
           GO TO 210
         END IF
       END DO
@@ -5565,6 +5634,9 @@ C*      Count fission reactions
 C* Read the incident particle energy
   300 READ (REC(51:60),994) EE
       EE=EE*1.E6
+c...
+C...  if(mt6.eq.91 .or. mt6.eq.102) print *,' Jumped to 300 '//rec(1:70)
+c...
 C...
 C...  PRINT *,' ==============================='
 C...  PRINT *,' Reading energy',EE,(EE-ETH),-EE*SMALL,MT,mtc,mtx
@@ -5573,6 +5645,9 @@ C...
       NGAM=0
       NFIS=0
       JFIS=0
+C...
+C...  print *,'EE,E0,ETH,de,detest',EE,E0,ETH,ee-eth,-ee*small
+C...
       IF(EE.GT.E0 .AND. (EE-ETH).GT.-EE*SMALL) GO TO 310
 C* Skip to next energy if current less or equal to previous point
   302 READ (LIN,891,END=700) REC
@@ -5599,6 +5674,9 @@ C*    -- Identify the reaction
 C*      -- Assign MT number from residual ZA (save MT into MTSV)
         MEQ=0
         CALL EMTIZA(IZI,IZA,JZA,MT,MEQ)
+c...
+C...    print *,REC(20:29),JZ,CH,JA,MT,MEQ,MTC
+c...
         IF(MT.EQ.0) MT=10*JZA+5
         MTX=MT
         IF(MTX.EQ. 50) MTX= 91
@@ -5688,11 +5766,14 @@ c...    print *,'              ',egam(nprim+1),gxs(nprim+1)
 c...    print *,'              ',egam(NGAM),gxs(NGAM)
 c...
         GO TO 210
+      ELSE
+        GO TO 210
       END IF
       GO TO 314
 C*
 C* Read the elastic angular distributions
-  400 IF(MT6.NE.-2) GO TO 210
+  400 CONTINUE
+      IF(MT6.NE.-2) GO TO 210
 C...
 C...  print *,'Extract elastic cross section'
 C...
@@ -5867,6 +5948,9 @@ C* Save a copy of the tabular distribution
 C*
 C* Read the energy/angle distribution data
   600 IF(REC(24:34).EQ.'(z,partfis)') GO TO 210
+c...
+C...  print *,' '//rec(1:70)
+c...
       MT =0
       E0 =EE
       DELTAE=SMALL
