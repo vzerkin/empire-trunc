@@ -4,10 +4,10 @@ module ph_lvl_dens
 
     implicit none
 
-    real*8 cnex      ! excitation energy of compound nucleus [MeV]
-    real*8 sp_den    ! single particle state density [1/MeV]
-    real*8 bind_e    ! neutron binding energy for conditional state densities [MeV]
-    real*8 signx     ! width [MeV]
+    real*8 cnex      !! excitation energy of compound nucleus [MeV]
+    real*8 sp_den    !! single particle state density [1/MeV]
+    real*8 bind_e    !! neutron binding energy for conditional state densities [MeV]
+    real*8 signx     !! width [MeV]
 
     private w1, w2, w3
 
@@ -20,10 +20,10 @@ contains
         ! calculates conditional p-h state densities according
         ! to Nucl. Phys. A430(1984)69 (including all necessary factors)
 
-        integer*4, intent(in) :: In   !
-        integer*4, intent(in) :: IP   ! particle number
-        integer*4, intent(in) :: IH   ! hole number
-        real*8, intent(in) :: X    ! excitation energy
+        integer*4, intent(in) :: In   !!
+        integer*4, intent(in) :: IP   !! particle number
+        integer*4, intent(in) :: IH   !! hole number
+        real*8, intent(in) :: X    !! excitation energy
 
         WT = W(Ip, Ih, X)/fact(Ip)/fact(Ih)*sp_den**In
 
@@ -37,9 +37,9 @@ contains
         ! calculates conditional p-h state densities according
         ! to Nucl. Phys. A430(1984)69 without g**n/p!/h!
 
-        integer*4, intent(in) :: IP   ! particle number
-        integer*4, intent(in) :: IH   ! hole number
-        real*8, intent(in) :: X    ! excitation energy
+        integer*4, intent(in) :: IP   !! particle number
+        integer*4, intent(in) :: IH   !! hole number
+        real*8, intent(in) :: X    !! excitation energy
 
         integer*4 ix
         real*8 pix
@@ -195,9 +195,9 @@ contains
         ! the actual version accounts for the factor 1/2 as pointed
         ! out by Oblozinsky (Nucl. Phys. A453(1986)127)
 
-        integer*4, intent(in) :: IP   ! particle number
-        integer*4, intent(in) :: IH   ! hole number
-        real*8, intent(in) :: X    ! excitation energy
+        integer*4, intent(in) :: IP   !! particle number
+        integer*4, intent(in) :: IH   !! hole number
+        real*8, intent(in) :: X    !! excitation energy
 
         integer*4 ip1
         real*8 e1b, ro1, roph, xh2, xp
@@ -224,9 +224,9 @@ contains
 
         implicit none
 
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
-        real*8, intent(in) :: X    ! excitation energy
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
+        real*8, intent(in) :: X       !! excitation energy
 
         real*8 a, a1, e2b
 
@@ -251,9 +251,9 @@ contains
 
         implicit none
 
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
-        real*8, intent(in) :: X    ! excitation energy
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
+        real*8, intent(in) :: X       !! excitation energy
 
         minus = W(2, 1, cnex - X)*W(Ip - 2, Ih - 1, X)*dble(Ip*(Ip - 1)*Ih)/2.D0
 
@@ -269,8 +269,8 @@ contains
         ! Nucl. Phys. A453(1986)127 formula 13; without factor
         ! g**(p+h)/p!h!(n-1)! and neglecting well depth
 
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
         integer*4, intent(in) :: Ni   !
         real*8, intent(in) :: U    !
 
@@ -312,8 +312,8 @@ contains
         ! backward transitions  (without g/w(p,h,e,-1) factor)
         ! using Oblozinsky's formula for cond. st. den.
 
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
 
         integer*4 n1, n2
         real*8 ebe, yb
@@ -344,8 +344,8 @@ contains
         ! exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
         ! weighting funtion in the case of particles (analogous for holes)
 
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
         real*8, intent(in) :: U    !
 
         real*8, parameter :: c = 3.0D-3
@@ -445,8 +445,8 @@ contains
         real*8, parameter :: pi = 3.1415926535897932D0 ! until we have base class
 
         integer*4, intent(in) :: N    !
-        integer*4, intent(in) :: Ip   ! particle number
-        integer*4, intent(in) :: Ih   ! hole number
+        integer*4, intent(in) :: Ip   !! particle number
+        integer*4, intent(in) :: Ih   !! hole number
         integer*4, intent(in) :: J    !
         integer*4, intent(in) :: Ngs  !
         real*8, intent(in) :: S    !
@@ -492,10 +492,10 @@ contains
         !*                                                                        *
         !**************************************************************************
 
-        integer*4, intent(in) :: np    ! number of particles
-        integer*4, intent(in) :: nh    ! number of holes
-        real*8, intent(in) :: x     ! excitation energy [MeV]
-        real*8, intent(in) :: f     ! nuclear potential depth
+        integer*4, intent(in) :: np    !! number of particles
+        integer*4, intent(in) :: nh    !! number of holes
+        real*8, intent(in) :: x     !! excitation energy [MeV]
+        real*8, intent(in) :: f     !! nuclear potential depth
 
         integer*4 i, j, nn
         real*8 alpha, aph, ch, cp, ecor, ecor1, h, p, sum0, t1, t2
