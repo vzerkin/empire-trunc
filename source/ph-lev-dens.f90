@@ -346,9 +346,10 @@ contains
 
         integer*4, intent(in) :: Ip   !! particle number
         integer*4, intent(in) :: Ih   !! hole number
-        real*8, intent(in) :: U    !
+        real*8, intent(in) :: U    !! excitiation energy
 
-        real*8, parameter :: c = 3.0D-3
+        real*8, parameter :: c = 3.0D-3 !! Mahaux factor in imaginary potential depth W=c*E^2
+        real*8 :: cfact = 0.8d+0  !! factor allowing to scale c and adjust Gamma down  
 
         integer*4 ih1, ip1, n
         real*8 ub, x, w1, w2, w3, w4, w5, w6, w7, w8
@@ -380,11 +381,11 @@ contains
         ! particle part
 
         VQ = 2.D0/x/(x + 1.D0)*(w3 - w4) - 2.D0/x*w5*bind_e - w6*bind_e*bind_e
-        VQ = VQ*dble(Ip)*c/x/(w1 - w2)
+        VQ = VQ*dble(Ip)*cfact*c/x/(w1 - w2)
 
         ! hole part
 
-        VQ = VQ + 2.D0*c*dble(Ih)*w7/(x*x*(x + 1.D0)*w8)
+        VQ = VQ + 2.D0*cfact*c*dble(Ih)*w7/(x*x*(x + 1.D0)*w8)
 
         return
     end FUNCTION VQ
