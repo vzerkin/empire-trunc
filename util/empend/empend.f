@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2023-05-29 08:30:37 +0200 (Mo, 29 Mai 2023) $
+Ccc   * $Author: zerkin $
+Ccc   * $Date: 2023-06-14 18:24:41 +0200 (Mi, 14 Jun 2023) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -4685,7 +4685,7 @@ C* Reconstruct Q-values from MT and the binding energies
       IF(QQ.EQ.0 .AND. (MT.NE.9151 .AND. MT.NE.91 .AND. MT.NE.456)) THEN
 C*      If undefined, reconstruct Q-values from MT and binding energies
         CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
-        WRITE(LER,*) 'WARNING - Q-val. for MT',MT,' calculated with QVAL'
+        WRITE(LER,*)'WARNING - Q-val. for MT',MT,' calculated with QVAL'
      &              ,' from particle binding energies QQ=',QQ
       END IF
 C...
