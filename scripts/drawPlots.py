@@ -197,18 +197,22 @@ def reactionName(i):
 
     print("MF/MT, Einc, Elevel, outParticle ", MF, MT, Einc, Elevel, ejectile,
           yamlSection, reactionTitle)
+
     return yamlSection, reactionTitle, MF, MT, Einc, ejectile, isomerSuff
 
 
 def decluter():
     """Manipulates the first line of the LSTTAB.CUR file to remove clutter in the legend.  """
+    # pass
     with open("LSTTAB.CUR", 'r') as f:
         ff = f.readlines()
+    cluter = ff[0][60:79]
     ff[0] = ff[0][:59] + "                    " + ff[0][79:]
     with open("temp", 'w') as tempf:
         tempf.writelines(ff)
     os.system("rm LSTTAB.CUR 2>/dev/null")
     os.system("mv temp LSTTAB.CUR")
+    return cluter
 
 
 def writeMiniPlotc4(material, MF, Einc, Inelastics):
@@ -351,7 +355,7 @@ def runLSTTAB(ine):
     # os.system("rm LSTTAB.INP zv.eps zvd.eps 2>/dev/null")
     print("print7")
     if ine == 1:
-        decluter()
+        cluter = decluter()
         os.system("mv LSTTAB.PNT LSTTAB.PNT{}".format(ine))
     os.system("mv LSTTAB.CUR LSTTAB.CUR{}".format(ine))
     os.system("rm LSTTAB.INP 2>/dev/null")
@@ -385,7 +389,7 @@ else:
     exit()
 
 # Move ps01.tit file out of the way (it will be restored by the end of this script)
-# os.copy(ps01.tit, ps01.tit.ToBeRestored)
+os.system("mv ps01.tit ps01.tit.ToBeRestored")
 
 # open PLOTC4 list of possible plots (the one in the right-hand-side of the "ZVV plots" tab in GUI)
 plotc4 = open(file + '-log.plotc4', 'r')
@@ -453,16 +457,17 @@ for i in plotNumi:
 
     #  get reaction specifications from reactionName
     channel, reactionTit, MF, MT, Einc, ejectile, isomerSuff = reactionName(i)
+    print("Reaction title returned: ", reactionTit)
 
     # create reaction specific part of the configuration file ps01.tit
     with open("psSpecific.tit", 'w') as p:
-        p.write("\n")
-        p.write("NODIALOG: " + nodialog + "\n")
+        # p.write("\n")
         if config["reaction"][channel]["name"] == "":
             p.write("TIT:" + element + reactionTit + "\n")
         else:
-            p.write("TIT:" + element + config["reaction"][channel]["name"] +
-                    "\n")
+            p.write("TIT:" + element + reactionTit + "\n")
+            # p.write("TIT:" + element + config["reaction"][channel]["name"] +
+            #         "\n")
         p.write("TIT3XY: " + config["reaction"][channel]["title_xy"] + "\n")
         p.write("LEGEND: " + legend + "\n")
         if config["reaction"][channel]["legend_xy"] == "":
@@ -497,6 +502,7 @@ for i in plotNumi:
         else:
             divider = str(0)
         p.write("DIVIDER: " + divider + "\n")
+        p.write("NODIALOG: " + nodialog + "\n")
 
     # Read psTemp.tit from the c4zvd directory (unlikely to be modified, part of ps01.tit)
     os.system("rm ps01.tit 2>/dev/null")
@@ -534,29 +540,29 @@ for i in plotNumi:
         os.system("$EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP ")
         # os.system("$EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP >/dev/null")
         # os.system("rm LSTTAB.INP zv.eps zvd.eps 2>/dev/null")
-        decluter()
+        cluter = decluter()
 
     # Run Zvd plotting
     os.system(
         "$EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd >/dev/null"
     )
 
+    # Make plot axes thiner
+    os.system("sed 's/ax_lw 1.5 def/ax_lw 1.0 def/' zv.eps > zvc.eps 2>/dev/null")
     # Correct y-axis legend position
-    os.system("sed 's/^0 (s/10 (s/' zv.eps > zvd.eps 2>/dev/null")
-    os.system("sed 's/^0 (d2/10 (d2/' zvd.eps > zv.eps 2>/dev/null")
-    os.system("sed 's/^0 (/10 (/' zv.eps > zvd.eps 2>/dev/null")
+    os.system("sed 's/axy_left -28 def/axy_left  0 def/' zvc.eps > zvd.eps 2>/dev/null")
+    os.system("sed 's/axy_down -12 def/axy_down  5 def/' zvd.eps > zv.eps 2>/dev/null")
 
     # Rename created plots
     plotName = file + suf + "-MF" + str(MF) + "-MT" + str(
         MT) + isomerSuff + "-Id" + str(i)
-    os.system("mv zvd.eps {}.eps".format(plotName))
+    os.system("mv zv.eps {}.eps".format(plotName))
     os.system("mv DDXPLOT.zvd {}.zvd".format(plotName))
 
     # Clean and remove specific version of the ps01.tit to restore normal operation from GUI
-    os.system("rm ps01.tit psSpecific.tit 2>/dev/null")
-    os.system(
-        "rm cur.zvd pnt.zvd zv.eps tmp.dat temp-log.plotc4 LSTTAB.* 2>/dev/null"
-    )
+    # os.system("rm ps01.tit psSpecific.tit 2>/dev/null")
+    os.system("rm cur.zvd pnt.zvd zvd.eps zvc.eps tmp.dat temp-log.plotc4 LSTTAB.* 2>/dev/null")
+    # os.system("cp ps01.tit.ToBeRestored ps01.tit ")
 
 plotc4.close
 # input("hit any key to quit")

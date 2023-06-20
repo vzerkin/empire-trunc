@@ -29,15 +29,24 @@ def replace_string(old_string, new_string, file_to_modify):
     f.close()
 
 
-if os.path.isfile("ps01.tit"):
-    os.system("mv ps01.tit ps01.tit-mem")
-    os.system("ln -sf $EMPIREDIR/util/c4zvd/ps02.tit ps01.tit"
-              )  # use ps02.tit to be non-interactive
+# if os.path.isfile("ps01.tit"):
+#     os.system("mv ps01.tit ps01.tit-mem")
+#     os.system("ln -sf $EMPIREDIR/util/c4zvd/ps02.tit ps01.tit"
+#               )  # use ps02.tit to be non-interactive
 
 for file in glob.glob('*.zvd'):
     # Change a default zvd string to a nicer one below.
     # Multiple lines are allowed (remove comment sign!)
-    replace_string('73-Ta-181', '{+181}Ta', file)
+    replace_string(' 73-Ta-181', ' {+181}Ta', file)
+    replace_string(' 78-Pt-190', ' {+190}Pt', file)
+    replace_string(' 78-Pt-191', ' {+191}Pt', file)
+    replace_string(' 78-Pt-192', ' {+192}Pt', file)
+    replace_string(' 78-Pt-193', ' {+193}Pt', file)
+    replace_string(' 78-Pt-194', ' {+194}Pt', file)
+    replace_string(' 78-Pt-195', ' {+195}Pt', file)
+    replace_string(' 78-Pt-196', ' {+196}Pt', file)
+    replace_string(' 78-Pt-197', ' {+197}Pt', file)
+    replace_string(' 78-Pt-198', ' {+198}Pt', file)
     replace_string('Cross Section Uncertainty', ' ', file)
     replace_string('dot: o', 'dot:  ', file)
     replace_string('bot: .', 'bot:  ', file)
@@ -55,16 +64,18 @@ for file in glob.glob('*.zvd'):
     out_file = file + '.eps'
     os.rename(out_file, 'zv.eps')
 
-    # Correct y-axis legend position
-    os.system("sed 's/^0 (s/10 (s/' zv.eps > zvd.eps 2>/dev/null")
-    os.system("sed 's/^0 (d2/10 (d2/' zvd.eps > zv.eps 2>/dev/null")
-    os.system("sed 's/^0 (/10 (/' zv.eps > zvd.eps 2>/dev/null")
+    # Make plot axes thiner
+    os.system("sed 's/ax_lw 1.5 def/ax_lw 1.0 def/' zv.eps > zvc.eps 2>/dev/null")
+
+    # Correct y-axis legend position in eps file
+    os.system("sed 's/axy_left -28 def/axy_left  0 def/' zvc.eps > zvd.eps 2>/dev/null")
+    os.system("sed 's/axy_down -12 def/axy_down  5 def/' zvd.eps > zv.eps 2>/dev/null")
     os.system(
-        "sed 's/%%BoundingBox: 60 60 541 455/%%BoundingBox: 60 60 541 445/' zvd.eps > zv.eps 2>/dev/null"
+        "sed 's/%%BoundingBox: 60 60 541 455/%%BoundingBox: 60 60 541 445/' zv.eps > zvd.eps 2>/dev/null"
     )
     eps_file = root + '.eps'
-    os.rename('zv.eps', eps_file)
-    os.system("rm zvd.eps")
+    os.rename('zvd.eps', eps_file)
+    os.system("rm zv.eps")
 
-if os.path.isfile("ps01.tit-mem"):
-    os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit
+# if os.path.isfile("ps01.tit-mem"):
+#     os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit
