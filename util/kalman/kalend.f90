@@ -384,10 +384,16 @@ contains
 
         ! don't plot corr if cross section is less than a microbarn
 
-        ist = 1
-        do while((y(ist) <= 1.D-03) .and. (ist <= ken))
-            ist = ist + 1
-        end do
+        ! ist = 1
+        ! do while((ist <= ken) .and. (y(ist) <= 1.D-03) )
+        !     ist = ist + 1
+        ! end do
+
+        do ist = 1, ken
+            if (y(ist) >= 1.D-03) exit
+        enddo
+
+
 
         open(25,file='corrplot.d',status='UNKNOWN',action='write')
 
@@ -683,12 +689,14 @@ contains
 
         ! create our MF33 section
 
+        write(6,*) 'Create MF=33 section MT=', mt1
         nf33%mt  = mt1
         nf33%za  = mat%mf1%za
         nf33%awr = mat%mf1%awr
         nf33%mtl = 0
         nf33%nl  = 1
         allocate(nf33%sct(1))
+        write(6,*) 'Allocated MF=33 section MT=', mt1
         sct => nf33%sct(1)
         sct%mf1  = 0
         sct%lfs1 = 0
@@ -697,6 +705,7 @@ contains
         sct%nc    = 0
         sct%ni    = 1
         allocate(sct%nis(1))
+        write(6,*) 'Allocated MF=33 MT=',mt1,' subsection =', 1
         ni => sct%nis(1)
         ni%lb = 5
         ni%ls = 1
@@ -705,6 +714,7 @@ contains
         ni%ll => null()
         ni%ec => null()
         allocate(ni%e(ne),ni%cov(ne-1,ne-1))
+        write(6,*) 'Allocated MF=33 MT=',mt1,' subsection =', 1, ' covarince data'
         ni%e = en*1.D+06
         ni%cov = cov
 
@@ -752,7 +762,7 @@ contains
 
         type (mf_33), target :: nf33
         type (mf_33), save, pointer :: mf33
-        type (mf33_sect), pointer :: sct
+        type (mf33_sect), pointer :: sc
         type (ni_cov_sect), pointer :: ni
 
         ! integer*4, parameter :: mt(nrs) = (/1,2,4,5,16,102,103,107/) ! MT selected for ENDF formating (defined already)
@@ -763,25 +773,30 @@ contains
         ! create our MF33 section
 
         ! create section header line data
+        write(6,*) 'Create MF=33 section MT=', mt1
         nf33%mt  = mt1
         nf33%za  = mat%mf1%za
         nf33%awr = mat%mf1%awr
         nf33%mtl = 0
-        nf33%nl  = 1 ! calculate here how many section i.e., nrs-current section position we need
-
+        nf33%nl  = 1 ! calculate here how many subsections (cross-reaction correlations) are needed
         il = findloc(mt,mt1,1)
+        ! write(*,*) 'il set to ',il
+
         do inl = 1,nf33%nl  ! 1 implies a diagonal subsection for mt1, i.e. no reaction cross-correlations
-            write(*,*) 'inl =',inl
+            ! write(*,*) 'Section running number =',inl
             allocate(nf33%sct(inl))
-            sct => nf33%sct(inl)
-            sct%mf1  = 0
-            sct%lfs1 = 0
-            sct%mat1  = 0
-            sct%mt1   = mt(il+inl-1)
-            sct%nc    = 0
-            sct%ni    = 1 !inl   ! 1 ! total number of ni(inl)-type subsections
-            allocate(sct%nis(1))
-            ni => sct%nis(1)
+            ! write(6,*) 'Allocated MF=33 section # ', inl
+            sc => nf33%sct(inl)
+            sc%mf1  = 0
+            sc%lfs1 = 0
+            sc%mat1  = 0
+            sc%mt1   = mt(il+inl-1)
+            write(*,*) '2nd cross reaction MT = ', sc%mt1
+            sc%nc    = 0
+            sc%ni    = 1 !inl   ! 1 ! total number of ni(inl)-type subsections
+            allocate(sc%nis(1))
+            ! write(*,*) 'Allocated MF=33 section for 2nd MT =', sc%mt1, 'covarianace subsection'
+            ni => sc%nis(1)
             ni%ne = ne
             ni%kl => null()
             ni%ll => null()
@@ -790,9 +805,10 @@ contains
                 ni%ls = 1
                 ni%ec => null()
                 allocate(ni%e(ne),ni%cov(ne-1,ne-1))
+                write(*,*) 'Allocated diagonal matrices for MT = ', nf33%mt 
                 ni%e = en*1.D+06
                 ni%cov = cov
-            write(*,*) ' ni-lb-1 ', sct%nis(1)%lb, sct%nis(1)%ne, ni%lb, sct%mt1
+                ! write(*,*) 'Diagonal subsection ', sc%nis(1)%lb, sc%nis(1)%ne, sc%mt1
             else                ! LB=6
                 ni%lb = 6
                 ni%ls = 0
@@ -801,7 +817,7 @@ contains
                 ni%e = en*1.D+06
                 ni%ec = en*1.D+06
                 ni%cov = cov
-            write(*,*) ' ni-lb-2',  sct%nis(1)%lb, sct%nis(1)%ne, ni%lb, sct%mt1
+            write(*,*) 'Off-diagonal subsection',  sc%nis(1)%lb, sc%nis(1)%ne, sc%mt1
             end if
         end do
 
@@ -812,13 +828,15 @@ contains
         ! ENDF evaluation, which may have an different energy
         ! range from the one we're replacing. For now, just
         ! stick in the MF33 for this MT in the ENDF file.
-        
-        ! mf33 => pop(mat%mf33,mt1)
-        print *, "putting cov for mt=", mt1
+        ! write(*,*) 'pop old', mat%mf33%mt
+        mf33 => pop(mat%mf33,mt1)   ! HERE invalid memory reference when subsection is missing with the  'new scenic route'
+        ! print *, 'removed existing MF33, MT = ', mt1
+        print *, "Putting cov for  MT = ", mt1
         qins = put(mat%mf33,nf33)
         if(.not.qins) then
-            write(6,*) ' Error inserting MF33, MT=',mt1
+            write(6,*) ' Error, MF33, MT =',mt1, ' not inserted'
         endif
+        print *, ' '
 
         ! if(mt1 == mt(nrs) .and. mt2 == mt(nrs) .or. writeRun) then
             ! print *, "what's inside ", endf%mat%mf33%sct(1)%mt1
@@ -828,7 +846,7 @@ contains
             ! print *, "what's inside ", endf%mat%mf33%sct(5)%mt1
             ! print *, "what's inside ", endf%mat%mf33%sct(6)%mt1
             ! kalFile = file(l1:l2)//'-mt'//trim(str(mt1))//'-kal.endf'
-            call system('rm -r '//kalFile)
+            call system('rm -r '//kalFile//' 2>/dev/null')
             status = write_endf_file(kalFile,endf)
             if(status /= 0) then
                 write(6,*) ' Error writing ', kalFile
