@@ -302,33 +302,33 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8   CSRead
    real*8   D1Fra
    real*8   DE
-   real*8   DEFga
-   real*8   DEFgp
-   real*8   DEFgw
-   real*8   DEFpar
-   real*8   DEFprj
-   real*8   DEGa
-   real*8   DENhf
-   real*8   DERec
-   real*8   DFUs 
-   real*8   DIRect 
-   real*8   DIToro
-   real*8   DV 
-   real*8   DEFdyn
-   real*8   DEFsta
-   real*8   ECUtcoll
-   real*8   EGDr1 
-   real*8   EGDr2 
-   real*8   EINl         
-   real*8   SUMlev_alf
-   real*8   EDDfig  
-   real*8   EWSr2
-   real*8   EX1
-   real*8   EX2
-   real*8   EXCn
-   real*8   EXPush
-   real*8   FCC
-   real*8   EWSr1
+   real*8   DEFga       !! Amplitude of the Gaussian term defined by Eq. \ref{BfJfade};  positive value increases fission barrier
+   real*8   DEFgp       !! $J_{G}$ (spin position) of the Gaussian (term Eq. \ref{BfJfade})
+   real*8   DEFgw       !! $\Delta J_{G}$ (width in spin) in the Gaussian (term of Eq. \ref{BfJfade})
+   real*8   DEFpar      !! Coefficient \emph{b} in Eq. \ref{defor}
+   real*8   DEFprj      !! Deformation of the projectile
+   real*8   DEGa        !! probably related to DEGAS and NOT used???
+   real*8   DENhf       !! Hauser-Feshbach denominator
+   real*8   DERec       !! Bin width in recoil spectra     
+   real*8   DFUs        !! Diffuseness in the transmission coefficients of HI fusion
+   real*8   DIRect      !! Controls use of direct models
+   real*8   DIToro      !! Factor in energy increase of GDR width
+   real*8   DV          !! Parameter used to adjust the barrier in CCFUS (Default 20) 
+   real*8   DEFdyn      !! Multiplies DWBA dynamical deformation 
+   real*8   DEFsta      !! scales CC static deformation 
+   real*8   ECUtcoll    !! Cut-off energy for collective DWBA levels
+   real*8   EGDr1       !! GDR energy of first peak
+   real*8   EGDr2       !! GDR energy of second peak
+   real*8   EINl        !! Incident energy in LAB   
+   real*8   SUMlev_alf  !! Total population of levels in prime alpha reside
+   real*8   EDDfig      !! If >0 DE and DD spectra will be plotted at incident energy EDDfig (MeV) 
+   real*8   EWSr1       !! Scales gamma strength for the first GDR hump
+   real*8   EWSr2       !! Scales gamma strength for the second GDR hump
+   real*8   EX1         !! Initial number of excitons that are neutrons
+   real*8   EX2         !! Initial number of excitons that are neutrons
+   real*8   EXCn        !! Excitation energy of compound nucleus
+   real*8   EXPush      !! Extra-push energy in HI fusion
+   real*8   FCC         !! FCC parameter in CCFUS
    real*8   EMInmsd
    real*8   GDIv
    real*8   FCOred
