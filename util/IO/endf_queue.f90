@@ -1646,6 +1646,7 @@ contains
         do while (associated(mf))
             if (mf%mt < mt) then
                 lm => mf
+                if(.not.associated(mf%next)) exit
                 mf => mf%next
             else if (mf%mt == mt) then
                 exit
