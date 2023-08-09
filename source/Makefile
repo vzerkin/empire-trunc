@@ -1,6 +1,6 @@
-#$Rev: 5485 $
+#$Rev: 5500 $
 #$Author: mwherman $
-#$Date: 2023-05-23 02:25:44 +0200 (Di, 23 Mai 2023) $
+#$Date: 2023-08-09 23:29:07 +0200 (Mi, 09 Aug 2023) $
 
 # set default compilers:
 
@@ -30,14 +30,17 @@ ifeq ($(FC),gfortran)
   #---------------------------------
   #----flags for production compilation with gfortran
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
-  #FFLAGS = -O3 -pg -std=legacy
+  #FFLAGS = -O3 -ftree-vectorize -ffast-math -std=legacy -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp 
+  #DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib	
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math
+  EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math 
+  #EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   #----flags for OPTMAN
-  OFLAGS = -O3 -w -ftree-vectorize -ffast-math -cpp 
+  #OFLAGS = -O3 -w -ftree-vectorize -ffast-math -cpp 
+  #OFLAGS = -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -134,12 +137,13 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
 
 all: 
 	$(MAKE) empire
-	cd ../source-optman; $(MAKE) "FC=$(FC)"; cd ../source
+	cd ../source-optman; $(MAKE) "FC=$(FC)" ; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
-	# svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
-	~/spack/opt/spack/darwin-catalina-x86_64/apple-clang-12.0.0/subversion-1.14.0-gcac6ggwz2rcagivwggru6meckmt7qmc/bin/svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+	svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+	# Below is MH version of the above if svn is not in the standard (PATH) location
+	#~/spack/opt/spack/darwin-catalina-x86_64/apple-clang-12.0.0/subversion-1.14.0-gcac6ggwz2rcagivwggru6meckmt7qmc/bin/svn info | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
 
 subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f

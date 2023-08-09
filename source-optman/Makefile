@@ -47,12 +47,14 @@ ifeq ($(FC),gfortran)
   #----flags for production compilation with gfortran
   # FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
   FFLAGS = -O2 -w -std=legacy -ffast-math -cpp
+  #FFLAGS = -O2 -w -std=legacy -ffast-math -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   ifeq ($(PARALLEL),OPENMP) 
     FFLAGS = $(FFLAGS) -fopenmp
   endif
   #FFLAGS = -O3 -pg -std=legacy -cpp
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv  -cpp
+  #DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv  -cpp  -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   # -pg shoudl be added for profiling
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
