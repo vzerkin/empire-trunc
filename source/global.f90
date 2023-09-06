@@ -34,29 +34,29 @@ PUBLIC
 !!
 !! DO NOT CHANGE parameters below unless you REALLY know what you are doing.
 !!
-   INTEGER*4, parameter :: NDANGecis = 91   !! number of angles in ECIS code                                                  
+   INTEGER*4, parameter :: NDANGecis = 91   !! number of angles in ECIS code
    INTEGER*4, parameter :: NDCC = 10                                                          
    INTEGER*4, parameter :: NDDEFCC = 6
-   INTEGER*4, parameter :: NDCOLLEV = 99    !! number of collective levels including DWBA in the contiuum                     
+   INTEGER*4, parameter :: NDCOLLEV = 99    !! number of collective levels including DWBA in the contiuum
    INTEGER*4, parameter  :: MAX_PRN = 30                                             
    INTEGER*4, parameter  :: NDEJC = 6        !! number of ejectiles                                                  
-   INTEGER*4, parameter  :: NDZMAX = 110     !! number of elements in symbol tables                                                 
-   INTEGER*4, parameter  :: NDEPFN = 251     !! number of energies in PFNS spectra                                                  
+   INTEGER*4, parameter  :: NDZMAX = 110     !! number of elements in symbol tables
+   INTEGER*4, parameter  :: NDEPFN = 251     !! number of energies in PFNS spectra
    INTEGER*4, parameter  :: NDAnghmx = 37    !! must be equal to NDAnghms in ddhms.cmb
    INTEGER*4, parameter  :: NLGRID = 301     !! number of points in the HFB GDR RIPL files      
-   INTEGER*4, parameter  :: NDVOM = 7        !! number of parameters in OMP real depth                                                  
-   INTEGER*4, parameter  :: NDWOM = 7        !! number of parameters in OMP imaginary depth                                                   
-   INTEGER*4, parameter  :: NDVSO = 7        !! number of parameters in OMP spin-orbit depth                                                   
-   INTEGER*4, parameter  :: NDRVOM = 3       !! number of parameters in OMP real radius                                                   
-   INTEGER*4, parameter  :: NDRWOM = 3       !! number of parameters in OMP imaginary radius                                                  
-   INTEGER*4, parameter  :: NDRVSO = 3       !! number of parameters in OMP spin-orbit radius                                                   
-   INTEGER*4, parameter  :: NDROPM = 7       !! number of level density parameters                                                  
+   INTEGER*4, parameter  :: NDVOM = 7        !! number of parameters in OMP real depth
+   INTEGER*4, parameter  :: NDWOM = 7        !! number of parameters in OMP imaginary depth
+   INTEGER*4, parameter  :: NDVSO = 7        !! number of parameters in OMP spin-orbit depth
+   INTEGER*4, parameter  :: NDRVOM = 3       !! number of parameters in OMP real radius
+   INTEGER*4, parameter  :: NDRWOM = 3       !! number of parameters in OMP imaginary radius
+   INTEGER*4, parameter  :: NDRVSO = 3       !! number of parameters in OMP spin-orbit radius
+   INTEGER*4, parameter  :: NDROPM = 7       !! number of level density parameters
    INTEGER*4, parameter  :: NDGDRPM = 10     !! number of GDR parameters
    INTEGER*4, parameter  :: NDGQRPM = 8      !! number of GQR parameters
    INTEGER*4, parameter  :: NDGMRPM = 8      !! number of GMR parameters                             
    INTEGER*4, parameter  :: NDKNTR = 3
-   INTEGER*4, parameter  :: NMAsse = 9066    !! number of nuclides in the mass table                                        
-   INTEGER*4, parameter  :: NDREGIONS = 14   !! number of exit channels in the IDNA matrix defining use of the models (neut. disc., neut. cont., prot. disc., prot. cont.,
+   INTEGER*4, parameter  :: NMAsse = 9066    !! number of nuclides in the mass table
+   INTEGER*4, parameter  :: NDREGIONS = 14   !! number of exit channels in the IDNA matrix defining use of the models
    INTEGER*4, parameter  :: NDMODELS = 6     !! number of reaction models
    INTEGER*4, parameter  :: NFtrans = 40
    INTEGER*4, parameter  :: NFMOD = 3        !! number of fission modes
@@ -102,7 +102,7 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8  S0_obs !! measured neutron strength function for S-wave
    real*8  S0_unc !! uncertaity of the neutron strength function
    real*8  Gg_obs !! obsered averaged gamma width at thermal
-   real*8  Gg_unc !! uncertainty of the gamma width 
+   real*8  Gg_unc !! uncertainty of the gamma width at thermal
 
 !! ECIS realted
    real*8  SANgler(ndangecis)
@@ -113,31 +113,31 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8  FLAm(ndcc)
 
 !!OMP Hamiltonian matrix elements
-   real*8  SR_Ham_hw
-   real*8  SR_Ham_amb0
-   real*8  SR_Ham_amg0
-   real*8  SR_Ham_gam0
-   real*8  SR_Ham_bet0
-   real*8  SR_Ham_bet4
-   real*8  SR_Ham_bb42
-   real*8  SR_Ham_gamg
-   real*8  SR_Ham_delg
-   real*8  SR_Ham_bet3
-   real*8  SR_Ham_et0
-   real*8  SR_Ham_amu0
-   real*8  SR_Ham_hw0 
-   real*8  SR_Ham_bb32
-   real*8  SR_Ham_gamde
-   real*8  SR_Ham_dpar
-   real*8  SR_Ham_gshape
+   real*8  SR_Ham_hw       !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_amb0     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_amg0     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_gam0     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_bet0     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_bet4     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_bb42     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_gamg     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_delg     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_bet3     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_et0      !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_amu0     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_hw0      !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_bb32     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_gamde    !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_dpar     !! Hamiltonian matrix element (OPTMAN)
+   real*8  SR_Ham_gshape   !! Hamiltonian matrix element (OPTMAN)
 
 !! PFNS parameters
-   real*8  PFNtke
-   real*8  PFNalp
-   real*8  PFNrat
-   real*8  PFNniu
-   real*8  PFNere
-   real*8  TMAxw
+   real*8  PFNtke    !! PFNS kinetic energy
+   real*8  PFNalp    !! PFNS parameter
+   real*8  PFNrat    !! PFNS parameter
+   real*8  PFNniu    !! PFNS parameter
+   real*8  PFNere    !! PFNS parameter
+   real*8  TMAxw     !! PFNS Maxwellian temperature
 
 !! Collective levels
    integer*4  D_Klv(ndcollev)
@@ -154,184 +154,177 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8     QCC(1:ndcc)
 
 !! ENDF MT numbers
-   integer*4  MT2
-   integer*4  MT91
-   integer*4  MT649
-   integer*4  MT699
-   integer*4  MT749
-   integer*4  MT799
-   integer*4  MT849
+   integer*4  MT2	   	!! elastic nucleus position
+   integer*4  MT91		!! inelastic nucleus position
+   integer*4  MT649		!! (z,p) residue position
+   integer*4  MT699		!! (z,d) residue position
+   integer*4  MT749		!! (z,t) residue position
+   integer*4  MT799		!! (z,3He) residue position
+   integer*4  MT849		!! (z,a) residue position
 
 !! Global correction factors    
-   real*8 ::  TOTred  = 1.0D0
-   real*8 ::  ELAred  = 1.0D0
-   real*8 ::  CELred  = 1.0D0
-   real*8 ::  CELcor  = 1.0D0  ! MAY NOT BE NEEDED
-   real*8 ::  rTOTRED = 1.0D0
-   real*8 ::  rFCCRED = 1.0D0
-   real*8 ::  rFUSRED = 1.0D0
-   real*8 ::  FUSred0 = 1.0D0
-   real*8 ::  FUSred  = 1.0D0
-   real*8 ::  rFCOred = 1.0D0
-   real*8 ::  rELAred = 1.0D0
-   real*8 ::  rCELred = 1.0D0
-   real*8 ::  rCELcor = 1.0D0 ! MAY NOT BE NEEDED
-   real*8 ::  FCCred0 = 1.0D0
-   real*8 ::  ELAred0 = 1.0D0
-   real*8 ::  FCOred0 = 1.0D0
-   real*8 ::  TOTred0 = 1.0D0
-   real*8 ::  rCINred(ndlv) = 1.0D0 ! ALL MATRX TO SET TO 1
+   real*8 ::  TOTred  = 1.0D0    !! total x-sec scale factor
+   real*8 ::  FUSred  = 1.0D0    !! fusion x-sec scale factor
+   real*8 ::  ELAred  = 1.0D0    !! elastic x-sec scale factor
+   real*8 ::  CELred  = 1.0D0    !! compound elastic scale factor
+   real*8 ::  FCCred  = 1.0d0    !! dicrete collective levels scaling factor
+   real*8 ::  FCOred  = 1.0D0    !! scaling factor on DWBA cross sections
+   real*8 ::  rTOTRED = 1.0D0    !! total x-sec scale factor in randomization
+   real*8 ::  rFCCRED = 1.0D0    !! CC scale factor in randomizaton
+   real*8 ::  rFUSRED = 1.0D0    !! fusion x-sec scale factor in randomization
+   real*8 ::  rELAred = 1.0D0    !! elastic scale factor in randomization
+   real*8 ::  rCELred = 1.0D0    !! compound elastic x-sec scale factor in randomization
+   real*8 ::  rCINred(ndlv) = 1.0D0 !! compound inelastic x-sec scale factor in randomization 
 
 !! Input options
 !! (to covert eventually to logical)
-   integer*4 :: FITomp = 0
-   integer*4 :: INTerf = 1
-   integer*4 :: KALman = 0
-   integer*4 :: LHMs   = 0
-   integer*4 :: MSC    = 1
-   integer*4 :: MSD    = 1
-!! (non-covertable to logical)
-   integer*4 :: LHRtw   = 1
-   integer*4 :: IOUt    = 3
-   integer*4 :: LEVtarg = 1
-   integer*4 :: NEMn    = 2
-   integer*4 :: NEMp    = 1
-   integer*4 :: NEMa    = 1
-   integer*4 :: NEMc    = 0
-   integer*4 :: NEXreq  = 80
-   integer*4 :: NHMs    = 0
-   real*8    :: EIN     = 5.0d0
-   real*8    :: FITlev  = 0.0d0
-   real*8    :: FCCred  = 1.0d0
-   real*8    :: GCAsc   = 1.0d0
+   integer*4 :: FITomp = 0    !! fit OM parameters
+   integer*4 :: INTerf = 1    !! include Engelbrecht-Weidenmueller transformation
+   integer*4 :: KALman = 0    !! run sensitivity calculations for Kalman
+   integer*4 :: LHMs   = 0    !! run HMS calculations
+   integer*4 :: MSC    = 1    !! run MSC calculations
+   integer*4 :: MSD    = 1    !! run MSD calculations
+
+   !! (non-convertable to logical)
+   integer*4 :: LHRtw   = 1      !! selects Widths Fluctuation model and its elastic enhacment option
+   integer*4 :: IOUt    = 3      !! amouint of output
+   integer*4 :: LEVtarg = 1      !! level in which target is
+   integer*4 :: NEMn    = 2      !! number of neutrons to follow
+   integer*4 :: NEMp    = 1      !! number of protons to follow
+   integer*4 :: NEMa    = 1      !! number of alphas to follow
+   integer*4 :: NEMc    = 0      !! number of clusters to follow
+   integer*4 :: NEXreq  = 80     !! number of requested bins in the continum
+   integer*4 :: NHMs    = 0      !! number of Monts Carlo events in HMS
+   real*8    :: EIN     = 5.0d0  !! incident projectile energy
+   real*8    :: FITlev  = 0.0d0  !! controls fitting of cumulative number of discrete levels
+   real*8    :: GCAsc   = 1.0d0  !! controls gamma cascade in a CN
 
 !! others
-   integer*4  ICOmpff
-   integer*4  IX4ret 
-   integer*4  PESpin
-   integer*4  NNG_xs
-   integer*4  F_Print
-   integer*4  NPRIm_g
-   integer*4  NPAirpe
-   integer*4  FHMs
-   integer*4  IDEfcc
-   integer*4  IFLuc
-   integer*4  IGE1
-   integer*4  IGE2
-   integer*4  IGM1
-   integer*4  IOMwritecc
-   integer*4  IOPsys
-   integer*4  IOPran
-   integer*4  IDDfig(3)
-   integer*4  IWArn
-   integer*4  JCUtcoll
-   integer*4  KEY_gdrgfl
-   integer*4  KEY_shape
-   integer*4  KTRompcc
-   integer*4  LMAxcc
-   integer*4  MODelecis
-   integer*4  MAXmult
-   integer*4  NACc
-   integer*4  ND_nlv
-   integer*4  NEJcm
-   integer*4  NANgela
-   integer*4  IHFnew
-   integer*4  NLW
-   integer*4  NNUcd
-   integer*4  NNUct
-   integer*4  NOUt
-   integer*4  NPRoject
-   integer*4  NRBar
-   integer*4  NRWel
-   integer*4  NSCc
-   integer*4  NTArget
-   integer*4  NENdf
-   integer*4  NEXclusive
-   integer*4  NDAng
-   integer*4  ICAlangs
-   integer*4  FISspe
-   integer*4  SFAct
-   integer*4  IPArcov
-   integer*4  ngamm_tr
-   integer*4  nfiss_tr
-   integer*4  PLcont_lmax(NDEX)
-   integer*4  IDNa(ndregions,ndmodels)
+   integer*4  ICOmpff      !! controls use of compressional factor in MSD (0 - off, 1 - on)
+   integer*4  IX4ret       !! controls EXFOR retrieval
+   integer*4  PESpin       !! cntrols spin cut-off factor in exciton model (0 - 2, 1 - n)
+   integer*4  NNG_xs       !! controls gamma production cross sections printout (0 - no , 1 - yes)
+   integer*4  F_Print      ! likely to be deleted
+   integer*4  NPRIm_g      !! controls primary gammas (0 - no, 1 - yes)
+   integer*4  NPAirpe      !! controls pairing correction in PCROSS (0 - no, 1 - yes)
+   integer*4  FHMs         !! controls level densities in HMS (0 - 3)
+   integer*4  IDEfcc       !! number of multipoles used to define a collective level deformation
+   integer*4  IFLuc        ! likely to be deleted
+   integer*4  IGE1         !! GDR ??
+   integer*4  IGE2         !! GQR ??
+   integer*4  IGM1         !! GMR ??
+   integer*4  IOMwritecc   !! controls writing in tlf
+   integer*4  IOPsys       !! 0 Linux, 1 Windows
+   integer*4  IOPran       !! MC sampling off by default, 'RANDOM' turns it on
+   integer*4  IDDfig(3)    !! position of 30, 150 deg in angular distributions (1 for neutrons)
+   integer*4  IWArn        !! selects type of warning
+   integer*4  JCUtcoll     !! maximum spin for DWBA collective levels
+   integer*4  KEY_gdrgfl   !! paameter to set shape of E1 strength function and GDR parameters
+   integer*4  KEY_shape    !! paameter to set shape of E1 strength function and GDR parameters
+   integer*4  KTRompcc     !! o. m. parameters RIPL catalog number 
+   integer*4  LMAxcc       !! max l for CC collective levels
+   integer*4  MODelecis    !! transfer IMOdel to local common (IMOdel selects spherical or type of CC calculations)
+   integer*4  MAXmult      !! max. gamma multiplicity
+   integer*4  NACc         !! number of additional channels 
+   integer*4  ND_nlv       !! number of collective states to be considered
+   integer*4  NEJcm        !! number of ejectiles
+   integer*4  NANgela      !! number of angles in angular distributions
+   integer*4  IHFnew       !! modified Hauser-Feshbach to include Tlj(E) (not default)
+   integer*4  NLW          !! number of partial waves
+   integer*4  NNUcd        !! number of nuclei being decayed
+   integer*4  NNUct        !! total number of nuclides involved (includes non-dcaying residues)
+   integer*4  NOUt         !! controls size of output
+   integer*4  NPRoject     !! index pointing to projectile type
+   integer*4  NRBar        !! number of fission barriers
+   integer*4  NRWel        !! number of wells in the potential surface (fission) 
+   integer*4  NSCc         !! number of inelastic surface channels in CCFUS
+   integer*4  NTArget      !! index of target in the list of nuclei
+   integer*4  NENdf        !! controls ENDF formatting (0 no fmt)
+   integer*4  NEXclusive   !! number of exclusive nuclei
+   integer*4  NDAng        !! DIMENSION: for angles in DA
+   integer*4  ICAlangs     !! related to number of angles in DA?
+   integer*4  FISspe       !! controls calculation of PFNS (0 - no, 1 - LANL, 2 - Kornilov)
+   integer*4  SFAct        !! controls output of S-factor
+   integer*4  IPArcov      !! counter of sampled parameters
+   integer*4  ngamm_tr     !! max l 
+   integer*4  nfiss_tr     !! controls consideration of gamma emission in HF in ECIS
+   integer*4  PLcont_lmax(NDEX)           !! maximum order of Legendre polynomials
+   integer*4  IDNa(ndregions,ndmodels)    !! array of models usage in different channels
    
-   LOGICAL  :: FIRst_ein = .true.
-   LOGICAL  :: FUSread = .false.
-   LOGICAL  :: EXClusiv = .false.
-   LOGICAL  :: CN_isotropic = .false.
-   LOGICAL  CCCalc
+   LOGICAL  :: FIRst_ein = .true.      !! indicates the first incident energy
+   LOGICAL  :: FUSread = .false.       !! read fuson ross sections 
+   LOGICAL  :: EXClusiv = .false.      !! exclusive nucleus
+   LOGICAL  :: CN_isotropic = .false.  !! HF is isotropic
+   LOGICAL  CCCalc                     !! CC calculations
    LOGICAL  DEFault_energy_functional
    LOGICAL  DEFormed
-   LOGICAL  FILevel
-   LOGICAL  OMParfcc
-   LOGICAL  OMPar_riplf
-   LOGICAL  RELkin
-   LOGICAL  SDRead
-   LOGICAL  SOFt
-   LOGICAL  NUBarread
-   LOGICAL  BENchm
-   LOGICAL  CALctl
-   LOGICAL  DYNam
-   LOGICAL  COLfile
+   LOGICAL  FILevel       !! ??
+   LOGICAL  OMParfcc      !! is OM parameter file not empty
+   LOGICAL  OMPar_riplf   !! does OM parameter file exist
+   LOGICAL  RELkin        !! relativistic kinematics
+   LOGICAL  SDRead        !! fusion spin distribution read from SDREAD file
+   LOGICAL  SOFt          !! soft rotor
+   LOGICAL  NUBarread     !! read nu-bar
+   LOGICAL  BENchm        !! controls if benchmark calculation is requested
+   LOGICAL  CALctl        !! controls use of calculated transmission coefficients for both projectile and ejectiles
+   LOGICAL  DYNam         !! dynamically deformed
+   LOGICAL  COLfile       !! file with collective levels exists
 
    real*8   :: EXCessmass(0:130,0:400)
    real*8   :: RESmas(0:130,0:400)
-   real*8   TFB
-   real*8   TDIrect
-   real*8   ADIv
-   real*8   EHRtw
-   real*8   BETav
-   real*8   BFUs
-   real*8   BUNorm
-   real*8   NTNorm
-   real*8   COMega
-   real*8   CETa
-   real*8   CHMs
-   real*8   CRL
-   real*8   CHMax
-   real*8   CSFis
-   real*8   CSFus
-   real*8   CSGdr1
-   real*8   CSGdr2
-   real*8   COEf
-   real*8   ELCncs
-   real*8   CSMsc(0:2)
-   real*8   CSO
-   real*8   CSRead
-   real*8   D1Fra
-   real*8   DE
-   real*8   DEFga       !! Amplitude of the Gaussian term defined by Eq. \ref{BfJfade};  positive value increases fission barrier
-   real*8   DEFgp       !! $J_{G}$ (spin position) of the Gaussian (term Eq. \ref{BfJfade})
-   real*8   DEFgw       !! $\Delta J_{G}$ (width in spin) in the Gaussian (term of Eq. \ref{BfJfade})
-   real*8   DEFpar      !! Coefficient \emph{b} in Eq. \ref{defor}
-   real*8   DEFprj      !! Deformation of the projectile
-   real*8   DEGa        !! probably related to DEGAS and NOT used???
-   real*8   DENhf       !! Hauser-Feshbach denominator
-   real*8   DERec       !! Bin width in recoil spectra     
-   real*8   DFUs        !! Diffuseness in the transmission coefficients of HI fusion
-   real*8   DIRect      !! Controls use of direct models
-   real*8   DIToro      !! Factor in energy increase of GDR width
-   real*8   DV          !! Parameter used to adjust the barrier in CCFUS (Default 20) 
-   real*8   DEFdyn      !! Multiplies DWBA dynamical deformation 
-   real*8   DEFsta      !! scales CC static deformation 
-   real*8   ECUtcoll    !! Cut-off energy for collective DWBA levels
-   real*8   EGDr1       !! GDR energy of first peak
-   real*8   EGDr2       !! GDR energy of second peak
-   real*8   EINl        !! Incident energy in LAB   
-   real*8   SUMlev_alf  !! Total population of levels in prime alpha reside
-   real*8   EDDfig      !! If >0 DE and DD spectra will be plotted at incident energy EDDfig (MeV) 
-   real*8   EWSr1       !! Scales gamma strength for the first GDR hump
-   real*8   EWSr2       !! Scales gamma strength for the second GDR hump
-   real*8   EX1         !! Initial number of excitons that are neutrons
-   real*8   EX2         !! Initial number of excitons that are neutrons
-   real*8   EXCn        !! Excitation energy of compound nucleus
-   real*8   EXPush      !! Extra-push energy in HI fusion
-   real*8   FCC         !! FCC parameter in CCFUS
-   real*8   EMInmsd
-   real*8   GDIv
-   real*8   FCOred
+   real*8   TFB            !! fission related (barrier) ??
+   real*8   TDIrect        !! seems not used ??
+   real*8   ADIv           !! type of level density
+   real*8   EHRtw          !! incident energy limit for using width fluctuation correction
+   real*8   BETav          !! viscosity parameter in Eqs. \ref{diss1}, \ref{diss2}
+   real*8   BFUs           !! fusion barrier height in the distributed barrier model
+   real*8   BUNorm         !! breakup normalization
+   real*8   NTNorm         !! nucleon transfer reactions normalization (Kalbach)
+   real*8   COMega         !! width of Coulomb barrier 
+   real*8   CETa           !! constant in ECIS ??
+   real*8   CHMs           !! multiplies default damp rate in HMS
+   real*8   CRL            !! critical l-value for HI fusion
+   real*8   CHMax          !! Max hole number in PCROSS set to CHMax*sqrt(g*U)
+   real*8   CSFis          !! fission cross section
+   real*8   CSFus          !! fusion cross section
+   real*8   CSGdr1         !! GDR cross section of first peak
+   real*8   CSGdr2         !! GDR cross section of second peak
+   real*8   COEf           !! scales fusion cross section
+   real*8   ELCncs         !! CN elastic cross section is PIx4*ELCncs
+   real*8   CSMsc(0:2)     !! MSC emission cross section (n or p)
+   real*8   CSO            !! ECIS related ??
+   real*8   CSRead         !! Controls HI fusion cross section determination (see manual)
+   real*8   D1Fra          !! Ratio of the spreading GDR width to the total GDR width in MSC
+   real*8   DE             !! contiuum discretization energy bin width 
+   real*8   DEFga          !! Amplitude of the Gaussian term defined by Eq. \ref{BfJfade};  positive increases fission barrier
+   real*8   DEFgp          !! $J_{G}$ (spin position) of the Gaussian (term Eq. \ref{BfJfade})
+   real*8   DEFgw          !! $\Delta J_{G}$ (width in spin) in the Gaussian (term of Eq. \ref{BfJfade})
+   real*8   DEFpar         !! Coefficient \emph{b} in Eq. \ref{defor}
+   real*8   DEFprj         !! Deformation of the projectile
+   real*8   DEGa           !! probably related to DEGAS and NOT used???
+   real*8   DENhf          !! Hauser-Feshbach denominator
+   real*8   DERec          !! Bin width in recoil spectra     
+   real*8   DFUs           !! Diffuseness in the transmission coefficients of HI fusion
+   real*8   DIRect         !! Controls use of direct models
+   real*8   DIToro         !! Factor in energy increase of GDR width
+   real*8   DV             !! Parameter used to adjust the barrier in CCFUS (Default 20) 
+   real*8   DEFdyn         !! Multiplies DWBA dynamical deformation 
+   real*8   DEFsta         !! scales CC static deformation 
+   real*8   ECUtcoll       !! Cut-off energy for collective DWBA levels
+   real*8   EGDr1          !! GDR energy of first peak
+   real*8   EGDr2          !! GDR energy of second peak
+   real*8   EINl           !! Incident energy in LAB   
+   real*8   SUMlev_alf     !! Total population of levels in prime alpha reside
+   real*8   EDDfig         !! If >0 DE and DD spectra will be plotted at incident energy EDDfig (MeV) 
+   real*8   EWSr1          !! Scales gamma strength for the first GDR hump
+   real*8   EWSr2          !! Scales gamma strength for the second GDR hump
+   real*8   EX1            !! Initial number of excitons that are neutrons
+   real*8   EX2            !! Initial number of excitons that are neutrons
+   real*8   EXCn           !! Excitation energy of compound nucleus
+   real*8   EXPush         !! Extra-push energy in HI fusion
+   real*8   FCC            !! FCC parameter in CCFUS
+   real*8   EMInmsd        !! incident energy at which MSD starts 
+   real*8   GDIv           !! factor defining p-h level densities in MSC and PCROSS (A/GDIv)
    real*8   GDResh
    real*8   GDRspl
    real*8   GDRwa1
@@ -441,7 +434,7 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8     VIBfdtm(NFMOD)
    real*8     VIBfnormm(NFMOD)
 
-TYPE OMP_type !TO BE DIMENSIONED 0(or 1):NDNUC
+! TYPE OMP_type !TO BE DIMENSIONED 0(or 1):NDNUC
    integer KTRlom(0:ndejc,0:ndnuc)
    real*8  SIGabs(ndetl,ndejc,ndnuc)
    real*8  VOM(0:ndejc,0:ndnuc)
@@ -469,9 +462,9 @@ TYPE OMP_type !TO BE DIMENSIONED 0(or 1):NDNUC
    real*8  FNrwvomp(0:ndejc,0:ndnuc)
    real*8  FNrsomp(0:ndejc,0:ndnuc)
    real*8  XNAver(0:ndejc,NDEtl)
-END TYPE OMP_type
+! END TYPE OMP_type
 
-TYPE Ejectile_type !TO BE DIMENSIONED 0(or 1):NDejc
+! TYPE Ejectile_type !TO BE DIMENSIONED 0(or 1):NDejc
    character*2 SYMbe(0:ndejc)        !! symbol
    integer IZAejc(0:ndejc)           !! Z*1000 + A
    integer NREs(0:ndejc)             !!
@@ -504,9 +497,9 @@ TYPE Ejectile_type !TO BE DIMENSIONED 0(or 1):NDejc
    real*8  TUNEpe(0:ndejc)
    real*8  TUNEbu(0:ndejc)
    real*8  TUNEnt(0:ndejc)
-END TYPE Ejectile_type
+! END TYPE Ejectile_type
 
-TYPE Nucleus_type !TO BE DIMENSIONED 0(or 1):NDNUC
+! TYPE Nucleus_type !TO BE DIMENSIONED 0(or 1):NDNUC
    character*2 SYMb(0:ndnuc)             !! chemical symbol of the nucleus
    character*21 REAction(1:ndnuc)        !! reaction string associated with the nucleus
    logical :: FISsil(1:ndnuc) = .false.  !! is it fissile?
@@ -590,8 +583,7 @@ TYPE Nucleus_type !TO BE DIMENSIONED 0(or 1):NDNUC
    real*8  POPcs(0:ndejc,0:ndexclus)  !! population cross section (exclusive nuclei)
    real*8  POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus) !! population energy spectrum (exclusive nuclei)  
    real*8  POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus)  !! population energy ??? spectrum (exclusive nuclei)
-   real*8  POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus) !! fraction of energy_angle spectrum from the CN emission(exclusive nuclei)
- 
+   real*8  POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus) !! fraction of energy_angle spectrum from the CN emission
    real*8  GDRpar(ndgdrpm,0:ndnuc)  !! Giant Dipol Resonance parametrs
    real*8  GMRpar(ndgmrpm,0:ndnuc)  !! Giant Magnetic Resonance parametrs 
    real*8  GQRpar(ndgqrpm,0:ndnuc)  !! Giant Quadrupole Resonance parametrs
@@ -637,8 +629,8 @@ TYPE Nucleus_type !TO BE DIMENSIONED 0(or 1):NDNUC
    real*8  TUNEfi(0:ndnuc)
    real*8  rTUNEfi(0:ndnuc)
    
-   TYPE (OMP_type), pointer :: OMP(:)   !! OM parameters
-END TYPE Nucleus_type
+!   TYPE (OMP_type), pointer :: OMP(:)   !! OM parameters
+! END TYPE Nucleus_type
 
 ! Dimensions derived from other dimensions (DO NOT MODIFY!)
 !NDECSE  = NDEX*1.30                                                 
