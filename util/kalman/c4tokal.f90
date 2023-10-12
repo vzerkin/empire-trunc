@@ -1,6 +1,8 @@
 program c4tokal
 
     use c4_io
+    use reactionNames
+
 
     implicit none
 
@@ -50,7 +52,6 @@ program c4tokal
     type (c4_section), pointer :: sc
     type (c4_data_point), pointer :: pt
 
-    integer*4, external :: rctn
 
     ! get project name, plotting MT, MAT and fitting flag nex
 
