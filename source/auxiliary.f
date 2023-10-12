@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5364 $
+Ccc   * $Rev: 5507 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-06-06 03:39:30 +0200 (Mo, 06 Jun 2022) $
+Ccc   * $Date: 2023-10-12 23:04:24 +0200 (Do, 12 Okt 2023) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -464,12 +464,6 @@ Ccc
       rFUSRED   = 0.d0
       rELAred   = 0.d0
       rCELred   = 0.d0
-      rCELcor   = 0.d0
-      FCCred0   = 0.d0
-      FUSred0   = 0.d0
-      ELAred0   = 0.d0
-      FCOred0   = 0.d0
-      TOTred0   = 0.d0
       rTUNEfi   = 0.d0
       rFCOred   = 0.d0
       rCINred   = 0.d0
