@@ -1,4 +1,4 @@
-ccc   * $Rev: 5478 $
+ccc   * $Rev: 5513 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -1555,8 +1555,9 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                IF (GST.GT.0) IDNa(5,3) = 1
 C--------------stop MSC charge-exchange if DDHMS or PCROSS active
                IF (PEQc.GT.0 .or. LHMs.GT.0) THEN
-                 IF (NPRoject.EQ.1)  IDNa(4,3) = 0 ! cont p via PCROSS or GGHMS
-                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0 ! cont n via PCROSS or DDHMS
+                  ! If next if commented (n,p) is calculated with MSC (eg. Ta181 evaluation) 
+                  IF (NPRoject.EQ.1)  IDNa(4,3) = 0 ! cont p via PCROSS or GGHMS
+                  IF (NPRoject.EQ.2)  IDNa(2,3) = 0 ! cont n via PCROSS or DDHMS
                ENDIF
             ENDIF
       ENDIF
@@ -3665,6 +3666,7 @@ C
      &                BET2in, GRIn
       LOGICAL OMPAR_USEFILES
       COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
+
 C
 C Local variables
 C
@@ -7328,7 +7330,7 @@ C-----Sensitivity calculations for KALMAN
          IF (name.EQ.'SENSIT' .or. name.EQ.'KALMAN') THEN
             KALman = val
             ! write(8,*) 'KALman set in input.f', KALman
-            IF (KALman.GT.0) WRITE (8,
+            IF (KALman.gt.0) WRITE (8,
      &'('' Sensitivity calculations will be performed'',
      & '' (will reset ENDF option to 0)'')')
             GOTO 100
