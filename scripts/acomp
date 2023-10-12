@@ -1,6 +1,6 @@
 #!/bin/bash
 #Script to produce ZVV plots comparing four sets of calculations
-#with experimental data (all MTs for a single material)
+#with experimental data (MTs for a single material)
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
