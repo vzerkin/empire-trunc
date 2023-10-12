@@ -349,7 +349,7 @@ contains
         real*8, intent(in) :: U    !! excitiation energy
 
         real*8, parameter :: c = 3.0D-3 !! Mahaux factor in imaginary potential depth W=c*E^2
-        real*8 :: cfact = 0.8d+0  !! factor allowing to scale c and adjust Gamma down  
+        real*8 :: cfact = 1.0d+0  !! factor allowing to scale c and adjust Gamma down  
 
         integer*4 ih1, ip1, n
         real*8 ub, x, w1, w2, w3, w4, w5, w6, w7, w8
