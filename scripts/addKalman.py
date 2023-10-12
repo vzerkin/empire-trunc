@@ -15,31 +15,33 @@ files respectively) before running Kalman
 then use this code to push new values back into MF2/MF32
 """
 
-
 import sys
 import os
 import shutil
-import numpy
 import math
+import numpy
 
 from empy import endf
 from empy.MF_base import *
 
-def main(zam,rgn,rgg,nrr):
+
+def main(zam, rgn, rgg, nrr):
     # should be in form '025055'
     zam = zam.zfill(6)
-    print 'argument=',rgn,',',rgg,',',nrr
+    print('argument=', rgn, ',', rgg, ',', nrr)
 
     # should we write new parameter vals from the Kalman update?
     writeKalmanPars = True
-    MF2Replacements={}
+    MF2Replacements = {}
     if writeKalmanPars:
-        print "Adjusted parameters written to MF=2 and 32 files"
+        print("Adjusted parameters written to MF=2 and 32 files")
     else:
-        print "Adjusted parameters not written out"
+        print("Adjusted parameters not written out")
 
     flag1 = False
-    MAT=0; MF=0; MT=0
+    MAT = 0
+    MF = 0
+    MT = 0
 
     # read the endf file created by ptanal/wriurr, create 'resNew' file:
     #filein = "%s-res.endf"%zam
@@ -47,38 +49,39 @@ def main(zam,rgn,rgg,nrr):
 
     # or, read endf file from ptanal (resolved region only):
     filein = "endfr.txt"
-    fileout = "%s-res.endf"%zam
+    fileout = "%s-res.endf" % zam
 
     # At the end, I want zam-resNew.endf with new updated values
-    lStart32, flag = endf.locate_section(filein,32,'*')
-    assert flag[0]==0, "MF 32 not found in %s" % filein
+    lStart32, flag = endf.locate_section(filein, 32, '*')
+    assert flag[0] == 0, "MF 32 not found in %s" % filein
 
-    fin = open(filein,"r").readlines()
-    fout = open(fileout,"w")
+    fin = open(filein, "r").readlines()
+    fout = open(fileout, "w")
 
     # lStart32+4 tells us how many resonances are present in the file:
-    nResLine = fin[lStart32+4]; nres = int(nResLine[55:66])
+    nResLine = fin[lStart32 + 4]
+    nres = int(nResLine[55:66])
 
     # read Kalman results for updated parameters and covariance matrix:
-    pars, mat, ncorr = readKalmanOut(zam,nres)
-    print 'ncorr=',ncorr
+    pars, mat, ncorr = readKalmanOut(zam, nres)
+    print('ncorr=', ncorr)
 
     # adjust nrr so that it is between ncorr/3 and nres (Cho)
-    nrr = min(nrr, nres);
+    nrr = min(nrr, nres)
     nrr = max(nrr, ncorr // 3)
 
     # write file up to MF32:
     for ll in range(len(fin)):
         MAT, MF, MT = endf.getVals(fin[ll])
         #print MAT, MF, MT
-        if MF==32:
+        if MF == 32:
             break
         fout.write(fin[ll])
 
     # find out the energy of nrr(th) resonance and correct the upper energy limit (Cho)
     # removed-cmattoon, don't change energy limits unless we modify diagonal
 
-    for ll in range(ll,ll+5):
+    for ll in range(ll, ll + 5):
         # write five lines of MF32 header:
         fout.write(fin[ll])
     ll += 1
@@ -89,19 +92,21 @@ def main(zam,rgn,rgg,nrr):
     m = MF_base()
     m.numberLines = False
 
-    for i in range(len(pars) // 3 ):
-        vals = m.readENDFline(fin[ll + 2*i])
-        valLine = fin[ll + 2*i]
+    for i in range(len(pars) // 3):
+        vals = m.readENDFline(fin[ll + 2 * i])
+        valLine = fin[ll + 2 * i]
         #print (vals)
-        unc = m.readENDFline(fin[ll+1 + 2*i])
+        unc = m.readENDFline(fin[ll + 1 + 2 * i])
         #print (unc)
-        En = pars[3*i + 1]
-        Gn = pars[3*i + 2]
-        Gg = pars[3*i + 3]
+        En = pars[3 * i + 1]
+        Gn = pars[3 * i + 2]
+        Gg = pars[3 * i + 3]
 
         # adjust parameters based on Kalman
-        vals[0] *= En[0]; vals[3] *= Gn[0]; vals[4] *= Gg[0];
-        vals[2] = vals[3]+vals[4]
+        vals[0] *= En[0]
+        vals[3] *= Gn[0]
+        vals[4] *= Gg[0]
+        vals[2] = vals[3] + vals[4]
 
         # and adjust uncertainties based on the new Kalman values:
         unc[0] = 0.01 * En[1] * math.fabs(vals[0])
@@ -111,15 +116,17 @@ def main(zam,rgn,rgg,nrr):
 
         if writeKalmanPars:
             # write new parameters from Kalman
-            st = m.writeENDFline(vals,MAT,MF,MT)
-            MF2Replacements[valLine.replace('32151',' 2151').rstrip()]=st.replace('32151',' 2151').rstrip()
+            st = m.writeENDFline(vals, MAT, MF, MT)
+            MF2Replacements[valLine.replace('32151',
+                                            ' 2151').rstrip()] = st.replace(
+                                                '32151', ' 2151').rstrip()
             fout.write(st)
         else:
             # keep original parameters from Atlas
-            fout.write( valLine )
+            fout.write(valLine)
 
         # either way, write the new uncertainties from Kalman:
-        st = m.writeENDFline(unc,MAT,MF,MT)
+        st = m.writeENDFline(unc, MAT, MF, MT)
         fout.write(st)
 
     # change ll now that we are past the first few parameters:
@@ -129,12 +136,12 @@ def main(zam,rgn,rgg,nrr):
     nunc = 2 * (len(pars) // 3)
 
     # keep writing ENDF file up to start of off-diagonal portion:
-    for ll in range(ll,len(fin)):
+    for ll in range(ll, len(fin)):
         MAT, MF, MT = endf.getVals(fin[ll])
         #print MAT, MF, MT
-        if MF==32:
+        if MF == 32:
             flag1 = True
-        if flag1 and m.readENDFline(fin[ll])[:4] == [0,0,3,3*nres]:
+        if flag1 and m.readENDFline(fin[ll])[:4] == [0, 0, 3, 3 * nres]:
             # this is insertion point for the off-diagonal part of matrix
             break
         if flag1 and endf.isSEND(fin[ll]):
@@ -142,64 +149,64 @@ def main(zam,rgn,rgg,nrr):
             break
         #otherwise write the line or loop while MF==32 (Cho)
         nunc += 1
-        if nunc <= 2*nrr:
+        if nunc <= 2 * nrr:
             fout.write(fin[ll])
 
     # add covariance matrix from Kalman output:
-    kij = numpy.zeros( (18) )
+    kij = numpy.zeros((18))
 
     #nnn = 3*nres (Cho)
-    nnn = 3*nrr
-    ndigit=3
+    nnn = 3 * nrr
     nm = 0
 
     # assign correlations between Gns or between Ggs (Cho)
-    for i in range(ncorr+1,min(3*nrr,nnn)):
-        if (i+2)%3 == 0:
-            for j in range(ncorr+1, i):
-                if (j+2)%3 == 0:
-                    mat[i,j] = rgn
-        elif (i+1)%3 == 0:
-            for j in range(ncorr+1, i):
-                if (j+1)%3 == 0:
-                    mat[i,j] = rgg
+    for i in range(ncorr + 1, min(3 * nrr, nnn)):
+        if (i + 2) % 3 == 0:
+            for j in range(ncorr + 1, i):
+                if (j + 2) % 3 == 0:
+                    mat[i, j] = rgn
+        elif (i + 1) % 3 == 0:
+            for j in range(ncorr + 1, i):
+                if (j + 1) % 3 == 0:
+                    mat[i, j] = rgg
 
     # number of lines for correlation coefficients:
     for i in range(nnn):
         j = 0
-        while j<i:
-            if mat[i,j] != 0:
-                leng=min(13,i-j)
-                j=j+leng
+        while j < i:
+            if mat[i, j] != 0:
+                leng = min(13, i - j)
+                j = j + leng
                 nm += 1
             else:
-                j+=1
+                j += 1
 
-    print 'nm=',nm
+    print('nm=', nm)
 
     # mf and mt will always be 32 and 151 (I think)
     mtwrite = 151
 
     # revised header:
-    fout.write( m.writeENDFline( [0.0,0.0,3,nnn,nm,0],MAT,MF,mtwrite ) )
+    fout.write(m.writeENDFline([0.0, 0.0, 3, nnn, nm, 0], MAT, MF, mtwrite))
 
     for i in range(nnn):
         j = 0
-        while j<i:
-            if mat[i,j] != 0:
-                leng = min(13,i-j)
+        while j < i:
+            if mat[i, j] != 0:
+                leng = min(13, i - j)
                 for n in range(leng):
                     #kij[n] = 1000*corrmat[i,j+n]
                     #Kalman output already in INTG form
-                    kij[n] = mat[i,j+n]
+                    kij[n] = mat[i, j + n]
 
                 #for n in range(leng+1,18): just reset below
                 #   kij[n] = 0
 
-                if i==9 or i==10:
-                    print kij
-                str = m.writeINTG( i+1,j+1, tuple(kij[:13]), MAT,MF,mtwrite )
-                fout.write( str )
+                if i == 9 or i == 10:
+                    print(kij)
+                str = m.writeINTG(i + 1, j + 1, tuple(kij[:13]), MAT, MF,
+                                  mtwrite)
+                fout.write(str)
                 j += leng
                 # reset kij to all zeros
                 kij[:] = 0
@@ -208,43 +215,42 @@ def main(zam,rgn,rgg,nrr):
 
     # finish writing file
     # skip one line, this was the original header for empty covariance matrix
-    for ll in range(ll+1,len(fin)):
+    for ll in range(ll + 1, len(fin)):
         fout.write(fin[ll])
     fout.close()
 
     # replace MF2 lines
     if writeKalmanPars:
-        fout = open(fileout,"r").readlines()
-        newfout=[]
+        fout = open(fileout, "r").readlines()
+        newfout = []
         for line in fout:
             if ' 2151' in line:
-                gotit=False
-                for k,v in MF2Replacements.items():
+                gotit = False
+                for k, v in MF2Replacements.items():
                     if k in line:
-                        newfout.append(line.replace(k,v))
-                        gotit=True
+                        newfout.append(line.replace(k, v))
+                        gotit = True
                         break
                 if not gotit:
                     newfout.append(line)
             else:
                 newfout.append(line)
-        open(fileout,'w').writelines(newfout)
+        open(fileout, 'w').writelines(newfout)
 
     return 0
 
 
-def readKalmanOut(zam,nres):
+def readKalmanOut(zam, nres):
     """
     from the Kalman output file, get updated parameters, errors,
     and the covariance matrix
     """
     filename = "za%s-out.kal" % zam
-    assert os.path.exists(filename), "file %s not found"%filename
-    fkal = open(filename,"r")
+    assert os.path.exists(filename), "file %s not found" % filename
+    fkal = open(filename, "r")
 
     fkal.next()
     line = fkal.next()
-    nparTot = int(line.strip().split()[-1])
     # the next line tells how many Kalman actually varies
     # (ESTIMATED PARAMETERS):
     npar = int(fkal.next().strip().split()[-1])
@@ -253,7 +259,7 @@ def readKalmanOut(zam,nres):
         # read past the header, search for start of
         # uncertainties:
         line = fkal.next()
-        if line.upper().split()[:2] == ['PARAMETER','INITIAL']:
+        if line.upper().split()[:2] == ['PARAMETER', 'INITIAL']:
             #read one more:
             fkal.next()
             break
@@ -263,7 +269,7 @@ def readKalmanOut(zam,nres):
     for i in range(npar):
         line = fkal.next().strip()
         meas, err = line.split()[2:4]
-        kalMeasure.append( (float(meas),float(err)) )
+        kalMeasure.append((float(meas), float(err)))
 
     #read three lines:
     for i in range(3):
@@ -271,7 +277,7 @@ def readKalmanOut(zam,nres):
 
     # corr_mat should have dimension of (3*nres + 1) squared
     # or (4*nres + 1) squared if fission. Use dummy for now
-    corrmat = numpy.zeros( ((3*nres+1), (3*nres+1)) )
+    corrmat = numpy.zeros(((3 * nres + 1), (3 * nres + 1)))
 
     # use sample values for testing:
     #   corrmat[0,0] = 1.0
@@ -290,27 +296,27 @@ def readKalmanOut(zam,nres):
 
     # upper-diagonal kalman format only allows ten columns
     # per 'bunch'. How many 'bunches'?
-    if npar%10==0:
-        nbunches=npar//10
+    if npar % 10 == 0:
+        nbunches = npar // 10
     else:
-        nbunches = npar//10 + 1
+        nbunches = npar // 10 + 1
     bunch = 0
     nparStart = 0
     offset = 0
 
-    while bunch<nbunches:
+    while bunch < nbunches:
 
-        for i in range(nparStart,npar):
+        for i in range(nparStart, npar):
             # careful: locking down a parameter results in '*****' in a column
             # I think positional is safer than split() in this case
             line = fkal.next().rstrip()
 
             vals = []
 
-            start = 26 # position of left-most correlation element
+            start = 26  # position of left-most correlation element
             width = 5
             while True:
-                val = line[start:start+width]
+                val = line[start:start + width]
                 if val == '':
                     break
                 elif val == '*****':
@@ -319,18 +325,18 @@ def readKalmanOut(zam,nres):
                     vals.append(int(val))
                 start += 5
 
-            vals = numpy.array( vals )
+            vals = numpy.array(vals)
             #vals = numpy.array( [int(a) for a in line[2:]] )
 
             # assign values to the correlation in lower-diagonal format
-            corrmat[i,offset:][:len(vals)] = vals
+            corrmat[i, offset:][:len(vals)] = vals
 
         # the next 'bunch' is smaller by 10 parameters
         nparStart += 10
         offset += 10
         bunch += 1
         # skip two lines between bunches:
-        if bunch <= nbunches-1:
+        if bunch <= nbunches - 1:
             for i in range(2):
                 fkal.next()
 
@@ -341,23 +347,22 @@ def readKalmanOut(zam,nres):
     # in later versions), so use brute force method instead
 
     # find out number of resonance parameters (=ncorr) in Kalman output (Cho)
-    ncorr=npar
+    ncorr = npar
     for idx in range(npar)[::-1]:
         # start at end to keep it simple,
         # matrix should be lower-diagonal, DON'T symmetrize!
         hasNaN = False
-        col = corrmat[:,idx]
+        col = corrmat[:, idx]
         for val in col:
             if numpy.isnan(val):
                 hasNaN = True
         if hasNaN:
-            print ('NaN found in column %i'%idx)
+            print('NaN found in column %i' % idx)
             RowCols = range(len(corrmat))
             RowCols.remove(idx)
-            ncorr-=1
-            corrmat = corrmat.take( RowCols, axis=0 )
-            corrmat = corrmat.take( RowCols, axis=1 )
-
+            ncorr -= 1
+            corrmat = corrmat.take(RowCols, axis=0)
+            corrmat = corrmat.take(RowCols, axis=1)
 
     #print corrmat[:37,:10]
 
@@ -377,6 +382,7 @@ def readKalmanOut(zam,nres):
 
     return kalMeasure, corrmat, ncorr
 
+
 if __name__ == '__main__':
     zam = sys.argv[1]
 
@@ -384,4 +390,4 @@ if __name__ == '__main__':
     rgn = sys.argv[2]
     rgg = sys.argv[3]
     nrr = sys.argv[4]
-    c = main( zam,1000*float(rgn),1000*float(rgg),int(nrr) )
+    c = main(zam, 1000 * float(rgn), 1000 * float(rgg), int(nrr))
