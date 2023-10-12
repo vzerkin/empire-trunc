@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5420 $
+Ccc   * $Rev: 5511 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-01-13 04:36:53 +0100 (Fr, 13 Jän 2023) $
+Ccc   * $Date: 2023-10-12 23:34:51 +0200 (Do, 12 Okt 2023) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1798,6 +1798,9 @@ C
 
       return
       end
+
+
+
       subroutine sensitivity
 Ccc
 Ccc   ********************************************************************
@@ -1832,7 +1835,7 @@ Ccc
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, ndkeys, j, kalman
 
-      integer iopens
+      integer iopens, inpFile
       logical itsopen
       character*108 name_of_file
 
@@ -1920,6 +1923,7 @@ C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE,
 C-----    TOTRED, FUSRED, ELARED ...
 ccc
 
+      inpFile = 44  ! original input file 
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
@@ -1948,20 +1952,20 @@ c     read(44,*) aprojec,Zprojec
 c     close(44)
 
       CLOSE(5) !close standard INPUT.DAT (just to be sure)
-      OPEN (UNIT = 44,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
+      OPEN (UNIT = inpFile,FILE='INPUTREF.DAT', STATUS='OLD') !standard input moved out of the way
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
 C-----
 C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,10
-         READ(44,'(A80)') inprecord 
+         READ(inpFile,'(A80)') inprecord 
 C--------Read target and projectile from the input file
          IF(i.EQ.2) read(inprecord,*) atarget,ztarget
          IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
          WRITE(7,'(A80)') inprecord
       ENDDO
 C-----Read line of optional input
-   50 READ (44,'(A80)',END = 350) inprecord
+   50 READ (inpFile,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 50
 
@@ -1973,6 +1977,17 @@ C-----Read line of optional input
         GOTO 50  ! next line
       ENDIF
 
+      IF(inprecord(1:1).EQ.'>') THEN
+         inpFile = 555
+         OPEN (inpFile,FILE = 'common.inp',STATUS = 'OLD') ! switch reading to the common.inp instead of standard input file *.inp
+         GOTO 50  ! go to reading from common.inp
+      ELSEIF(inprecord(1:1).eq.'<') THEN
+         close (inpFile)
+         inpFile = 44
+         GOTO 50  ! return to reading from INPUTREF.DAT
+      ENDIF
+! HERE
+
       READ(inprecord,'(A6,G10.5,4I5)',END=70,ERR=70)
      &    namee,vale,i1e,i2e,i3e,i4e
 C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
@@ -1980,14 +1995,13 @@ C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
          WRITE(7,'(A6)')namee
          GOTO 70 !Jump to $ format for parameters that happens after GO
       ENDIF
-C-----Copy input but skip SENSIT
-C     IF(namee.NE.'SENSIT')
+C-----Copy optional input line
       WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
       GOTO 50
 C-----
-C-----Read and copy optional part of the standard input
+C-----Read and copy part of the standard input after 'GO    '
 C-----
-   70 READ(44,'(A80)',END = 30) inprecord
+   70 READ(inpFile,'(A80)',END = 30) inprecord
       IF(inprecord(1:1).EQ.'$') THEN
           READ(inprecord,'(1X,A6,G10.5,4I5)',END=30)namee,vale,i1e,i2e,
      &    i3e,i4e
@@ -2057,6 +2071,7 @@ C-----Check category of the parameter to be varied
 C-----Check whether omp is being varied - if so then move Tl directory out of the way
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
+         ! HERE more selective Tl removal 
          itmp = ipipe_move('TL','TLREF')
          itmp = ipipe_mkdir('TL')
       ENDIF
@@ -2066,6 +2081,7 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
          IF(k.EQ.2) val = -val !normally we only invert the sign
          IF(name(1:4).EQ.'UOMP'  .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA'.AND. k.EQ.2 ) THEN
+            ! HERE more selective Tl removal 
             itmp = ipipe_rmdir('TL')
             itmp = ipipe_mkdir('TL')
          ENDIF
@@ -2075,12 +2091,14 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
 
 C-----Read and copy mandatory part of the standard input
 C-----
+      inpFile = 44
       DO i=1,10
-         READ(44,'(A80)') inprecord 
+         READ(inpFile,'(A80)') inprecord 
          WRITE(7,'(A80)') inprecord 
       ENDDO
 C-----Read line of optional input
-  150 READ (44,'(A80)',END = 350) inprecord
+      write(*,*) " Creating optional part of modified input"
+  150 READ (inpFile,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
      &    inprecord(1:1).EQ.'!') GOTO 150  ! comments 
 
@@ -2091,7 +2109,15 @@ C-----Read line of optional input
         EMPtitle(1:1)= ' '
         GOTO 150  ! next line
       ENDIF
-
+      IF(inprecord(1:1).EQ.'>') THEN
+         inpFile = 555
+         OPEN (inpFile,FILE = 'common.inp',STATUS = 'OLD') ! switch reading to the common.inp instead of standard input file *.inp
+         GOTO 150  ! go to reading from common.inp
+      ELSEIF(inprecord(1:1).eq.'<') THEN
+         close (inpFile)
+         inpFile = 44
+         GOTO 150  ! return to reading from INPUTREF.DAT
+      ENDIF
       ! READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)
       READ(inprecord,'(A6,G10.5,4I5)',END=300)
      & namee,vale,i1e,i2e,i3e,i4e
@@ -2109,7 +2135,7 @@ C           IF(category.EQ.'A') THEN
                ENDIF
             ELSEIF(category.EQ.'R') THEN
                CLOSE(7)
-               CLOSE(44)
+               CLOSE(inpFile)
                CLOSE(5)
                GOTO 100 !get next parameter to vary
             ENDIF
@@ -2140,7 +2166,7 @@ C     ELSEIF(namee.NE.'SENSIT') THEN
 C-----
 C-----Read and copy optional part of the standard input
 C-----
-  170 READ(44,'(A80)',END = 300) inprecord
+  170 READ(inpFile,'(A80)',END = 300) inprecord
       IF(inprecord(1:1).EQ.'$') THEN
          READ (inprecord,'(1X,A6,G10.5,4I5)',END = 300) namee,vale, i1e,
      &      i2e, i3e, i4e
@@ -2162,9 +2188,9 @@ C--------Write modified input with increased value of the parameter if name matc
       GOTO 170
 
   300 CLOSE(7)
-      CLOSE(44)
-      CLOSE(5)
-      CALL EMPIRE
+      CLOSE(inpFile)
+      CLOSE(5)         
+      CALL EMPIRE ! Calculations with modified input (+ or -)
       
 C-----Delete modified input that has been used and move XSECTIONS.OUT file
       OPEN(5,FILE=('INPUT.DAT'),STATUS='OLD',ERR=305)
@@ -2180,6 +2206,7 @@ C-----Delete modified input that has been used and move XSECTIONS.OUT file
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA' ) THEN
+        ! HERE better Tl restored
         itmp = ipipe_rmdir('TL')
         itmp = ipipe_move('TLREF','TL')
       ENDIF
@@ -2255,5 +2282,3 @@ C-----Restore standard input/output
       itmp=ipipe_move('XSECTIONSREF.OUT','XSECTIONS.OUT')
       return
       end
-
-
