@@ -10,41 +10,10 @@
 
       implicit none
 
-<<<<<<< .mine
-||||||| .r5185
-      ! this routine converts the empire cross sections for each reaction
-      ! and the sensitivities those reactions have for each varied empire
-      ! model parameter. The cross sections are written out to unit 50.
-      ! the sensitivies are written out to unit 52. This routine assumes
-      ! that the model parameters are completely independent and their
-      ! correlation matrix is the identity matrix.
-=======
       integer*4, parameter :: nr = 60                !! maximum # reactions allowed
       integer*4, parameter :: ne = 1500              !! maximum # energies allowed for each reaction
       integer*4, parameter :: np = 200               !! maximum # of varied empire parameters
->>>>>>> .r5511
 
-<<<<<<< .mine
-      integer*4, parameter :: nr = 60                !! maximum # reactions allowed
-      integer*4, parameter :: ne = 1500              !! maximum # energies allowed for each reaction
-      integer*4, parameter :: np = 200               !! maximum # of varied empire parameters
-||||||| .r5185
-      integer*4, parameter :: nr = 60                ! maximum # reactions allowed
-      integer*4, parameter :: ne = 1500              ! maximum # energies allowed for each reaction
-      integer*4, parameter :: np = 200               ! maximum # of varied empire parameters
-=======
-      integer*4    :: i,j,k,mt,mt1,ios,nreac,ie,mat,nex,npfns,l1,l2
-      integer*4    :: ln1,ln2,la1,la2,lb1,lb2,lc1,lc2,nparm,lt1,lt2
-      CHARACTER*4  :: IA,IB,IC
-      CHARACTER*6  :: PN,TMP
-      CHARACTER*8  :: INPSEN
-      CHARACTER*15 :: MATSEN,XSC
-      CHARACTER*12 :: REACTION(NR),PNAME(NP)
-      CHARACTER*25 :: FILE
-      real*8 :: E(NE),CSEC(NE,NR),PERTB(NP),SENS(NP,NE,NR),SW(NP),W(NP,NP)
->>>>>>> .r5511
-
-<<<<<<< .mine
       integer*4    :: i,j,k,mt,mt1,ios,nreac,ie,mat,nex,npfns,l1,l2
       integer*4    :: ln1,ln2,la1,la2,lb1,lb2,lc1,lc2,nparm,lt1,lt2
       CHARACTER*4  :: IA,IB,IC
@@ -55,19 +24,6 @@
       CHARACTER*25 :: FILE
       real*8 :: E(NE),CSEC(NE,NR),PERTB(NP),SENS(NP,NE,NR),SW(NP),W(NP,NP)
 
-||||||| .r5185
-      integer*4 i,j,k,mt,mt1,ios,nreac,ie,mat,nex,npfns,l1,l2
-      integer*4 ln1,ln2,la1,la2,lb1,lb2,lc1,lc2,nparm,lt1,lt2
-      CHARACTER*4 IA,IB,IC
-      CHARACTER*6 PN,TMP
-      CHARACTER*8 INPSEN
-      CHARACTER*15 MATSEN,XSC
-      CHARACTER*12 REACTION(NR),PNAME(NP)
-      CHARACTER*25 FILE
-      real*8 E(NE),CSEC(NE,NR),PERTB(NP),SENS(NP,NE,NR),SW(NP),W(NP,NP)
-
-=======
->>>>>>> .r5511
 
       INPSEN='-inp.sen'
 
@@ -201,13 +157,8 @@
             write(0,*) 'WRONG PARAMETER found in ',FILE(L1:L2)//trim(MATSEN)
             write(0,*) TMP(LT1:LT2), ' vs ',PN(LT1:LT2), ' Parameter #', i
             write(0,*) 'Order in -inp.sen file might differ from -mat.sen '
-<<<<<<< .mine
             write(0,*) 'If TMP is like .0000E check whether .xcs file has the same energies as -mat.sen'
             write(0,*) 'Check also for double blank lines if sensitivities were added'
-||||||| .r5185
-=======
-            write(0,*) 'Check also for double blank lines if sensitivities were added'
->>>>>>> .r5511
             stop 1
          endif
          READ(10,*) ! THIRD LINE

@@ -34,12 +34,12 @@ program kalend
     character*25 :: memFile        !! name to store a copy of the Empire endf file
     character*25 :: kalFile        !! name of the endf file Kalend will write to    
 
-    character*11 :: reac            !! first reaction name or error in of readFort16
-    character*11 :: reac1           !! second reaction name
+    character*12 :: reac            !! first reaction name or error in of readFort16
+    character*12 :: reac1           !! second reaction name
 
     real*8, allocatable :: eg(:),sg(:,:)         !! energies & cross sections from empire .xsc file
     real*8, allocatable :: x(:),y(:),w(:,:)      !! ener, crs, & covar from kalman
-    character*9, allocatable :: rxtn(:)          !! reaction names from empire .xcs file
+    character*12, allocatable :: rxtn(:)         !! reaction names from empire .xcs file
     logical :: writeRun = .false.
 
     integer*4 :: i1, i2, i
@@ -178,7 +178,8 @@ contains
 
         rewind(10)
         read(10,*)
-        read(10,'(12X,(3A12),(A10),(90A12))') (rxtn(i),i=1,nReac)
+        ! read(10,'(12X,(3A12),(A10),(90A12))') (rxtn(i),i=1,nReac)
+        read(10,'(12X,(90A12))') (rxtn(i),i=1,nReac)
         do i = 1,nEnrg
             read(10,*) eg(i),(sg(i,j),j=1,nReac)
         end do
@@ -281,8 +282,8 @@ contains
         
         logical*4 :: qfnd                       !! found right combination of mt and mt1
         integer*4 :: i,j,k,ios
-        character*11 :: rxt                      !! reaction name for mt 
-        character*11 :: r, r1                   !! reaction names read from fort.16 cvariance file
+        character*12 :: rxt                      !! reaction name for mt 
+        character*12 :: r, r1                   !! reaction names read from fort.16 cvariance file
         write(*,*) ' Got into readFort16'
         
         k = 1
@@ -290,7 +291,7 @@ contains
         if(allocated(x)) deallocate(x,y,w)
         
         do      ! going over the Kalamn covariance file (fort.16)
-            read(16,'(I5,43X,A11,1x,A11)',iostat=ios) ken, r1, r
+            read(16,'(I5,43X,A12,A12)',iostat=ios) ken, r1, r
             call strlen(r,l1,l2)
             rxt = r(l1:l2)
             call strlen(r1,l1,l2)
@@ -664,15 +665,15 @@ contains
         integer*4 :: iz                 !! second reaction index
         integer*4 :: i,j,k,ios,l1,l2
         logical*4 :: qfnd               !! .true. if both reaction of the covariance subsection belong to the list of reactions
-        character*11 :: r, r1           !! names of the two involved reactions as in fort.16
-        character*11 :: reac, reac1      !! names of the two involved reactions (9 characters)
+        character*12 :: r, r1           !! names of the two involved reactions as in fort.16
+        character*12 :: reac, reac1      !! names of the two involved reactions (9 characters)
         
         ! allocate(covk(ncovk))
 
         k = 1
         rewind(16)
         do
-            read(16,'(I5,43X,A11,1x,A11)',iostat=ios) ken, r1, r
+            read(16,'(I5,43X,A12,A12)',iostat=ios) ken, r1, r
             if(ios /= 0) exit
             call strlen(r,l1,l2)
             reac = r(l1:l2)

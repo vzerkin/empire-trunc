@@ -37,7 +37,7 @@ module reactionNames
       !! return the corresponding MT value for this reaction.
       !! if reaction string is not found, return -1.
     
-      character*11, intent(in) :: name         ! reaction name to find
+      character*12, intent(in) :: name         ! reaction name to find
 
       i = 1
       CALL STRLEN(NAME,LN1,LN2)
