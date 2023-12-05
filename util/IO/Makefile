@@ -35,6 +35,7 @@ else ifeq ($(FC),gfortran)
   defR8  = -fdefault-real-8
   defR16 = -fdefault-real-16
   FFLAGS = -O3 -std=legacy
+  FFLAGS = -std=legacy -g
 else ifeq ($(FC),af90)
   defR4 =
   defR8 = -N113

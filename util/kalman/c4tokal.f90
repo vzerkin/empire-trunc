@@ -1,30 +1,29 @@
 program c4tokal
+    !! convert c4 file into format understood by Kalman
+    use rctn, only: retReactionMT
 
     use c4_io
-    use reactionNames
-
-
     implicit none
 
-    integer*4, parameter :: ngmt = 15      ! list of allowed MTs for Kalman fitting
+    integer*4, parameter :: ngmt = 15      !! list of allowed MTs for Kalman fitting
     integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 851/)
 
-    integer*4, parameter :: kctl1 = 0      ! set nonzero to read priors
-    integer*4, parameter :: kctl2 = 0      ! set nonzero to write posteriors
-    integer*4, parameter :: kcovex = 1     ! set nonzero to read experimental covariances
-    real*4, parameter    :: scale = 1.0    ! scale factor for parameter unc**2
-    real*4, parameter    :: emin = 0.0     ! lower energy limit on exp data, 0 == no limit
-    real*4, parameter    :: emax = 0.0     ! upper energy limit on exp data, 0 == no limit
+    integer*4, parameter :: kctl1 = 0      !! set nonzero to read priors
+    integer*4, parameter :: kctl2 = 0      !! set nonzero to write posteriors
+    integer*4, parameter :: kcovex = 1     !! set nonzero to read experimental covariances
+    real*4, parameter    :: scale = 1.0    !! scale factor for parameter unc**2
+    real*4, parameter    :: emin = 0.0     !! lower energy limit on exp data, 0 == no limit
+    real*4, parameter    :: emax = 0.0     !! upper energy limit on exp data, 0 == no limit
 
     character*4, parameter :: xsc = '.xsc'
     character*8, parameter :: inpsen = '-inp.sen'
 
-    integer*4 nsec     ! # of sections in C4 file
-    integer*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT. 
-    integer*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
-    integer*4 nrx      ! # of reactions in EMPIRE XSC file
-    integer*4 mat      ! MAT of material. not used here
-    integer*4 nprm     ! # EMPIRE parameters in sensitivity input file
+    integer*4 nsec     !! # of sections in C4 file
+    integer*4 mt1      !! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT. 
+    integer*4 nex      !! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
+    integer*4 nrx      !! # of reactions in EMPIRE XSC file
+    integer*4 mat      !! MAT of material. not used here
+    integer*4 nprm     !! # EMPIRE parameters in sensitivity input file
 
     logical*4 qex,qmt,hmt(999)
     integer*4 i,j,k,m,ix,l1,l2,ios,status
@@ -37,15 +36,15 @@ program c4tokal
     type (empire_reaction), allocatable :: rcx(:)
 
     type fitted_reaction
-        integer*4 mt                               ! MT value
-        integer*4 ix                               ! index in empire reaction
-        integer*4 num                              ! # of C4 data sets for this MT
-        integer*4, allocatable :: ic(:)            ! C4 index of each data set
-        real*8, allocatable :: wt(:)               ! weights for each data set
+        integer*4 mt                               !! MT value
+        integer*4 ix                               !! index in empire reaction
+        integer*4 num                              !! # of C4 data sets for this MT
+        integer*4, allocatable :: ic(:)            !! C4 index of each data set
+        real*8, allocatable :: wt(:)               !! weights for each data set
     end type
-    integer*4 :: nmt                               ! # MTs that will be fit
-    integer*4, allocatable :: kx(:)                ! section indices
-    type (fitted_reaction), target  :: fmt(ngmt)   ! the MTs being fit
+    integer*4 :: nmt                               !! # MTs that will be fit
+    integer*4, allocatable :: kx(:)                !! section indices
+    type (fitted_reaction), target  :: fmt(ngmt)   !! the MTs being fit
     type (fitted_reaction), pointer :: fx
 
     type (c4_file) c4
@@ -124,7 +123,7 @@ program c4tokal
     ! convert reaction name to MT value
 
     do i = 1,nrx
-       rcx(i)%mt = rctn(rcx(i)%name)
+       rcx(i)%mt = retReactionMT(rcx(i)%name)
     end do
 
     ! open C4 data file and get data
@@ -280,95 +279,95 @@ program c4tokal
 
     subroutine dataout(sc,mt)
 
-    implicit none
+        implicit none
 
-    ! echo data items back out to fortran units 10,11,12.
-    ! write energies in MeV, cross sections in mb.
-    ! also to unit 75 in MeV, barns for plotting.
+        ! echo data items back out to fortran units 10,11,12.
+        ! write energies in MeV, cross sections in mb.
+        ! also to unit 75 in MeV, barns for plotting.
 
-    type (c4_section), intent(in) :: sc       ! C4 section to scan
-    integer*4, intent(in) :: mt               ! MT to extract
+        type (c4_section), intent(in) :: sc       ! C4 section to scan
+        integer*4, intent(in) :: mt               ! MT to extract
 
-    real*8, parameter :: cor = 0.2D0
+        real*8, parameter :: cor = 0.2D0
 
-    logical*4 qwt
-    integer*4 i,l,m,npt
-    real*8 xf
-    character chr3*3
+        logical*4 qwt
+        integer*4 i,l,m,npt
+        real*8 xf
+        character chr3*3
 
-    type mtpt
-        real*8 e
-        real*8 x
-        real*8 z
-    end type
-    type (mtpt), allocatable, target :: gpts(:)
-    type (mtpt), pointer :: gp
+        type mtpt
+            real*8 e
+            real*8 x
+            real*8 z
+        end type
+        type (mtpt), allocatable, target :: gpts(:)
+        type (mtpt), pointer :: gp
 
-    type (c4_data_point), pointer :: pt
+        type (c4_data_point), pointer :: pt
 
-    ! data written to unit 75 is for plots
+        ! data written to unit 75 is for plots
 
-    qwt = .false.
-    if((mt1 == 0) .or. (mt == mt1)) then
-       write(chr3,'(I3)') mt
-       call strlen(chr3,l,m)
-       open(75,file=file(l1:l2)//'-'//chr3(l:m)//'-c4.gpd',status='UNKNOWN',action='WRITE',access='APPEND')
-       qwt = .true.
-    endif
+        qwt = .false.
+        if((mt1 == 0) .or. (mt == mt1)) then
+           write(chr3,'(I3)') mt
+           call strlen(chr3,l,m)
+           open(75,file=file(l1:l2)//'-'//chr3(l:m)//'-c4.gpd',status='UNKNOWN',action='WRITE',access='APPEND')
+           qwt = .true.
+        endif
 
-    if(mt < 200) then
-        xf = 1000.D0         ! convert regular cross sections to mb
-    else
-        xf = 1.D0            ! don't convert mubar, nubar
-    endif
+        if(mt < 200) then
+            xf = 1000.D0         ! convert regular cross sections to mb
+        else
+            xf = 1.D0            ! don't convert mubar, nubar
+        endif
 
-    allocate(gpts(sc%ndat))
+        allocate(gpts(sc%ndat))
 
-    npt = 0
-    do i = 1,sc%ndat
-       pt => sc%pt(i)
-       if(pt%mt /= mt) cycle
-       npt = npt + 1
-       gp => gpts(npt)
-       gp%e = 1.0D-06*pt%e
-       gp%x = xf*pt%x
-       if(pt%x == 0.D0) then
-           gp%z = 0.D0
-       else
-           gp%z = pt%dx/pt%x
-       endif
-       if(.not.qwt) cycle
-       if(pt%dx > 0.D0) write(75,999) gp%e,pt%x,pt%dx,mt
-    end do
+        npt = 0
+        do i = 1,sc%ndat
+           pt => sc%pt(i)
+           if(pt%mt /= mt) cycle
+           npt = npt + 1
+           gp => gpts(npt)
+           gp%e = 1.0D-06*pt%e
+           gp%x = xf*pt%x
+           if(pt%x == 0.D0) then
+               gp%z = 0.D0
+           else
+               gp%z = pt%dx/pt%x
+           endif
+           if(.not.qwt) cycle
+           if(pt%dx > 0.D0) write(75,999) gp%e,pt%x,pt%dx,mt
+        end do
 
-    if(qwt) close(75)
+        if(qwt) close(75)
 
-    if(npt < 1) then
-        ! no points for MT should not happen
-        ! print error message and abort
-        write(0,'(a,i0)') ' Internal inconsistency processing MT = ',mt
-        stop 1
-    endif
+        if(npt < 1) then
+            ! no points for MT should not happen
+            ! print error message and abort
+            write(0,'(a,i0)') ' Internal inconsistency processing MT = ',mt
+            stop 1
+        endif
 
-    ! data to 10,11,12 are used for fitting
+        ! data to 10,11,12 are used for fitting
 
-    write(10,100) sc%ref, sc%ent, sc%sub, npt
-    write(10,200) (gpts(i)%e,gpts(i)%x, i=1,npt)
-    write(11,100) sc%ref, sc%ent, sc%sub, npt
-    write(11,200) (gpts(i)%e,gpts(i)%z,i=1,npt)
-    if(kcovex /= 0) then
-        write(12,100) sc%ref, sc%ent, sc%sub,-npt
-        write(12,300) cor
-    endif
+        write(10,100) sc%ref, sc%ent, sc%sub, npt
+        write(10,200) (gpts(i)%e,gpts(i)%x, i=1,npt)
+        write(11,100) sc%ref, sc%ent, sc%sub, npt
+        write(11,200) (gpts(i)%e,gpts(i)%z,i=1,npt)
+        if(kcovex /= 0) then
+            write(12,100) sc%ref, sc%ent, sc%sub,-npt
+            write(12,300) cor
+        endif
 
-    deallocate(gpts)
+        deallocate(gpts)
 
-    return
+        return
 
-100 FORMAT(A25,5X,A5,A3,5X,I6)
-200 FORMAT(6(1PE11.4))
-300 FORMAT(F6.3)
-999 FORMAT(3(1X,E12.5),I4)
+        100 FORMAT(A25,5X,A5,A3,5X,I6)
+        200 FORMAT(6(1PE11.4))
+        300 FORMAT(F6.3)
+        999 FORMAT(3(1X,E12.5),I4)
 
     end subroutine dataout
 

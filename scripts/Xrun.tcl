@@ -1,6 +1,6 @@
-# $Rev: 5464 $
+# $Rev: 5517 $
 # $Author: mwherman $
-# $Date: 2023-03-31 23:11:46 +0200 (Fr, 31 Mär 2023) $
+# $Date: 2023-12-06 00:56:09 +0100 (Mi, 06 Dez 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -9070,6 +9070,9 @@ cd $workdir} \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 105 $mat $EXPDAT} \
         -label {(z,t) MT=105} 
     $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 106 $mat $EXPDAT} \
+        -label {(z,3He) MT=106}
+    $site_4_0.men89 add command \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 107 $mat $EXPDAT} \
         -label "(z,a) MT=107" 
     $site_4_0.men89 add command \
@@ -9093,7 +9096,6 @@ cd $workdir} \
     $site_3_0.men80 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
         -label {Manipulate C4 file for KALMAN} 
-# HERE1
 
     $site_3_0.men80 add separator \
 
@@ -9142,6 +9144,15 @@ cd $workdir} \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
         -label "(n,p) MT=103" 
     $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 104 $mat $EXPDAT} \
+        -label "(n,d) MT=104"
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 105 $mat $EXPDAT} \
+        -label "(n,t) MT=105"
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 106 $mat $EXPDAT} \
+        -label "(n,3He) MT=106"         
+    $site_5_0.men87 add command \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
         -label "(n,a) MT=107" 
     $site_5_0.men87 add command \
@@ -9156,6 +9167,8 @@ cd $workdir} \
         -command { editFile $file-xsc.kal } -label "View KALMAN x-sections" 
     $site_3_0.men80 add command \
         -command { editFile $file-parCorrOut.kal } -label "View KALMAN adj. parameters" 
+
+# HERE1
     $site_3_0.men80 add command \
         -command {exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.gp &} \
         -label "Gnuplot covariance" 

@@ -6,7 +6,8 @@
       !! that the model parameters are completely independent and their
       !! correlation matrix is the identity matrix.
 
-      use reactionNames
+      use rctn, only: retReactionMT
+      use c4_io, only : strlen
 
       implicit none
 
@@ -71,7 +72,7 @@
       IF(NPFNS.EQ.0) THEN
         J=0
         DO I = 1,nreac
-           mt = RCTN(REACTION(I))
+           mt = retReactionMT(REACTION(I))
            IF (MT .EQ. MT1) THEN
               J=1
               exit
@@ -99,7 +100,7 @@
       OPEN(10,FILE=FILE(L1:L2)//INPSEN,STATUS='OLD',iostat=ios)
       if(ios /= 0) then
           WRITE(0,*) 'PARAMETER FILE NOT FOUND: ',FILE(L1:L2)//INPSEN
-          STOP 1
+          STOP 2
       endif
       I=1
       do
@@ -145,7 +146,7 @@
       OPEN(10,FILE=FILE(L1:L2)//trim(MATSEN),STATUS='OLD',iostat=ios)
       if(ios /= 0) then
           WRITE(0,*) 'SENSITIVITY FILE NOT FOUND: ',FILE(L1:L2)//trim(MATSEN)
-          STOP 1
+          STOP 3
       endif
       DO I=1,NPARM
          READ(10,*) ! FIRST LINE

@@ -1,5 +1,7 @@
-module reactionNames   
+module rctn   
+    use c4_io, only : strlen
     implicit none
+ 
 
     integer*4, parameter :: nrmax = 54       ! max # of reactions tested
 
@@ -28,41 +30,46 @@ module reactionNames
      156, 207,   5, 851/)
 
     integer*4, private :: ln1,ln2,ll1,ll2,i
-    public rctn, returnReaction
+    ! public retReactionMT, retReactionName
 
     contains 
 
-    integer*4 function rctn(name)
-      !! look for the supplied 9-character reaction name and
+    integer*4 function retReactionMT(name12)
+      !! Look for the supplied 12-character reaction name and
       !! return the corresponding MT value for this reaction.
-      !! if reaction string is not found, return -1.
+      !! If reaction string is not found, return -1.
+      !! Actually, the name is 12- instead of 9-characters since 
+      !! such is the format in *.xsc file.
     
-      character*12, intent(in) :: name         ! reaction name to find
+      character*12, intent(in) :: name12       ! reaction name to find (12 characters)
+      character*9 :: name                      ! reaction name to find (9 characters)
+
+      name = name12(1:9)
 
       i = 1
       CALL STRLEN(NAME,LN1,LN2)
       do
          CALL STRLEN(LIST(I),LL1,LL2)
          if(name(ln1:ln2) == list(i)(ll1:ll2)) then
-             rctn = listMT(i)
+             retReactionMT = listMT(i)
              return
          endif
          i = i + 1
          if(i > nrmax) then
-             WRITE(0,*) 'MT NOT FOUND FOR ',name(ln1:ln2)
-             rctn = -1
+            !  WRITE(0,*) 'MT NOT FOUND FOR ',name(ln1:ln2)
+             retReactionMT = -1
              return
          endif
       end do
 
-    end function rctn
+    end function retReactionMT
 
 
-    subroutine returnReaction(name,mtAsked)
-      !! look for the  9-character reaction name 
+    subroutine retReactionName(name,mtAsked)
+      !! Return the  9-character reaction name 
       !! corresponding to supplied MT value.
       !! If MT is not found, return string "wrong MT".
-      !! Inverse functionality to rctn function which returns MT.
+      !! Inverse functionality to retReactionMT function which returns MT.
       
       character*9, intent(out) :: name  ! reaction name to return
       integer*4, intent(in) :: mtAsked  ! MT value asking for reaction name
@@ -81,6 +88,6 @@ module reactionNames
          endif
       end do
 
-    end subroutine returnReaction
+    end subroutine retReactionName
 
-end module reactionNames 
+end module rctn
