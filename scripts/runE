@@ -472,7 +472,7 @@ def runE(proj):
     rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out', 'OPTMAN.OUT', 'ddhms.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'MU_BAR.LST', 'MU_BAR.TMP')
-    rm(glob('TARGET-*.tl'), glob('ecis06.*'))
+    rm(glob('TARGET-*.tl'), glob('ecis*'), glob('dwba*'))
     rm('TARGET.LEV', 'OMP_A.DAT', 'angdis.p92', 'COVAR-PAR.DAT', 'ecis06_INC.LST')
     rm('TOTCOR.DAT', 'CN-LEV-XS.DAT')
     rm('C4SORTM.INP')
