@@ -33,7 +33,7 @@
 
         call reset_mf1
         call findQvalues
-        call setQvalues
+        call setQMvalues
 
         if(.not.quiet) write(6,*) ' Writing '//outfile(1:nout)
         status = write_endf_file(outfile(1:nout),endf,qover)
@@ -109,39 +109,89 @@
     end subroutine findQvalues
 
 
-    subroutine setQvalues
+    subroutine setQMvalues
         !! Set Q-values for MT = 103, 104, 105, 106, 107, 
         !! ((n,p), (n,d), (n,t), (n,3He) and (n,a))
         !! using Q-values from the respective ground state MTs,
         !! e.g., MT=600 for (n,p), MT=800 for (n,a), ...
+        !! Acts on MF = 3, 9, and 10 therefore there is no need 
+        !! fix these Q-vakues with FIXUP (zero Q values in FIXUP input 
+        !! for MT = 103, 104, 105, 106, 107, will be fine)
 
         type (endf_mat), pointer :: mat
         type (mf_3), pointer :: mf3
+        type (mf_9), pointer :: mf9
+        type (mf_10), pointer :: mf10
 
         mf3 => endf%mat%mf3
         do while(associated(mf3))
-            select case (mf3%mt)    
+            select case (mf3%mt)
             case(103)
-                mf3%qm = Q103 
-                mf3%qi = Q103 
+                mf3%qm = Q103
+                mf3%qi = Q103
             case(104)
-                mf3%qm = Q104 
-                mf3%qi = Q104 
+                mf3%qm = Q104
+                mf3%qi = Q104
             case(105)
-                mf3%qm = Q105             
-                mf3%qi = Q105 
+                mf3%qm = Q105
+                mf3%qi = Q105
             case(106)
-                mf3%qm = Q106             
-                mf3%qi = Q106 
+                mf3%qm = Q106
+                mf3%qi = Q106
             case(107)
-                mf3%qm = Q107                 
-                mf3%qi = Q107 
+                mf3%qm = Q107
+                mf3%qi = Q107
             end select
             ! write(*,*)"Mt, Q, Qi", mf3%mt, mf3%qm, mf3%qi
             mf3 => mf3%next
         end do
+
+        mf9 => endf%mat%mf9
+        do while(associated(mf9))
+            select case (mf9%mt)
+            case(103)
+                mf9%fst%qm = Q103
+                mf9%fst%qi = Q103
+            case(104)
+                mf9%fst%qm = Q104
+                mf9%fst%qi = Q104
+            case(105)
+                mf9%fst%qm = Q105
+                mf9%fst%qi = Q105
+            case(106)
+                mf9%fst%qm = Q106
+                mf9%fst%qi = Q106 
+            case(107)
+                mf9%fst%qm = Q107
+                mf9%fst%qi = Q107
+            end select
+            mf9 => mf9%next
+        end do
+
+        mf10 => endf%mat%mf10
+        do while(associated(mf10))
+            select case (mf10%mt)
+            case(103)
+                mf10%fst%qm = Q103
+                mf10%fst%qi = Q103
+            case(104)
+                mf10%fst%qm = Q104
+                mf10%fst%qi = Q104
+            case(105)
+                mf10%fst%qm = Q105
+                mf10%fst%qi = Q105
+            case(106)
+                mf10%fst%qm = Q106
+                mf10%fst%qi = Q106
+            case(107)
+                mf10%fst%qm = Q107
+                mf10%fst%qi = Q107
+            end select
+            mf10 => mf10%next
+        end do
+
         return
-    end subroutine setQvalues
+    end subroutine setQMvalues
 
     end program stanef
 
