@@ -1,6 +1,6 @@
-   !cc   * $Author: gnobre $
-   !cc   * $Date: 2022-12-01 17:26:33 +0100 (Do, 01 Dez 2022) $
-   !cc   * $Id: lev-dens.f90 5393 2022-12-01 16:26:33Z gnobre $
+   !cc   * $Author: mwherman $
+   !cc   * $Date: 2023-12-11 20:00:50 +0100 (Mo, 11 Dez 2023) $
+   !cc   * $Id: lev-dens.f90 5523 2023-12-11 19:00:50Z mwherman $
    
    
    
@@ -295,8 +295,8 @@
       !CC                |-> VIB_K_EGSM
       !CC                |-> VIB_Q_EGSM
       !CC                |-> ROT_Q_EGSM
-      !CC   *****************************************************************
-      !CC   
+!CC   *****************************************************************
+!CC
       
       implicit none
       !*--DAMIRO309

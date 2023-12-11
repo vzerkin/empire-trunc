@@ -1,6 +1,6 @@
-!cc   * $Rev: 5465 $
+!cc   * $Rev: 5523 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2023-04-09 02:51:49 +0200 (So, 09 Apr 2023) $
+!cc   * $Date: 2023-12-11 20:00:50 +0100 (Mo, 11 Dez 2023) $
 
 ! c   ********************************************************************
 !!c   *                                                                  *
@@ -311,7 +311,7 @@ subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
    !-----Contribution coming straight from the current decay
    icsp = INT((Excnq - EX(Ief,Nnur))/DE + 1.0001)
    if(ENDf(Nnur)==1)then
-      POPcse(Ief , Nejc , icsp , INExc(Nnur)) = POPcse(Ief , Nejc , icsp , INExc(Nnur)) + Popt ! adding Popt to population spectra in exclusive residue
+      POPcse(Ief , Nejc , icsp , INExc(Nnur)) = POPcse(Ief , Nejc , icsp , INExc(Nnur)) + Popt ! adding to exclusive pop. spectra
    else
       CSE(icsp , Nejc , 0) = CSE(icsp , Nejc , 0) + Popt ! inclusive residue - add Popt directly to spectra
    endif
@@ -328,7 +328,7 @@ subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
          do iejc = 0 , NDEJC
             if(POPcse(Iec , iejc , ie , INExc(Nnuc))>0)then
                if(ENDf(Nnur)==2)then
-                  CSE(ie , iejc , 0) = CSE(ie , iejc , 0) + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor ! DE feeding contribution added to inclusive spectrum
+                  CSE(ie , iejc , 0) = CSE(ie , iejc , 0) + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor ! DE feeding to incl spectrum
                else
                   POPcse(Ief , iejc , ie , INExc(Nnur)) = POPcse(Ief , iejc , ie , INExc(Nnur))                                  &
                      & + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor  ! DE feeding contribution added to population spectrum
