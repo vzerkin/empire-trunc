@@ -7,7 +7,7 @@ PROGRAM c4service
    ! INTEGER*4, PARAMETER :: ngmt = 13      ! list of allowed MTs for Kalman fitting
    ! INTEGER*4, PARAMETER :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456/)
 
-   INTEGER*4, PARAMETER   :: kcovex = 1     ! set nonzero to read experimental covariances
+   INTEGER*4, PARAMETER   :: kcovex = 1     !! set nonzero to read experimental covariances
    ! REAL*4, PARAMETER    :: scale = 1.0    ! scale factor for parameter unc**2
 
 
@@ -16,24 +16,24 @@ PROGRAM c4service
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
    CHARACTER*7, PARAMETER :: logc4 = '-log.c4'
-   CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, a-add to, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
-   CHARACTER*10            :: arg2, arg3, arg4        ! arguments on the command line
-   REAL*4 :: y1 = 0.0, y2 = 0.0, y3 = 0.0, y4 = 0.0 ! section modifying parameters
-   INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
-   INTEGER*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
-   !   INTEGER*4 nrx      ! # of reactions in EMPIRE XSC file
+   CHARACTER*1            :: action = 'r'       !! action on a section r-retain, a-add to, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
+   CHARACTER*10           :: arg2, arg3, arg4   !! arguments on the command line
+   REAL*4 :: y1 = 0.0, y2 = 0.0, y3 = 0.0, y4 = 0.0 !! section modifying parameters
+   INTEGER*4 mt1                                !! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
+   INTEGER*4 nex                                !! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
+   !   INTEGER*4 nrx ! # of reactions in EMPIRE XSC file
    LOGICAL :: qex   
    LOGICAL :: inp_read = .FALSE.
    INTEGER*4 i,j,k,m,ix,l1,l2,ios,status,ndat,sec_num
    CHARACTER file*25, command*100   !pname*6,line*130
 
    INTEGER*4 rk, rpza, rtza,  rmf, rmt
-   INTEGER*4 nsec     ! # of sections in C4 file
+   INTEGER*4 nsec                !! # of sections in C4 file
    CHARACTER rref*25, rent*5, rsub*3, raction*1
-   REAL*4 :: ry1,ry2, ry3, ry4  ! input parameters for c4service
-   REAL*4 :: Emin = 0.0     ! lower energy limit on exp data
-   REAL*4 :: Emax = 1000.0     ! upper energy limit on exp data
-   REAL*4 :: Xmin = 0.0     ! lower cross section limit on exp data
+   REAL*4 :: ry1,ry2, ry3, ry4   !! input parameters for c4service
+   REAL*4 :: Emin = 0.0          !! lower energy limit on exp data
+   REAL*4 :: Emax = 1000.0       !! upper energy limit on exp data
+   REAL*4 :: Xmin = 0.0          !! lower cross section limit on exp data
 
    TYPE (c4_file) c4
    TYPE (c4_section), POINTER :: sc
