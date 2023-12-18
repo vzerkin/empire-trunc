@@ -1,5 +1,6 @@
 #! /bin/sh -
-#script to reconstruct inelastic, (n,p) and (n,alpha) reactions
+# script to reconstruct inelastic, (n,p), (n,d), (n,t), (n,3he) 
+# and (n,alpha) reactions
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -33,25 +34,18 @@ S106=+(750,799)
 S107=+(800,849)
 
  0.000000+0 0.000000+0          0          0${2}103
--2.446000+5-2.446000+5          0          0
+ 0.000000+0 0.000000+0          0          0
+ 0.000000+0 0.000000+0          0          0${2}104
+ 0.000000+0 0.000000+0          0          0
+ 0.000000+0 0.000000+0          0          0${2}105
+ 0.000000+0 0.000000+0          0          0
+ 0.000000+0 0.000000+0          0          0${2}106
+ 0.000000+0 0.000000+0          0          0
  0.000000+0 0.000000+0          0          0${2}107
- 7.551500+6 7.551500+6          0          0
+ 0.000000+0 0.000000+0          0          0
 
 EOF
 
-# RECONSTRUCT INELASTIC, AND (N,P) REACTIONS WITH FIXUP
-#cat >FIXUP.INP <<EOF
-#12101011111001
-#$file.endf
-#$file-tmp.endf
-#S  4=+( 50, 91)
-#S103=+(600,649)
-#
-# 0.00000+00 0.00000+00          0          0${2}103
-#
-#
-#
-#EOF
 
 $EMPIREDIR/util/fixup/fixup < FIXUP.INP
 
