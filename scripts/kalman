@@ -226,10 +226,22 @@ for k in $MT; do
     
     cat fort.16 fort.32 > fort.48
  
-    # temporary TO BE DELETED!!!
-    echo "Kalman run done"
+    echo "Kalman run done - continue with Kalend (y/n)?"
     read a
-   #  exit
+
+    
+    if [ ! $a -eq "y" ]; then
+      mv KALMAN.OUT $file-out.kal
+      mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
+      mv fort.14 $file-cov.kal
+      mv fort.12 $file-expCorr.kal
+      mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
+      mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal.
+      rm INPUT.D
+      rm ENERGYANDINDEX.TMP 2>/dev/null
+      #rm -f fort.{1*,50,75}
+      exit 11
+    fi
 
     echo  "Running kalend"
     if ! $EMPIREDIR/util/kalman/kalend < INPUT.D
