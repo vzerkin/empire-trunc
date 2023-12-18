@@ -130,7 +130,6 @@ program kalend
     allocate(covk(ncovk), rea(nrs))
     
     if(mt > 0) then                     ! single specific MT (diagonal-only version)
-        mt1 = mt                                    ! no cross-correlations 
         write(*,*)' Old good single route, looking for MT=',mt
         call readEndfSource                         ! read EMPIRE endf file and create endf structure
         call readCovarSubsection                    ! read MT self-covariance data (subsection)
@@ -146,7 +145,7 @@ program kalend
         ! mt1 = 4
         ! call writeXCovPlotFile                       ! write covariance to a plot file
         call createFullMF33(endf, mat, covk)        ! create and insert MF33 structure, write ENDF file
-    STOP 112
+    ! STOP 112
         ! call constrBigCovar(covk, rea, bigCov, bigEner, bigUnc)  ! combine partial Kalamn outputs into full single square covariance matrix 
         ! call writeCovPlotFile                     ! write covariances to plot file (MT1=MT2 only)
         ! call writeEndfFile                        ! write to ENDF file
@@ -904,6 +903,7 @@ contains
         integer*4, save :: isec                     !! enumerates sections
         integer*4 :: inl                            !! enumerates subsection
         integer*4 :: loc                            !! location of the reaction pair in covk structure
+        integer*4 :: n                              !! non-zero reports allocation probblem
         
         type (mf_33), target :: nf33
         type (mf_33), save, pointer :: mf33
@@ -913,9 +913,9 @@ contains
 
         if(.not.associated(mat)) return
 
-
         ! create our MF33 section
         do isec = 1, nrs    ! over MTs (MF33 sections)
+
             mt = mts(isec)
             
             ! create section header-line data
@@ -924,12 +924,15 @@ contains
             nf33%awr = mat%mf1%awr
             nf33%mtl = 0
             nf33%nl  = nrs + 1 - isec
+            print *, "nf33 header: ",nf33%mt, nf33%za, nf33%awr, nf33%mtl, nf33%nl 
+            allocate(nf33%sct(nf33%nl), stat=n)
+            if(n .ne. 0) call endf_badal     ! allocate subsections problem
             
-            do inl = isec, nrs
+            do inl = isec, 2 ! nrs
                 mt1 = mts(inl)  
+                print *, "MT pair: ", nf33%mt, mt1
                 loc = crossReactionPosition(mt,mt1)
                 ne = covk(loc)%ne
-                allocate(nf33%sct(inl))     ! allocate subsection
                 sct => nf33%sct(inl)
                 sct%mf1  = 0
                 sct%lfs1 = 0
@@ -937,7 +940,8 @@ contains
                 sct%mt1   = mt1
                 sct%nc    = 0
                 sct%ni    =  nrs+1-isec  ! total number of ni-type subsections
-                allocate(sct%nis(inl))
+                allocate(sct%nis(sct%ni), stat=n)
+                if(n .ne. 0) call endf_badal     ! allocate subsections problem)
                 ni => sct%nis(inl)
                 ni%ne = ne
                 ni%kl => null()
@@ -946,27 +950,42 @@ contains
                     ni%lb = 5
                     ni%ls = 1
                     ni%ec => null()
-                    allocate(ni%e(ne),ni%cov(ne-1,ne-1))
+                    allocate(ni%e(ne),ni%cov(ne-1,ne-1), stat=n)
+                    if(n .ne. 0) call endf_badal     ! allocate subsections problem)
                     ni%e = covk(loc)%x*1.D+06
                     ni%cov = covk(loc)%w(:ne-1,:ne-1) ! OK it has been allocated ne-1 at line 826 (less bins than boundaries)
+                    write(*,'(5G12.5)') ni%cov(1:56,1:5)
+                    ! mf33 => pop(mat%mf33,mt)
+                    print *, "  Putting diagonal covariances into structure"
+                    qins = put(mat%mf33,nf33)
+                    if(.not.qins) call errorMessage(40, mt)
+                    print *, " Putting diagonal seems to be done"
                     ! write(*,*) ' ni-lb-5 ', sct%nis(inl)%lb, sct%nis(inl)%ne, ni%lb, sct%mt1
                 else                ! off-diagonal section (LB=6)
                     ni%lb = 6
                     ni%ls = 0
                     ni%nt = 1 + ne*ne
-                    ! print *,"HERE6 ne", ne
-                    allocate(ni%e(ne),ni%ec(ne),ni%cov(ne-1,ne-1))
-                    ! print *,"HERE7"
+                    print *,"HERE6 ne", ne
+                    allocate(ni%e(ne),ni%ec(ne),ni%cov(ne-1,ne-1), stat=n)
+                    if(n .ne. 0) call endf_badal     ! allocate subsections problem)
+                    print *,"HERE7"
                     ni%e = covk(loc)%x*1.D+06
                     ni%ec = covk(loc)%x*1.D+06
                     ni%cov = covk(loc)%w(:ne-1,:ne-1)
-                    write(*,*) ' ni-lb-6',  ni%lb, nf33%mt, sct%mt1
-                    write(*,*) ni%cov
+                    ! write(*,*) ' ni-lb-6',  ni%lb, nf33%mt, sct%mt1
+                    write(*,'(5G12.5)') ni%cov(1:55,1:5)
                     ! print *,"ni%e", ni%e
                 end if
-            end do
-        end do
-            
+            end do  ! over MT1's
+            ! mf33 => pop(mat%mf33,mt)
+            print *, "  Putting cross-covariances into structure"
+            qins = put(mat%mf33,nf33)
+            if(.not.qins) call errorMessage(40, mt)
+            status = write_endf_file(kalFile,endf)
+
+            ! print *, " Putting seems to be done"
+        end do !over MTs
+        print *, " Full covariance done "
         ! Look in file to see what's already there.
         ! If a MT section found, remove it and replace it
         ! with the section we just created. Of course, this
@@ -975,10 +994,10 @@ contains
         ! range from the one we're replacing. For now, just
         ! stick in the MF33 for this MT in the ENDF file.
     
-        mf33 => pop(mat%mf33,mt)
-        print *, "putting covariances into structure"
-        qins = put(mat%mf33,nf33)
-        if(.not.qins) call errorMessage(40, mt)
+        ! mf33 => pop(mat%mf33,mt)
+        ! print *, "  Putting covariances into structure"
+        ! qins = put(mat%mf33,nf33)
+        ! if(.not.qins) call errorMessage(40, mt)
         
         ! if(mt1 == mt(nrs) .and. mt2 == mt(nrs) .or. writeRun) then
         ! print *, "what's inside ", endf%mat%mf33%sct(1)%mt1
@@ -996,7 +1015,7 @@ contains
             write(6,*) ' Error writing ', kalFile
         endif
         call system('mv '//kalFile//' '//originalFile)
-        
+        print *, " Kalend done"
         return
     end subroutine createFullMF33
 
