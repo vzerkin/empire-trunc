@@ -1,30 +1,7 @@
-! $Rev: 5256 $                                                          | 
-! $Date: 2020-10-01 11:06:59 +0200 (Do, 01 Okt 2020) $                                                     
-! $Author: capote $                                                  
+! $Rev: 5529 $                                                          | 
+! $Date: 2023-12-20 21:23:07 +0100 (Mi, 20 Dez 2023) $                                                     
+! $Author: mwherman $                                                  
 ! **********************************************************************
-* Copyright (C) 2004 Broohaven National Laboratory
-* Copyright (C) 2005 International Atomic Energy Agency
-* -----------------------------------------------------------------------------
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is furnished
-* to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in all
-* copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*
-*-----------------------------------------------------------------------------
 ! *
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
@@ -52,9 +29,6 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
-!-V         Version 8.24   January 2020 A. Trkov
-!-V                        Lift restriction on MF=4,5,6,12,14,15 for particles
-!-V                        other than neutrons
 !-V         Version 8.23   April 2019 D. Lopez Aldama (updated by RCN)
 !-V                        - For IRDFF checking (see DLA comments)
 !-V         Version 8.22   October 2017 D. Brown
@@ -191,7 +165,6 @@
 !-V                           output file names can be given. Default
 !-V                           options are assumed unless third
 !-V                           parameter is N.
-!-V
 !-V      Refer all comments and inquiries to
 !-V
 !-V         National Nuclear Data Center
@@ -296,7 +269,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.24'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
 !
 !     Define variable precision
 !
@@ -337,7 +310,7 @@
       INTEGER(KIND=I4), PARAMETER :: NANGMAX=201     ! Angle points
 !          File 5 secondary energy data
       INTEGER(KIND=I4), PARAMETER :: NSUBSMAX=100    ! Subsection limit
-      INTEGER(KIND=I4), PARAMETER :: NES5MAX=200     ! Number of E(INC)
+      INTEGER(KIND=I4), PARAMETER :: NES5MAX=1000    ! Number of E(INC)
       INTEGER(KIND=I4), PARAMETER :: NEDISMAX=1000   ! Energy points
 !          File 6 secondary energy-angle data
       INTEGER(KIND=I4), PARAMETER :: NSUBS6MAX=2000  ! Subsection limit
@@ -420,7 +393,7 @@
 !                                         !  0, YES;  1, NO
 !
       INTEGER (KIND=I4) :: CHECKR_SUCCESS !  Flag to indicate success or failure of checkr execution
-!     INTEGER (KIND=I4) :: IRERUN
+      INTEGER (KIND=I4) :: IRERUN
 !
       CHARACTER(LEN=66) :: TLABEL         ! File (TAPE) label from first record
       INTEGER (KIND=I4) :: LABEL          ! File (TAPE) number from first record
@@ -538,7 +511,7 @@
       IMPLICIT NONE
 !
       CHARACTER(LEN=1), INTRINSIC :: CHAR
-!     INTEGER(KIND=I4), INTRINSIC :: MOD, ICHAR
+      INTEGER(KIND=I4), INTRINSIC :: MOD, ICHAR
 !
       INTEGER(KIND=I4) :: IQUIT ! Flag to indicate whether or not to exit       
       INTEGER(KIND=I4) :: IFIND ! Flags whether desired material found
@@ -736,7 +709,7 @@
 !
 !     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
-!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       CHARACTER(LEN=1)  :: IW
       CHARACTER(LEN=11) :: ADATE
@@ -922,7 +895,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
 !
       CHARACTER(LEN=15) :: MATSIN
       CHARACTER(LEN=10) :: BUF
@@ -1111,7 +1084,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: ISUBTP
 !
@@ -1146,19 +1119,17 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                CALL CKF3
             END IF
          CASE (4)
-! ** Why is MF=4 forbidden for anything but neutrons?
-!           IF(NFOR.GE.6.AND.NSUB.NE.10) THEN
-!              CALL MF_ERRORS(3)
-!           ELSE
+            IF(NFOR.GE.6.AND.NSUB.NE.10) THEN
+               CALL MF_ERRORS(3)
+            ELSE
                CALL CKF4
-!           END IF
+            END IF
          CASE (5)
-! ** Why is MF=5 forbidden for anything but neutrons?
-!           IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4)) THEN
-!              CALL MF_ERRORS(2)
-!           ELSE
+            IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4)) THEN
+               CALL MF_ERRORS(2)
+            ELSE
                CALL CKF5
-!           END IF
+            END IF
          CASE (6)
             IF(NFOR.LT.6) THEN
                EMESS = 'MF=6 NOT ALLOWED PRIOR TO ENDF-6'
@@ -1188,26 +1159,26 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                CALL CKF9
             END IF
          CASE (12:13)
-! ** Why is MF=12 forbidden for anything but neutrons?
-!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-!              CALL MF_ERRORS(3)
-!           ELSE
+!            MF12-13 is now allowed for non-neutron projectiles
+!            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!               CALL MF_ERRORS(3)
+!            ELSE
                CALL CKF12
-!           END IF
+!            END IF
          CASE (14)
-! ** Why is MF=14 forbidden for anything but neutrons?
-!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-!              CALL MF_ERRORS(3)
-!           ELSE
+!            MF14 is now allowed for non-neutron projectiles
+!            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!               CALL MF_ERRORS(3)
+!            ELSE
                CALL CKF14
-!           END IF
+!            END IF
          CASE (15)
-! ** Why is MF=15 forbidden for anything but neutrons?
-!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-!              CALL MF_ERRORS(3)
-!           ELSE
+!            MF15 is now allowed for non-neutron projectiles
+!            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!               CALL MF_ERRORS(3)
+!            ELSE
                CALL CKF15
-!           END IF
+!            END IF
          CASE (23)
             IF(NFOR.GE.6.AND.(NSUB.NE.3.AND.NSUB.NE.113))  THEN
                CALL MF_ERRORS(2)
@@ -1519,7 +1490,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       INTEGER(KIND=I4) :: I
 !
-!     INTEGER(KIND=I4), INTRINSIC :: IABS
+      INTEGER(KIND=I4), INTRINSIC :: IABS
 !
       INTEGER(KIND=I4) :: II
 !
@@ -1736,7 +1707,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
 !     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
-!     INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
+      INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
 !     CHARACTER(LEN=11):: ZSA
       INTEGER(KIND=I4) :: IZ,IA,ISTA,IZA,IZ1
@@ -2666,7 +2637,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: IFG,KRM,NJS,KRL,NPP
+      INTEGER(KIND=I4) :: IFG,KRM,NJS,KRL,NPP,KBK,KPS,LLBK,LBK
       INTEGER(KIND=I4) :: J
 !
       IFG = L1H
@@ -2690,7 +2661,22 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       DO J=1,NJS
          CALL RDLIST
+         KBK = L1L
+         KPS = L2L
          CALL RDLIST
+         DO LLBK=1,KBK
+            CALL RDCONT
+            LBK = L2H
+            ! Background R-matrix
+            CALL TEST1(LBK,0,3,'LBK',1)
+            SELECT CASE (LBK)
+                case (1)
+                    CALL RDTAB1
+                    CALL RDTAB1
+                case (2,3)
+                    CALL RDLIST
+            END SELECT
+         end do
       END DO
 !
       RETURN
@@ -3259,7 +3245,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
       INTEGER(KIND=I4) :: LCT
@@ -3843,7 +3829,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     REAL(KIND=R4), INTRINSIC :: FLOAT
+      REAL(KIND=R4), INTRINSIC :: FLOAT
 !
       INTEGER(KIND=I4) :: NSP,NST,ISTA
       INTEGER(KIND=I4) :: NDKT
@@ -4009,7 +3995,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,ISET,INAT
       INTEGER(KIND=I4) :: NS,LFSO,LFSP,IZAP,IZAPP
@@ -4281,7 +4267,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
       INTEGER(KIND=I4) :: NK,NI
@@ -4384,7 +4370,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
 !
       INTEGER(KIND=I4) :: NC
@@ -4456,7 +4442,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-!     REAL(KIND=R4), INTRINSIC :: ABS
+      REAL(KIND=R4), INTRINSIC :: ABS
 !
       REAL(KIND=R4) :: ZTEST
 !
@@ -4879,7 +4865,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       IF(LCOMP.EQ.0)  THEN
          CALL TEST1(NLS,1,NLSMAX,'NLS',1)
       ELSE IF(LCOMP.EQ.1) THEN
-         CALL TEST2(NLS,0,'NLS')
+         CALL TEST1(NLS,1,NLSMAX,'NLS',1)
       END IF
       IF(LCOMP.EQ.0) THEN
 !
@@ -6334,7 +6320,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       INTEGER(KIND=I4) :: NRT,NPT,IBMOD
       INTEGER(KIND=I4) :: NBTT(NIRMAX),JNTT(NIRMAX)
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: JJNT,KNT
       INTEGER(KIND=I4) :: JNTMIN,JNTMAX
@@ -6510,7 +6496,7 @@ c        END IF
       REAL(KIND=R4) :: A,B
       CHARACTER(LEN=*) :: KXXX
 !
-!     REAL(KIND=R4), INTRINSIC :: ABS
+      REAL(KIND=R4), INTRINSIC :: ABS
 !
       IF(ABS(A-B).GT.EPS*MAX(ABS(A),ABS(B)))  THEN
          WRITE(EMESS,'(2A,1PE13.6)')                                    &       
@@ -6657,7 +6643,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: MTT,MT3,MTCAT
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MT7
 !
@@ -6853,7 +6839,7 @@ c        END IF
       INTEGER(KIND=I4) :: MTCAT
       INTEGER(KIND=I4) :: IEVAL
 !
-!     INTEGER(KIND=I4), INTRINSIC :: MOD
+      INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: ISUBTP
 !
@@ -7139,7 +7125,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: JSEQ
 !
-!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
 !       Material printout delimiter
@@ -7194,7 +7180,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: JSEQ
 !
-!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
 !       Material printout delimiter
@@ -7251,7 +7237,7 @@ c        END IF
       CHARACTER(LEN=*) :: INSTR,OUTSTR,DELIM
       INTEGER(KIND=I4) :: ITOK
 !
-!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
+      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
 !
       INTEGER(KIND=I4) :: ILEN,JLEN
       INTEGER(KIND=I4) :: ITOKP
@@ -7330,7 +7316,7 @@ c        END IF
 !...VMS
 !/      INTEGER(KIND=2) :: ILENP2
 !...ANS
-!       CHARACTER(LEN=100) :: CFILE
+        CHARACTER(LEN=100) :: CFILE
 !---MDC---
 !
       INPAR = ' '
