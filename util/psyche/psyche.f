@@ -1,6 +1,6 @@
-! $Rev: 5256 $                                                         |
-! $Date: 2020-10-01 11:06:59 +0200 (Do, 01 Okt 2020) $                                                     
-! $Author: capote $                                                  
+! $Rev: 5528 $                                                         |
+! $Date: 2023-12-20 02:55:42 +0100 (Mi, 20 Dez 2023) $                                                     
+! $Author: mwherman $                                                  
 ! **********************************************************************
 * Copyright (C) 2004 Broohaven National Laboratory
 * Copyright (C) 2005 International Atomic Energy Agency
@@ -417,7 +417,7 @@
 !     ARRAY STORING Q-VALUES FROM FILE 3 FOR LATER TESTS
 !
       INTEGER(KIND=I4) :: NMT3, NMTBAR
-      INTEGER(KIND=I4), PARAMETER ::  SZMT3=150
+      INTEGER(KIND=I4), PARAMETER ::  SZMT3=250
       INTEGER(KIND=I4), DIMENSION(SZMT3) :: MT3
       REAL(KIND=R4), DIMENSION(SZMT3) :: QIVAL,QVAL
       REAL(KIND=R4), PARAMETER :: QUNK= 7.777E+07
