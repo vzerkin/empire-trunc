@@ -1,6 +1,6 @@
-# $Rev: 5517 $
+# $Rev: 5530 $
 # $Author: mwherman $
-# $Date: 2023-12-06 00:56:09 +0100 (Mi, 06 Dez 2023) $
+# $Date: 2024-01-22 19:28:32 +0100 (Mo, 22 Jän 2024) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -9159,6 +9159,53 @@ cd $workdir} \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label "all MTs" 
       
+    $site_3_0.men80 add cascade \
+        -menu "$site_3_0.men80.men81" \
+        -command {} -label "Run KALEND for" 
+    set site_5_0 $site_3_0.men80
+    menu $site_5_0.men81 \
+        -activebackground #f9f9f9 -activeforeground black  \
+        -tearoff 2 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 1 $mat $EXPDAT 0 0} \
+        -label "Total MT=1" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 2 $mat $EXPDAT 0 0} \
+        -label "Elastic MT=2" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 4 $mat $EXPDAT 0 0} \
+        -label "Inelastic MT=4" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 16 $mat $EXPDAT 0 0} \
+        -label "(z,2n) MT=16" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 17 $mat $EXPDAT 0 0} \
+        -label "(z,3n) MT=17" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 18 $mat $EXPDAT 0 0} \
+        -label "(z,f) MT=18" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 102 $mat $EXPDAT 0 0} \
+        -label "(n,g) MT=102" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 103 $mat $EXPDAT 0 0} \
+        -label "(n,p) MT=103" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 104 $mat $EXPDAT 0 0} \
+        -label "(n,d) MT=104"
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 105 $mat $EXPDAT 0 0} \
+        -label "(n,t) MT=105"
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 106 $mat $EXPDAT 0 0} \
+        -label "(n,3He) MT=106"         
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 107 $mat $EXPDAT 0 0} \
+        -label "(n,a) MT=107" 
+    $site_5_0.men81 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file   0 $mat $EXPDAT 0 0} \
+        -label "all MTs" 
+
     $site_3_0.men80 add command \
         -command { editFile $file-out.kal } -label "View KALMAN output" 
     $site_3_0.men80 add command \
