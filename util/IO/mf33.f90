@@ -13,6 +13,7 @@ module ENDF_MF33_IO
     public
 
     type MF33_sect
+        ! type (MF33_sect), pointer :: next
         integer mf1                    !! mf of 2nd E-dep crs
         integer lfs1                   !! final excited state of 2nd E-dep crs
         integer mat1                   !! MAT for 2nd E-dep crs
@@ -105,7 +106,7 @@ module ENDF_MF33_IO
 
     do i = 1,mf33%nl
         sc => mf33%sct(i)
-	x1 = sc%mf1
+        x1 = sc%mf1
         x2 = sc%lfs1
         call write_endf(x1, x2, sc%mat1, sc%mt1, sc%nc, sc%ni)
         do j = 1,sc%nc

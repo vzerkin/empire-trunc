@@ -995,16 +995,16 @@ contains
 
     subroutine write_send
 
-    implicit none
+        implicit none
 
-    ! written to file when done with an MT
+        ! written to file when done with an MT
 
-    if(ipos /= 0) call put_endline
+        if(ipos /= 0) call put_endline
 
-    call set_mt(0)
-    call write_2r4i(zero, zero, 0, 0, 0, 0)
+        call set_mt(0)
+        call write_2r4i(zero, zero, 0, 0, 0, 0)
 
-    return
+        return
     end subroutine write_send
 
     !--------------------------------------------------------------------------------

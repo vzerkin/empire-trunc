@@ -17,9 +17,9 @@ module rctn
      '(z,h)    ', '(z,a)    ', '(z,2a)   ', '(z,3a)   ', &    ! 36
      '(z,2p)   ', '(z,pa)   ', '(z,t2a)  ', '(z,d2a)  ', &    ! 40
      '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonel-Cel', &    ! 44
-     '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    ', &    ! 48
+     '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '     MT=5', &    ! 48
      'Elastic* ', 'Nonelast*', '(z,4np)  ', '(z,xa)   ', &    ! 52
-     '     MT=5', '(n,a_dis)' /)
+     '    (z,X)', '(n,a_dis)' /)
 
     integer*4, parameter :: listMT(nrmax) = (/ &
        1,   2,   4,  11,  16,  17,  18,  19,  20,  21, &  ! 10
@@ -41,7 +41,7 @@ module rctn
       !! Actually, the name is 12- instead of 9-characters since 
       !! such is the format in *.xsc file.
     
-      character*12, intent(in) :: name12       ! reaction name to find (12 characters)
+      character(len=*), intent(in) :: name12       ! reaction name to find (12 characters)
       character*9 :: name                      ! reaction name to find (9 characters)
 
       name = name12(1:9)
