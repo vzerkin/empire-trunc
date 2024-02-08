@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 """
-zvd2eps.py: automatically converts all zvd files in the directory to eps format.
+zvd2eps.py: automatically converts all zvd files in the directory to eps format
+when called without any arguments. If a file names are given as an argumet only
+these files are prcessed. 
 It corrects position of the y-axes label and can be extended to convert
 any given string in the zvd file to another one e.g., 94-Pu-239 to 239Pu.
-No parameters needed.
 """
-
+import sys
 import glob
 import os.path
 
@@ -28,13 +29,17 @@ def replace_string(old_string, new_string, file_to_modify):
     f.write(data)
     f.close()
 
-
 # if os.path.isfile("ps01.tit"):
 #     os.system("mv ps01.tit ps01.tit-mem")
 #     os.system("ln -sf $EMPIREDIR/util/c4zvd/ps02.tit ps01.tit"
 #               )  # use ps02.tit to be non-interactive
+if len(sys.argv) >= 2:
+    fileList = [sys.argv[1:len(sys.argv)+1]]
+else:
+    fileList = [glob.glob('*.zvd')]
+print (fileList)
 
-for file in glob.glob('*.zvd'):
+for file in fileList:
     # Change a default zvd string to a nicer one below.
     # Multiple lines are allowed (remove comment sign!)
     replace_string(' 73-Ta-181', ' {+181}Ta', file)
@@ -75,7 +80,7 @@ for file in glob.glob('*.zvd'):
     )
     eps_file = root + '.eps'
     os.rename('zvd.eps', eps_file)
-    os.system("rm zv.eps")
+    os.system("rm zv.eps zvc.eps")
 
 # if os.path.isfile("ps01.tit-mem"):
 #     os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit
