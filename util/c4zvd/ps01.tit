@@ -19,7 +19,7 @@ PS_SCALEPICT: 1.00 1.00
 LG_PS_BOX: 1
 LG_PS_PAGE2: 1
 LG_PS_FONT: 0 10 Helvetica  
-LG_PS_BOXTITLE: 0 22 Helvetica
+LG_PS_BOXTITLE: 0 16 Helvetica
 
 [Legend-Box]
 LG_BOX0: 1 20 435 40 5 0
