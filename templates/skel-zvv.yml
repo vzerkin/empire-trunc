@@ -31,7 +31,7 @@ EminInelastics: " 0.007 0.100 1.200  "
 reaction:                       # Settings for individual plots (options can be added but have to be propagated to the reading script drawPlots.py) 
   total:                        # Reaction
     name: ""                    # Reaction strings (inluding incident energies and final levels) will be generated internally if left ""
-    title_xy: 278 727           # Position of the title  on a plot (respect to the upper-left corner)
+    title_xy: 278 627           # Position of the title  on a plot (respect to the upper-left corner)
     legend_xy: 500 10           # Position of the legend on a plot (respect to the upper-left corner)        
     x_scale: log                # 'log' or 'lin'
     y_scale: log                # 'log' or 'lin'
@@ -43,7 +43,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot:  "False"         # Plots ratio to the line under cursor    
   elastic:                      # see above ^
     name: ""
-    title_xy: 378 727 
+    title_xy: 378 627 
     legend_xy: 30 150
     x_scale: log
     y_scale: log
@@ -55,7 +55,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot:  "False"
   capture:
     name: ""
-    title_xy: 378 727 
+    title_xy: 378 627 
     legend_xy: 500 30
     x_scale: log
     y_scale: log
@@ -67,7 +67,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot:  "False"
   inelastic:
     name: ""
-    title_xy: 378 727 
+    title_xy: 378 627 
     legend_xy: 500 20
     x_scale: log
     y_scale: lin
@@ -79,7 +79,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot: "False"
   fission:
     name: ""
-    title_xy: 378 727 
+    title_xy: 378 627 
     legend_xy: 500 10
     x_scale: lin
     y_scale: log
@@ -91,7 +91,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot: "False"
   other:
     name: ""
-    title_xy: 378 727 
+    title_xy: 378 627 
 #    legend_xy: 30 10  # left side
     legend_xy: 500 10  # right side
     x_scale: lin
@@ -104,7 +104,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot: "False"
   angDistr:
     name: ""
-    title_xy: 120 727 
+    title_xy: 120 627 
     legend_xy: 500 150
     x_scale: ""
     y_scale: ""
@@ -128,7 +128,7 @@ reaction:                       # Settings for individual plots (options can be 
     ratioPlot: "False"
   g-spectra:
     name: ""
-    title_xy: 320 727 
+    title_xy: 320 627 
     legend_xy: 100 550
     x_scale: log
     y_scale: log
