@@ -36,10 +36,15 @@ def replace_string(old_string, new_string, file_to_modify):
 if len(sys.argv) >= 2:
     fileList = [sys.argv[1:len(sys.argv)+1]]
 else:
-    fileList = [glob.glob('*.zvd')]
-print (fileList)
+    print ('Glob:',glob.glob('*.zvd'))
+    fileList = glob.glob('*.zvd')
+    print (fileList[0])
+    print (fileList[1])
 
-for file in fileList:
+# for x in fileList:
+for i in range(len(fileList)):
+    file = fileList[i]
+    print(type(file), file)
     # Change a default zvd string to a nicer one below.
     # Multiple lines are allowed (remove comment sign!)
     replace_string(' 73-Ta-181', ' {+181}Ta', file)
@@ -81,6 +86,7 @@ for file in fileList:
     eps_file = root + '.eps'
     os.rename('zvd.eps', eps_file)
     os.system("rm zv.eps zvc.eps")
+    os.system("epstopdf eps_file")
 
 # if os.path.isfile("ps01.tit-mem"):
 #     os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit

@@ -552,16 +552,20 @@ for i in plotNumi:
     # Correct y-axis legend position
     os.system("sed 's/axy_left -28 def/axy_left  0 def/' zvc.eps > zvd.eps 2>/dev/null")
     os.system("sed 's/axy_down -12 def/axy_down  5 def/' zvd.eps > zv.eps 2>/dev/null")
-
+    os.system(
+        "sed 's/%%BoundingBox: 60 60 541 455/%%BoundingBox: 60 60 541 445/' zv.eps > zvd.eps 2>/dev/null"
+    )
     # Rename created plots
     plotName = file + suf + "-MF" + str(MF) + "-MT" + str(
         MT) + isomerSuff + "-Id" + str(i)
-    os.system("mv zv.eps {}.eps".format(plotName))
+    plotNameEps = plotName + ".eps"
+    os.system("mv zvd.eps {}.eps".format(plotName))
     os.system("mv DDXPLOT.zvd {}.zvd".format(plotName))
+    os.system("epstopdf plotNameEps")
 
     # Clean and remove specific version of the ps01.tit to restore normal operation from GUI
     # os.system("rm ps01.tit psSpecific.tit 2>/dev/null")
-    os.system("rm cur.zvd pnt.zvd zvd.eps zvc.eps tmp.dat temp-log.plotc4 LSTTAB.* 2>/dev/null")
+    os.system("rm cur.zvd pnt.zvd zvd.eps zv.eps zvc.eps tmp.dat temp-log.plotc4 LSTTAB.* 2>/dev/null")
     # os.system("cp ps01.tit.ToBeRestored ps01.tit ")
 
 plotc4.close
