@@ -1,0 +1,82 @@
+
+[PostSript]
+PS_TYPE: EPS
+PS_PREFIX: zv
+PS_COLOR: COLOR
+PS_ORIENT: Portrait
+PS_FONTAXNUM: 1 15 Helvetica
+PS_FONTAXTEXT: 0 16 Helvetica
+PS_FONTTIT1: 1 16 Helvetica
+PS_FONTTIT2: 0 16 Helvetica
+PS_FONTTIMESTAMP: 1 9 Times-Italic
+PS_RTAXNUM: 1
+PS_PICTONPAGE: 0 0 180 140
+PS_PLOTONPICT: 20 14 20 20
+PS_SCALESYMB: 1.0 1.0
+PS_SCALEPICT: 1.00 1.00
+
+[Legend]
+LG_PS_BOX: 1
+LG_PS_PAGE2: 1
+LG_PS_FONT: 0 10 Helvetica  
+LG_PS_BOXTITLE: 0 16 Helvetica
+
+[Legend-Box]
+LG_BOX0: 1 20 435 40 5 0
+LG_BOX1: 0 320 435 40 0 5
+LG_BOX2: 0 640 435 40 0 5
+LG_BOX3: 0 960 435 40 0 5
+LG_BOX4: 0 1280 435 40 0 5
+
+[Func]
+useIfunc: 0
+useFunc: 1)c4.tab
+hide: 0
+dash: 0
+color: 7
+con: 0
+dot: 2
+bot: 0
+thick: 2
+err: 1
+err-fill: 0
+
+
+[Func]
+useFunc: 1) exp. data
+useIfunc: 0
+fun: 1) exp. data
+hide: 0
+dash: 0
+!Define color of exp points (7 - light grey; 1 - blue; ...)
+color:
+con: 0
+dot: 2
+bot: 0
+thick: 1
+err: 1
+err-fill: 1
+
+[Func]
+useFunc: 
+useIfunc: 1
+hide: 0
+dash: 0
+color: 12
+con: 1
+dot: 0
+bot: 0
+thick: 2
+
+[Func]
+useFunc: 
+useIfunc: 2
+hide: 0
+dash: 0
+color: 1
+con: 1
+dot: 0
+bot: 0
+thick: 2
+
+[Main]
