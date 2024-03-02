@@ -1,6 +1,6 @@
-#$Rev: 5500 $
+#$Rev: 5541 $
 #$Author: mwherman $
-#$Date: 2023-08-09 23:29:07 +0200 (Mi, 09 Aug 2023) $
+#$Date: 2024-03-02 22:22:15 +0100 (Sa, 02 Mär 2024) $
 
 # set default compilers:
 
@@ -29,18 +29,18 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
-  #FFLAGS = -O3 -ftree-vectorize -ffast-math -std=legacy -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
+  #FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
+  FFLAGS = -O3 -ftree-vectorize -ffast-math -std=legacy 
   #----flags for debuging
+  #DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp 
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp 
-  #DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib	
   # -pg shoudl be added for profiling
   #----flags for ECIS
+  #EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math 
   EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math 
-  #EFLAGS = -O3 -w -std=legacy -ftree-vectorize -ffast-math -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
   #----flags for OPTMAN
   #OFLAGS = -O3 -w -ftree-vectorize -ffast-math -cpp 
-  #OFLAGS = -L /Library/Developer/CommandLineTools/SDKs/MacOSX11.1.sdk/usr/lib
+  #OFLAGS = 
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
