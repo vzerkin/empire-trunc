@@ -1,9 +1,15 @@
 program c4tokal
     !! convert c4 file into format understood by Kalman
-    use rctn, only: retReactionMT
-
+    use rctn !, only: retReactionMT rctn_MOD_retreactionmt
     use c4_io
     implicit none
+
+    ! interface
+    !     function retReactionMT(name12)
+    !     character*12, intent(in) :: name12        !! reaction name
+    !     integer*4, intent(out) :: retReactionMT   !! MT value asking for reaction name
+    !     end function
+    ! end interface
 
     integer*4, parameter :: ngmt = 15      !! list of allowed MTs for Kalman fitting
     integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 851/)
@@ -18,7 +24,7 @@ program c4tokal
     character*4, parameter :: xsc = '.xsc'
     character*8, parameter :: inpsen = '-inp.sen'
 
-    integer*4 nsec     !! # of sections in C4 file
+    ! integer*4 nsec     !! # of sections in C4 file
     integer*4 mt1      !! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT. 
     integer*4 nex      !! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
     integer*4 nrx      !! # of reactions in EMPIRE XSC file
@@ -55,7 +61,8 @@ program c4tokal
     ! get project name, plotting MT, MAT and fitting flag nex
 
     read(5,*) file,mt1,mat,nex
-    call strlen(file,l1,l2)
+    call strLength(file,l1,l2)
+    print *, "c4tokal: ", file,mt1,mat,nex
 
     i = 1
     do while (i <= ngmt)
@@ -270,7 +277,10 @@ program c4tokal
             call dataout(c4%sec(fx%ic(i)),fx%mt)
         end do
     end do
-
+    
+    close(10)
+    close(11)
+    close(12)
     close(15)
 
     contains
@@ -306,11 +316,10 @@ program c4tokal
         type (c4_data_point), pointer :: pt
 
         ! data written to unit 75 is for plots
-
         qwt = .false.
         if((mt1 == 0) .or. (mt == mt1)) then
            write(chr3,'(I3)') mt
-           call strlen(chr3,l,m)
+           call strLength(chr3,l,m)
            open(75,file=file(l1:l2)//'-'//chr3(l:m)//'-c4.gpd',status='UNKNOWN',action='WRITE',access='APPEND')
            qwt = .true.
         endif
@@ -359,6 +368,7 @@ program c4tokal
             write(12,100) sc%ref, sc%ent, sc%sub,-npt
             write(12,300) cor
         endif
+
 
         deallocate(gpts)
 
