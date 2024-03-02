@@ -1,5 +1,5 @@
-! $Rev: 5529 $                                                          | 
-! $Date: 2023-12-20 21:23:07 +0100 (Mi, 20 Dez 2023) $                                                     
+! $Rev: 5542 $                                                          | 
+! $Date: 2024-03-02 22:24:35 +0100 (Sa, 02 Mär 2024) $                                                     
 ! $Author: mwherman $                                                  
 ! **********************************************************************
 ! *
@@ -301,7 +301,7 @@
       INTEGER(KIND=I4), PARAMETER :: NLSCMAX=20      ! l-values for dsigma
       INTEGER(KIND=I4), PARAMETER :: NJSMAX=6        ! Resonance J-values
       INTEGER(KIND=I4), PARAMETER :: NRESMAX=5000    ! Resonances per l
-      INTEGER(KIND=I4), PARAMETER :: NGREMAX=1,NFREMAX=1,NIREMAX=4,      &      
+      INTEGER(KIND=I4), PARAMETER :: NGREMAX=1,NFREMAX=1,NIREMAX=4,            
      &                               NCREMAX=4       ! Maximum of reactions per type
       INTEGER(KIND=I4), PARAMETER :: URNEMAX = 250   ! UR energy points
 !          File 4 secondary angular data
@@ -556,11 +556,11 @@
 !
    20 IF(IERX.EQ.2) THEN
          IF(IMDC.LT.4) THEN
-            WRITE(IOUT,'(//5X,2A)')  'End-of-file encountered before ', &       
+            WRITE(IOUT,'(//5X,2A)')  'End-of-file encountered before ',        
      &                      'TEND record found!'
          END IF
          IF(NOUT.NE.IOUT)   THEN
-            WRITE(NOUT,'(//5X,2A)')  'End-of-file encountered before ', &       
+            WRITE(NOUT,'(//5X,2A)')  'End-of-file encountered before ',        
      &                      'TEND record found!'
          END IF
          IF(NOUT.NE.IOUT) THEN
