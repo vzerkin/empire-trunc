@@ -1,7 +1,8 @@
 module rctn   
-    use c4_io, only : strlen
+    ! use c4_io, only : strLength
     implicit none
- 
+
+    public retReactionMT, retReactionName, strLength
 
     integer*4, parameter :: nrmax = 54       ! max # of reactions tested
 
@@ -38,18 +39,19 @@ module rctn
       !! Look for the supplied 12-character reaction name and
       !! return the corresponding MT value for this reaction.
       !! If reaction string is not found, return -1.
-      !! Actually, the name is 12- instead of 9-characters since 
-      !! such is the format in *.xsc file.
+      !! The name is 12- instead of 9-characters since 
+      !! such is the format in *.xsc file. It is converted to 
+      !! 9 characters in the first executable line.
     
-      character(len=*), intent(in) :: name12       ! reaction name to find (12 characters)
+      character(len=*), intent(in) :: name12   ! reaction name to find (12 characters)
       character*9 :: name                      ! reaction name to find (9 characters)
 
       name = name12(1:9)
 
       i = 1
-      CALL STRLEN(NAME,LN1,LN2)
+      call strLength(NAME,LN1,LN2)
       do
-         CALL STRLEN(LIST(I),LL1,LL2)
+         call strLength(LIST(I),LL1,LL2)
          if(name(ln1:ln2) == list(i)(ll1:ll2)) then
              retReactionMT = listMT(i)
              return
@@ -66,28 +68,66 @@ module rctn
 
 
     subroutine retReactionName(name,mtAsked)
-      !! Return the  9-character reaction name 
-      !! corresponding to supplied MT value.
-      !! If MT is not found, return string "wrong MT".
-      !! Inverse functionality to retReactionMT function which returns MT.
-      
-      character*9, intent(out) :: name  ! reaction name to return
-      integer*4, intent(in) :: mtAsked  ! MT value asking for reaction name
+        !! Return the  9-character reaction name 
+        !! corresponding to the supplied MT value.
+        !! If MT is not found, return string "wrong MT".
+        !! Inverse functionality to retReactionMT function which returns MT.
+        
+        character*9, intent(out) :: name  ! reaction name to return
+        integer*4, intent(in) :: mtAsked  ! MT value asking for reaction name
 
-      i = 1
-      do
-         if(mtAsked == listMT(i)) then
-             name = LIST(i)
-             return
-         endif
-         i = i + 1
-         if(i > nrmax) then
-             WRITE(0,*) 'MT NOT FOUND FOR ',name(ln1:ln2)
-             name = "wrong MT "
-             return
-         endif
-      end do
+        i = 1
+        do
+            if(mtAsked == listMT(i)) then
+                name = LIST(i)
+                return
+            endif
+            i = i + 1
+            if(i > nrmax) then
+                WRITE(0,*) 'MT NOT FOUND FOR ',name(ln1:ln2)
+                name = "wrong MT "
+                return
+            endif
+        end do
 
     end subroutine retReactionName
+
+    subroutine strLength(st, ls1, ls2)
+
+        implicit none
+
+        !! search the input string (st) and return indicies of the first (ls1)
+        !! and last (ls2) non-blank characters. If a string contains all blanks,
+        !! print a warning message on unit 0 and return ls1=ls2=0.
+
+        character*(*), intent(in) :: st         ! string to search
+        integer*4, intent(out)    :: ls1        ! first non-blank character in st
+        integer*4, intent(out)    :: ls2        ! last  non-blank character in st
+
+        integer*4 i
+
+        i = len(st)
+
+        do while(i > 0)
+            if(st(i:i) .ne. ' ') exit
+            i = i - 1
+        end do
+        ls2 = i
+
+        if(i == 0) then
+            write(0,*) 'EMPTY STRING'
+            ls1 = 0
+            return
+        endif
+
+        i = 1
+        do while(i < ls2)
+            if(st(i:i) .ne. ' ') exit
+            i = i + 1
+        end do
+        ls1 = i
+
+        return
+    end subroutine strLength
 
 end module rctn
