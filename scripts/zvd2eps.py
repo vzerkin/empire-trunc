@@ -38,8 +38,6 @@ if len(sys.argv) >= 2:
 else:
     print ('Glob:',glob.glob('*.zvd'))
     fileList = glob.glob('*.zvd')
-    print (fileList[0])
-    print (fileList[1])
 
 # for x in fileList:
 for i in range(len(fileList)):
@@ -86,7 +84,8 @@ for i in range(len(fileList)):
     eps_file = root + '.eps'
     os.rename('zvd.eps', eps_file)
     os.system("rm zv.eps zvc.eps")
-    os.system("epstopdf eps_file")
+    command = 'epstopdf ' + eps_file
+    os.system(command)
 
 # if os.path.isfile("ps01.tit-mem"):
 #     os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit
