@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 """
 drawPlots.py
@@ -564,9 +564,9 @@ for i in plotNumi:
     os.system("epstopdf plotNameEps")
 
     # Clean and remove specific version of the ps01.tit to restore normal operation from GUI
-    # os.system("rm ps01.tit psSpecific.tit 2>/dev/null")
+    os.system("rm ps01.tit psSpecific.tit 2>/dev/null")
     os.system("rm cur.zvd pnt.zvd zvd.eps zv.eps zvc.eps tmp.dat temp-log.plotc4 LSTTAB.* 2>/dev/null")
-    # os.system("cp ps01.tit.ToBeRestored ps01.tit ")
+    os.system("mv ps01.tit.ToBeRestored ps01.tit ")
 
 plotc4.close
 # input("hit any key to quit")
