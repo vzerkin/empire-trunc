@@ -5,8 +5,6 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
-
-
 proj=$1
 MT=$2
 
@@ -29,7 +27,6 @@ fi
 input=plotsenmat.in
 output=plotsenmat.out
 
-
 rm -f $input
 cat > $input <<EOF
 $proj
@@ -39,7 +36,6 @@ EOF
 rm -f $output
 $EMPIREDIR/util/pltsenmat/plotsenmat <$input >$output
 rm -f $input
-
 
 plotfile=$proj-sen-MT$MT.zvd
 
