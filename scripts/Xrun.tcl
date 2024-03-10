@@ -1,6 +1,6 @@
-# $Rev: 5530 $
+# $Rev: 5545 $
 # $Author: mwherman $
-# $Date: 2024-01-22 19:28:32 +0100 (Mo, 22 Jän 2024) $
+# $Date: 2024-03-10 07:46:38 +0100 (So, 10 Mär 2024) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5871,7 +5871,7 @@ foreach elm $output {
 
 # before calling init, check for EMPIREDIR at global scope
 if {[info exists env(EMPIREDIR)]} {
-        puts "Empire found in $::env(EMPIREDIR)"
+puts "EMPIRE found in $::env(EMPIREDIR)"
     } else {
         puts "Assuming empire root directory is at '..'"
         set env(EMPIREDIR) ".."
@@ -7306,11 +7306,10 @@ if {$exten == ".ps"} {
 } elseif {$exten == ".eps"} {
   pspdfView $selecfile
 } elseif {$exten == ".zvd"} {
-  exec xterm -e $::env(EMPIREDIR)/scripts/zvcomb $selecfile &
-} elseif {$exten == ".gnudat"} {
-  exec xterm -e cp $selecfile  corrplot.dat
-  exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.plt
-  exec xterm -e rm corrplot.dat
+                                                                                                                                                                                                                                                                                            exec xterm -e $::env(EMPIREDIR)/scripts/zvv $selecfile 
+} elseif {$exten == ".d"} {
+                                                                                                                                                                                                                                                                                            exec xterm -e $::env(EMPIREDIR)/util/kalman/corrx.py $selecfile
+                                                                                                                                                                                                                                                                                        #  exec xterm -e rm corrplot.dat
 } else {
   editFile $selecfile
 }} \
@@ -7366,6 +7365,9 @@ ddlist} \
     bind $site_10_0.but84 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Edit selected file with the default editor}
     }
+
+
+
     button $site_10_0.but85 \
         -activebackground red -activeforeground white -background #dcdcdc \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all selected files?" "" 0 No Yes ] == 1} {
@@ -8680,11 +8682,11 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -label "Edit experimental data correlations (*-C.kal)"
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/util/kalman/newinp $file &} \
-        -label "Propagate Kalman output into Empire input (*.new)"
+                                                                                                                                                                                                                                                                                                                                                                                                                                    -label "Propagate KALMAN output into EMPIRE input (*.new)"
     $site_3_0.menu93 add command \
         -command {exec mv $file.inp $file-old.inp
 exec mv $file.new $file.inp } \
-        -label "Replace Empire input with *.new"
+                                                                                                                                                                                                                                                                                                                                                                                                                                    -label "Replace EMPIRE input with *.new"
     $site_3_0.menu93 add cascade \
         -menu "$site_3_0.menu93.men89" \
         -command {} -label {Plot Sensitivity Matrix for} 
@@ -8775,7 +8777,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
      $site_3_0.menu93 add command \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/klean } \
-        -label {Clean Kalman files} 
+            -label {Clean KALMAN files} 
 
    $site_3_0.menu93 add separator \
 
@@ -8868,7 +8870,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu94 add command \
         -command { editFile $file-xsc.kal } -label {KALMAN x-sections} 
     $site_3_0.menu94 add command \
-        -command { editFile $file-cov.kal } -label {Covariance matrices} 
+        -command {editFile $file-cov.kal } -label {KALMAN covariance matrices} 
     $site_3_0.menu94 add command \
         -command {exec gnuplot $env(EMPIREDIR)/util/kalman/corr.gp &} \
         -label {Covariance plot} 
@@ -8937,16 +8939,20 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -activebackground #dcdcdc -activeforeground #000000 
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu95 add command \
-        -command { exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Yaml-driven plots}
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Run Yaml-driven plots}
     $site_3_0.menu95 add command \
-        -command { editFile $file-zvv.yml } -label {Edit Yaml}  
+        -command {editFile $file-zvv.yml } -label {Edit plot Yaml}  
     $site_3_0.menu95 add command \
-        -command { exec xterm -e python $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
+        -command {editFile ps01.tit } -label {Edit Zvview ps01.tit}
+$site_3_0.menu95 add command \
+        -command {exec xterm -e python $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {Convert zvv => eps}
 
     $site_3_0.menu95 add command \
         -command { exec xterm -e $::env(EMPIREDIR)/scripts/c4toggle $file 
-exec xterm -e $::env(EMPIREDIR)/scripts/plotlst $file } \
-        -label {Toggle c4 & -kal.c4 files}
+exec xterm -e $::env(EMPIREDIR)/scripts/plotlst $file &
+adjourn .top75 
+ddlist} \
+     -label {Create / toggle - kal.c4 & .c4 files}
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
@@ -9015,7 +9021,9 @@ cd $workdir} \
         -command { editFile $file-inp.sen } -label "Edit sensitivity input" 
     $site_3_0.men80 add command \
         -command { editFile $file-mat.sen } -label "View/Edit sensitivity matrix" 
-
+    $site_3_0.men80 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
+        -label {Manipulate C4 file for KALMAN} 
 
     $site_3_0.men80 add cascade \
         -menu "$site_3_0.men80.men89" \
@@ -9081,6 +9089,7 @@ cd $workdir} \
     $site_4_0.men89 add command \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 115 $mat $EXPDAT} \
         -label "(z,pd) MT=115" 
+
     $site_3_0.men80 add cascade \
         -menu "$site_3_0.men80.men90" -command {} -label {KALMAN option}
     set site_4_0 $site_3_0.men80
@@ -9088,14 +9097,46 @@ cd $workdir} \
         -activebackground #dcdcdc -activeforeground #000000
          #-background #dcdcdc -foreground #000000 -tearoff 1
     $site_4_0.men90 add radiobutton \
-        -value 0 -variable EXPDAT -label {No exp. data}
+        -value 0 -variable nMT -label {Exp. data for all reactions} 
     $site_4_0.men90 add radiobutton \
-        -value 1 -variable EXPDAT -label {Exp. data for selected reaction}
+        -value 1 -variable nMT -label {Exp. data for total}
     $site_4_0.men90 add radiobutton \
-        -value 2 -variable EXPDAT -label {All exp. data}
-    $site_3_0.men80 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
-        -label {Manipulate C4 file for KALMAN} 
+        -value 2 -variable nMT -label {Exp. data for elastic}
+    $site_4_0.men90 add radiobutton \
+        -value 4 -variable nMT -label {Exp. data for inelastic}
+    $site_4_0.men90 add radiobutton \
+        -value 11 -variable nMT -label {Exp. data for (z,2nd)}
+    $site_4_0.men90 add radiobutton \
+        -value 16 -variable nMT -label {Exp. data for (z,2n)}
+    $site_4_0.men90 add radiobutton \
+        -value 17 -variable nMT -label {Exp. data for (z,3n)}
+    $site_4_0.men90 add radiobutton \
+        -value 18 -variable nMT -label {Exp. data for fission}
+    $site_4_0.men90 add radiobutton \
+        -value 22 -variable nMT -label {Exp. data for (z,na)}
+    $site_4_0.men90 add radiobutton \
+        -value 24 -variable nMT -label {Exp. data for (z,2na)}
+    $site_4_0.men90 add radiobutton \
+        -value 45 -variable nMT -label {Exp. data for (z,npa)}
+    $site_4_0.men90 add radiobutton \
+        -value 102 -variable nMT -label {Exp. data for (z,gamma)}
+    $site_4_0.men90 add radiobutton \
+        -value 103 -variable nMT -label {Exp. data for (z,p)}
+    $site_4_0.men90 add radiobutton \
+        -value 104 -variable nMT -label {Exp. data for (z,d)}
+    $site_4_0.men90 add radiobutton \
+        -value 105 -variable nMT -label {Exp. data for (z,t)}
+    $site_4_0.men90 add radiobutton \
+        -value 106 -variable nMT -label {Exp. data for (z,3He)}
+    $site_4_0.men90 add radiobutton \
+        -value 107 -variable nMT -label {Exp. data for (z,a)}
+    $site_4_0.men90 add radiobutton \
+        -value 112 -variable nMT -label {Exp. data for (z,pa)}
+    $site_4_0.men90 add radiobutton \
+        -value 115 -variable nMT -label {Exp. data for (z,pd)}
+    $site_4_0.men90 add radiobutton \
+        -value 1000 -variable nMT -label {No exp. data}
+
 
     $site_3_0.men80 add separator \
 
@@ -9104,123 +9145,128 @@ cd $workdir} \
         -label "Clean previous KALMAN files" 
 
     $site_3_0.men80 add command \
-        -command { editFile $file-expCorr.kal } -label "Edit experimental data correlations (*-expCorr.kal)" 
+       -command { editFile $file-expCorr.kal } -label "Edit experimental data correlations (*-expCorr.kal)"
 
     $site_3_0.men80 add command \
         -command { editFile $file-parCorr.kal } -label "Edit parameter uncertainties (*-parCorr.kal)" 
 
     $site_3_0.men80 add command \
-        -command { editFile $file-inp.kal } -label "Edit Kalman input (*-inp.kal)"         
+        -command {editFile $file-inp.kal } -label "Edit KALMAN input (*-inp.kal)"         
 
-    $site_3_0.men80 add cascade \
-        -menu "$site_3_0.men80.men87" \
-        -command {} -label "Run KALMAN for" 
-    set site_5_0 $site_3_0.men80
-    menu $site_5_0.men87 \
-        -activebackground #f9f9f9 -activeforeground black  \
-        -tearoff 2 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 1 $mat $EXPDAT} \
-        -label "Total MT=1" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 2 $mat $EXPDAT} \
-        -label "Elastic MT=2" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 4 $mat $EXPDAT} \
-        -label "Inelastic MT=4" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 16 $mat $EXPDAT} \
-        -label "(z,2n) MT=16" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
-        -label "(z,3n) MT=17" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 18 $mat $EXPDAT} \
-        -label "(z,f) MT=18" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
-        -label "(n,g) MT=102" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
-        -label "(n,p) MT=103" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 104 $mat $EXPDAT} \
-        -label "(n,d) MT=104"
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 105 $mat $EXPDAT} \
-        -label "(n,t) MT=105"
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 106 $mat $EXPDAT} \
-        -label "(n,3He) MT=106"         
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
-        -label "(n,a) MT=107" 
-    $site_5_0.men87 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
-        -label "all MTs" 
-      
-    $site_3_0.men80 add cascade \
-        -menu "$site_3_0.men80.men81" \
-        -command {} -label "Run KALEND for" 
-    set site_5_0 $site_3_0.men80
-    menu $site_5_0.men81 \
-        -activebackground #f9f9f9 -activeforeground black  \
-        -tearoff 2 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 1 $mat $EXPDAT 0 0} \
-        -label "Total MT=1" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 2 $mat $EXPDAT 0 0} \
-        -label "Elastic MT=2" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 4 $mat $EXPDAT 0 0} \
-        -label "Inelastic MT=4" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 16 $mat $EXPDAT 0 0} \
-        -label "(z,2n) MT=16" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 17 $mat $EXPDAT 0 0} \
-        -label "(z,3n) MT=17" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 18 $mat $EXPDAT 0 0} \
-        -label "(z,f) MT=18" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 102 $mat $EXPDAT 0 0} \
-        -label "(n,g) MT=102" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 103 $mat $EXPDAT 0 0} \
-        -label "(n,p) MT=103" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 104 $mat $EXPDAT 0 0} \
-        -label "(n,d) MT=104"
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 105 $mat $EXPDAT 0 0} \
-        -label "(n,t) MT=105"
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 106 $mat $EXPDAT 0 0} \
-        -label "(n,3He) MT=106"         
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 107 $mat $EXPDAT 0 0} \
-        -label "(n,a) MT=107" 
-    $site_5_0.men81 add command \
-        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file   0 $mat $EXPDAT 0 0} \
-        -label "all MTs" 
+    $site_3_0.men80 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file $nMT $mat } -label "Run KALMAN " 
+ 
+#    -menu "$site_3_0.men80.men87" \
+#    set site_5_0 $site_3_0.men80
+#    menu $site_5_0.men87 \
+#        -activebackground #f9f9f9 -activeforeground black  \
+#        -tearoff 2 
+#    $site_5_0.men87 add command \
+#-command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
+#-label "all MTs"
+#$site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 1 $mat $EXPDAT} \
+#        -label "Total MT=1" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 2 $mat $EXPDAT} \
+#        -label "Elastic MT=2" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 4 $mat $EXPDAT} \
+#        -label "Inelastic MT=4" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 16 $mat $EXPDAT} \
+#        -label "(z,2n) MT=16" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
+#        -label "(z,3n) MT=17" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 18 $mat $EXPDAT} \
+#        -label "(z,f) MT=18" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
+#        -label "(n,g) MT=102" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
+#        -label "(n,p) MT=103" 
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 104 $mat $EXPDAT} \
+#        -label "(n,d) MT=104"
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 105 $mat $EXPDAT} \
+#        -label "(n,t) MT=105"
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 106 $mat $EXPDAT} \
+#        -label "(n,3He) MT=106"         
+#    $site_5_0.men87 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
+#-label "(n,a) MT=107" 
+#
+
 
     $site_3_0.men80 add command \
         -command { editFile $file-out.kal } -label "View KALMAN output" 
     $site_3_0.men80 add command \
-        -command { editFile $file-cov.kal } -label "View correlation matrices" 
+-command {editFile $file-cov.kal } -label "View KALMAN correlation matrices" 
     $site_3_0.men80 add command \
         -command { editFile $file-xsc.kal } -label "View KALMAN x-sections" 
     $site_3_0.men80 add command \
         -command { editFile $file-parCorrOut.kal } -label "View KALMAN adj. parameters" 
 
+$site_3_0.men80 add command \
+-command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file   0 $mat $EXPDAT 0 0 } \
+-label "Run KALEND for all MTs"
+
+#    $site_3_0.men80 add cascade \
+#        -menu "$site_3_0.men80.men81" \
+#        -command { } -label "Run KALEND for"
+#    set site_5_0 $site_3_0.men80
+#    menu $site_5_0.men81 \
+#        -activebackground #f9f9f9 -activeforeground black  \
+#        -tearoff 2
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file   0 $mat $EXPDAT 0 0} \
+#        -label "all MTs"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 1 $mat $EXPDAT 0 0} \
+#        -label "Total MT=1"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 2 $mat $EXPDAT 0 0} \
+#        -label "Elastic MT=2"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 4 $mat $EXPDAT 0 0} \
+#        -label "Inelastic MT=4"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 16 $mat $EXPDAT 0 0} \
+#        -label "(z,2n) MT=16"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 17 $mat $EXPDAT 0 0} \
+#        -label "(z,3n) MT=17"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 18 $mat $EXPDAT 0 0} \
+#        -label "(z,f) MT=18"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 102 $mat $EXPDAT 0 0} \
+#        -label "(n,g) MT=102"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 103 $mat $EXPDAT 0 0} \
+#        -label "(n,p) MT=103"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 104 $mat $EXPDAT 0 0} \
+#        -label "(n,d) MT=104"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 105 $mat $EXPDAT 0 0} \
+#        -label "(n,t) MT=105"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 106 $mat $EXPDAT 0 0} \
+#        -label "(n,3He) MT=106"
+#    $site_5_0.men81 add command \
+#        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalend  $file 107 $mat $EXPDAT 0 0} \
+#        -label "(n,a) MT=107" 
+
 # HERE1
     $site_3_0.men80 add command \
         -command {exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.gp &} \
         -label "Gnuplot covariance" 
-
-
 
     $site_3_0.men80 add separator \
 

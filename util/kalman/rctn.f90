@@ -39,11 +39,11 @@ module rctn
       !! Look for the supplied 12-character reaction name and
       !! return the corresponding MT value for this reaction.
       !! If reaction string is not found, return -1.
-      !! The name is 12- instead of 9-characters since 
-      !! such is the format in *.xsc file. It is converted to 
+      !! The name is * instead of 9-characters since 
+      !! the format in *.xsc file is 12. It is converted to 
       !! 9 characters in the first executable line.
     
-      character(len=*), intent(in) :: name12   ! reaction name to find (12 characters)
+      character(len=*), intent(in) :: name12   ! reaction name to find (* characters)
       character*9 :: name                      ! reaction name to find (9 characters)
 
       name = name12(1:9)

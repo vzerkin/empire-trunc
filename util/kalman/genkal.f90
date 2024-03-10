@@ -26,6 +26,7 @@ program genkal
    INPSEN = '-inp.sen'
 
    READ (5, *) FILE, MT1, MAT, NEX, NPFNS
+
    IF (NPFNS .EQ. 0) THEN
       MATSEN = '-mat.sen'
       XSC = '.xsc'
@@ -66,21 +67,21 @@ program genkal
    ! CHECKING IF THE REQUESTED MT1 IS PRESENT IN THE FILE.XSC FILE
    ! This check is only necessary when fitting cross sections, not pfns
 
-   IF (NPFNS .EQ. 0) THEN
-      j = 0
-      DO i = 1, nreac
-         mt = retReactionMT(REACTION(i))
-         IF (MT .EQ. MT1) THEN
-            j = 1
-            exit
-         END IF
-      end do
-      IF (j .EQ. 0) THEN
-         WRITE (0, *) 'REACTION( MT=', MT1, ') NOT FOUND IN ', FILE(L1:L2)//trim(XSC)
-         write (0, *)
-         STOP 1
-      END IF
-   END IF
+   ! IF (NPFNS .EQ. 0) THEN
+   !    j = 0
+   !    DO i = 1, nreac
+   !       mt = retReactionMT(REACTION(i))
+   !       IF (MT .EQ. MT1) THEN
+   !          j = 1
+   !          exit
+   !       END IF
+   !    end do
+   !    IF (j .EQ. 0) THEN
+   !       WRITE (0, *) 'REACTION( MT=', MT1, ') NOT FOUND IN ', FILE(L1:L2)//trim(XSC)
+   !       write (0, *)
+   !       STOP 1
+   !    END IF
+   ! END IF
 
    ! write the cross section file for kalman
 

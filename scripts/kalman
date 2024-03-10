@@ -14,9 +14,9 @@
 file=$1         # Empire input file stem (no extension) - required.
 MT=$2           # MT for plotting. If not present or 0 -> plot all.
 MAT=$3          # MAT of material. If not present or 0 -> use MAT in ENDF file.
-EXPDAT=$4       # 1=fit only specifed MT; 2=fit all MTs; other=fit no exp data.
-PFNS=$5         # set non-zero (true) to fit PFNS data.
-EINC=$6         # Incident energy for which to fit PFNS (in MeV).
+# EXPDAT=$4       # 1=fit only specifed MT; 2=fit all MTs; other=fit no exp data.
+PFNS=$4         # set non-zero (true) to fit PFNS data.
+EINC=$5         # Incident energy for which to fit PFNS (in MeV).
 
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
@@ -37,17 +37,26 @@ if [ ! -s ${file}.endf ]; then
 fi
 
 if [ -z $MT -o "$MT" = "0" ]; then
-   MT="1 2 3 4 16 17 18 102 103 105 106 107"
-   # MT="4 16 17 102 103 105 106 107"
+   MTset="1 2 3 4 11 16 17 1 22 24 45 102 103 105 105 106 107 112 207 251 456 5 851"   # MTset is used only for exp. data selection
+   MT="0"                                                         # MT=0 KALMAN for all available reactions 
+   EXPDAT="2"
+elif [ "$MT" = "1000" ]; then                                     # MT=100 KALMAN for all reactions but ignore exp. data
+   MTset="0"
+   MT="0"
+   EXDAT="3"
+else                                                              # KALMAN and using input MT exp.data only
+   MTset=$MT
+   EXPDAT="1"
 fi
+
 
 if [ -z $MAT -o "$MAT" = "0" ]; then
    MAT=$($EMPIREDIR/util/mkendf/getmtn ${file}.endf)
 fi
 
-if [ -z $EXPDAT ]; then
-   EXPDAT="0"
-fi
+# if [ -z $EXPDAT ]; then
+#    EXPDAT="0"
+# fi
 
 if [ -z $PFNS ]; then
    PFNS=0
@@ -99,17 +108,18 @@ else
 fi
 
 # clean up anything left around from a previous run
-rm -f fort.*  ENERGYANDINDEX.TMP
+rm -f fort.*  ENERGYANDINDEX.TMP *.gpd
 
 # now loop through the kalman fitting, repeating the fit for each plotted
 # MT. Note that all the data in the C4 and and XSC file are fitted for each
 # pass redundantly - only the MT plot changes for each pass through the loop.
 
+
 for k in $MT; do
 
-    rm expxscplot.d
     echo "MT= ${k}"
     echo $file ${k} $MAT $EXPDAT $PFNS $EINC > INPUT.D
+    rm expxscplot*.d
     rm -f KALMAN.INP
 
     if [ "$PFNS" -eq 0 ]
@@ -122,8 +132,9 @@ for k in $MT; do
          echo " Error running c4tokal"
          echo -n ' Hit carriage return to exit kalman script > '
          read errkey
-         exit 6
+         exit 7
       fi
+
     else
       # pnt2kal perpares PFNS data for fitting with kalman
       # data, unc, corr written to fort.10,11,12 & makes new KALMAN.INP
@@ -133,7 +144,7 @@ for k in $MT; do
          echo " Error running pnt2kal"
          echo -n ' Hit carriage return to exit kalman script > '
          read errkey
-         exit 6
+         exit 8
       fi
       if [ ! -s ENERGYANDINDEX.TMP ]; then
          echo "ERROR: pnt2kal ended abnormally!"
@@ -157,23 +168,25 @@ for k in $MT; do
       echo " Error running genkal"
       echo -n ' Hit carriage return to exit kalman script > '
       read errkey
-      exit 7
+      exit 9
     fi
+
 
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
     if [ "$EXPDAT" != 0 ]; then
        if [ -s $file-expXsc.kal ]; then
           echo "Existing file ${file}-expXsc.kal replacing C4 cross sections"
-	  cp $file-expXsc.kal fort.10
+	       cp $file-expXsc.kal fort.10    # c4tokal produced fort.10
        else
-	  cp fort.10 ${file}-expXsc.kal
+	       cp fort.10 ${file}-expXsc.kal
        fi
+
        if [ -s $file-expCorr.kal ]; then
           echo "Existing file ${file}-expCorr.kal replacing C4 xsec correlations"
-	  cp $file-expCorr.kal fort.12
+	       cp $file-expCorr.kal fort.12    # c4tokal produced fort.12
        else
-	  cp fort.12 ${file}-expCorr.kal
+	       cp fort.12 ${file}-expCorr.kal
        fi
     else
        echo " Experimental data not used. Removing data, err, & corr files"
@@ -190,28 +203,28 @@ for k in $MT; do
        cp ${file}-parCorr.kal fort.52
     fi
 
-    if [ "$EXPDAT" != 0 ]; then
-        kalinp=''
-        if [ -s $file-inp.kal ]; then
-            echo -n "Use existing Kalman input? (Y/N) > "
-            read kalinp
-        fi
-        if [ -n "$kalinp" ] && ( [ ${kalinp:0:1} = "y" ] || [ ${kalinp:0:1} = "Y" ] ); then
-            cp $file-inp.kal KALMAN.INP
-        else
-            echo 'EDIT KALMAN INPUT, CLOSE EDITOR '
-            echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
-         #   gvim KALMAN.INP
-         #  on Mac use MacVim or any other editor
-            open -a MacVim KALMAN.INP
-            read go 
-            cp KALMAN.INP $file-inp.kal
-            echo 'EDIT PARAMETER UNCERTAINTIES, CLOSE EDITOR '
-            echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
-            open -a MacVim fort.52
-            read go 
-        fi
-    fi
+   #  if [ "$EXPDAT" != 0 ]; then
+   #      kalinp=''
+   #      if [ -s $file-inp.kal ]; then
+   #          echo -n "Use existing Kalman input? (Y/N) > "
+   #          read kalinp
+   #      fi
+   #      if [ -n "$kalinp" ] && ( [ ${kalinp:0:1} = "y" ] || [ ${kalinp:0:1} = "Y" ] ); then
+   #          cp $file-inp.kal KALMAN.INP
+   #      else
+   #          echo 'EDIT KALMAN INPUT, CLOSE EDITOR '
+   #          echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
+   #       #   gvim KALMAN.INP
+   #       #  on Mac use MacVim or any other editor
+   #          open -a MacVim KALMAN.INP
+   #          read go 
+   #          cp KALMAN.INP $file-inp.kal
+   #          echo 'EDIT PARAMETER UNCERTAINTIES, CLOSE EDITOR '
+   #          echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
+   #          open -a MacVim fort.52
+   #          read go 
+   #      fi
+   #  fi
 
     echo  "Running kalman"
     # if ! $EMPIREDIR/util/kalman/kalman3.exe < KALMAN.INP > $file-out.kal
@@ -230,7 +243,7 @@ for k in $MT; do
     read a
 
     
-    if [ ! $a -eq "y" ]; then
+   #  if [ ! $a -eq "y" ]; then
       mv KALMAN.OUT $file-out.kal
       mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
       mv fort.14 $file-cov.kal
@@ -241,7 +254,7 @@ for k in $MT; do
       rm ENERGYANDINDEX.TMP 2>/dev/null
       #rm -f fort.{1*,50,75}
       exit 11
-    fi
+   #  fi
 
     echo  "Running kalend"
     if ! $EMPIREDIR/util/kalman/kalend < INPUT.D

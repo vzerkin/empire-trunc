@@ -1,6 +1,9 @@
 program c4tokal
-    !! convert c4 file into format understood by Kalman
-    use rctn !, only: retReactionMT rctn_MOD_retreactionmt
+    !! Convert c4 file into format understood by Kalman and
+    !! prepare Kalman input files fort.10, 11, 12 with
+    !! experimental data used for fitting.
+    !! Fort.15 contains Kalman input
+    use rctn, only: retReactionMT, strLength
     use c4_io
     implicit none
 
@@ -11,9 +14,8 @@ program c4tokal
     !     end function
     ! end interface
 
-    integer*4, parameter :: ngmt = 15      !! list of allowed MTs for Kalman fitting
-    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 851/)
-
+    integer*4, parameter :: ngmt = 23      !! list of allowed MTs for Kalman fitting
+    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,11,16,17,18,22,24,45,102,103,105,105,106,107,112,207,251,456, 5, 851/) !! possible MTs
     integer*4, parameter :: kctl1 = 0      !! set nonzero to read priors
     integer*4, parameter :: kctl2 = 0      !! set nonzero to write posteriors
     integer*4, parameter :: kcovex = 1     !! set nonzero to read experimental covariances
@@ -31,7 +33,7 @@ program c4tokal
     integer*4 mat      !! MAT of material. not used here
     integer*4 nprm     !! # EMPIRE parameters in sensitivity input file
 
-    logical*4 qex,qmt,hmt(999)
+    logical*4 qex,qmt,hmt(999),exist
     integer*4 i,j,k,m,ix,l1,l2,ios,status
     character pname*6,line*130,file*25
 
@@ -62,7 +64,10 @@ program c4tokal
 
     read(5,*) file,mt1,mat,nex
     call strLength(file,l1,l2)
-    print *, "c4tokal: ", file,mt1,mat,nex
+    print *, "c4tokal; file: ", file
+    print *, "c4tokal; MT: ", mt1
+    print *, "c4tokal; MAT: ", mat
+    print *, "c4tokal; nex (1 or 2):", nex
 
     i = 1
     do while (i <= ngmt)
@@ -87,6 +92,7 @@ program c4tokal
         endif
     case default
         write(0,'(a,i0)') ' Undefined value for NEX specified : ',nex
+
         stop 1
     end select
 
@@ -268,7 +274,6 @@ program c4tokal
     write(15,*) 'INPUT'
     write(15,'(5I5,5X,3E10.3)') nmt,nprm,kctl1,kctl2,kcovex,scale,emin,emax
     write(15,'(14I5)') (i,i=1,nprm)   ! fitting all parameters in sens file
-
     do m = 1,nmt
         fx => fmt(m)
         write(15,'(2I5)') fx%ix,fx%num
@@ -277,11 +282,11 @@ program c4tokal
             call dataout(c4%sec(fx%ic(i)),fx%mt)
         end do
     end do
-    
+    close(15)
+
     close(10)
     close(11)
     close(12)
-    close(15)
 
     contains
 

@@ -1,4 +1,4 @@
-#set term X11
+set term X11
 
 set size square
 
