@@ -269,6 +269,7 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    LOGICAL  CALctl        !! controls use of calculated transmission coefficients for both projectile and ejectiles
    LOGICAL  DYNam         !! dynamically deformed
    LOGICAL  COLfile       !! file with collective levels exists
+   LOGICAL  SENsita       !! calculate sensitivities for Kalman
 
    real*8   :: EXCessmass(0:130,0:400)
    real*8   :: RESmas(0:130,0:400)
