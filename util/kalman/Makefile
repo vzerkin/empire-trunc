@@ -66,7 +66,7 @@ libdir = /Users/herman/Desktop/work/empire/lib
 all: rctn kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee weight_calc slim
 
 rctn : rctn.f90 
-	$(FC) $(FFLAGS) -c rctn.f90
+	$(FC) $(FFLAGS) -L $(libdir) -I$(libdir) -c rctn.f90
 
 # OBJF = rctn.f90
 # rctn : $(OBJF) $(libdir)/libc4io.a
