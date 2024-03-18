@@ -718,6 +718,10 @@ C* Try another set of points
       GO TO 50
 C* All processing completed
    90 CONTINUE
+      close(LC4)
+      close(LPN)
+      close(LCU)
+      close(LLG)
       STOP 
 C*
    91 FORMAT(2A40)
