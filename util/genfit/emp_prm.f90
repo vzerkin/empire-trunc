@@ -652,7 +652,7 @@
       'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 'GCROD ', &
       'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', &
       'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', &
-      'PFNNIU', 'CELRED', 'CINRED', 'TUNETL', 'UOMPDS'/)
+      'PFNNIU', 'CELRED', 'CINRED', 'TUNETL', 'UOMPDS', /)
 
       integer*4 i
 
@@ -713,9 +713,9 @@
 
       character*6, intent(in) :: pnm
 
-      integer*4, parameter :: nrs = 16
+      integer*4, parameter :: nrs = 17
       character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV  ','RESNOR','FCCRED', 'TUNETL', &
-                                                'ELARED','CELRED','CINRED','PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU'/)
+                                            'ELARED','CELRED','CINRED','PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU','GDRWA',/)
       integer*4 i
 
       do i = 1,nrs

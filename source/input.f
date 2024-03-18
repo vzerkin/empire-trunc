@@ -1,4 +1,4 @@
-ccc   * $Rev: 5513 $
+ccc   * $Rev: 5553 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -459,6 +459,7 @@ C--------begin GDR parameters
          GDResh = 0.d0
          GDRwa1 = 0.d0
          GDRwa2 = 0.d0
+         GDRwa  = 1.d0
          GDRspl = 0.d0
          EWSr1 = 1.0d0
          EWSr2 = 1.0d0
@@ -6729,6 +6730,16 @@ C-----
      &             DIToro
             GOTO 100
          ENDIF
+C-----
+         IF (name.EQ.'GDRWA') THEN
+            GDRwa = val
+            WRITE (8,  '('' GDR width in MSC increased by factor'',
+     &         F5.2,'' MeV'')') GDRwa
+            WRITE (12, '('' GDR width in MSC increased by factor'',
+     &         F5.2,'' MeV'')') GDRwa
+            GOTO 100
+         ENDIF
+C-----
 C-----
          IF (name.EQ.'GDRWA1') THEN
             GDRwa1 = val

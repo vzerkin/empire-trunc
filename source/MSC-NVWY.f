@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5508 $
+Ccc   * $Rev: 5553 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-10-12 23:20:29 +0200 (Do, 12 Okt 2023) $
+Ccc   * $Date: 2024-03-19 00:15:23 +0100 (Di, 19 Mär 2024) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -430,6 +430,7 @@ C-----peaks is added to the average; this being absolutely arbitrary)
      &                                 + 0.5*(GDRpar(4,1) - GDRpar(1,1))
       WRITE (8,'('' Spreading/total GDR width ='',G12.5)') D1Fra
       egdrr = EXCn - egdr
+      gdrw = gdrw*GDRwa    ! vary GDR width to adjust MSC gamma calculations (mostly for covariances)
 C-----
 C-----calculation of spin distribution for each exciton number
 C-----
@@ -1126,8 +1127,8 @@ C--------------------------summing the matrix elements on the right
                         DO kg = kgin, ncm
 C--------------------------next  4 lines calculate interstage rate VMN calculated
 C--------------------------ang.  from o.m. mom. coeff. being neglected as they nearly
-C--------------------------(m,4)->(m+1,4) use s.p. matrix element
 C--------------------------cancel out
+C--------------------------(m,4)->(m+1,4) use s.p. matrix element
                            ecor = ((ip(kg)**2 + ih(kg)**2)
      &                            /4.0 + (ip(kg) - ih(kg))/4.0 - ih(kg)
      &                            /2.0)/sp_den

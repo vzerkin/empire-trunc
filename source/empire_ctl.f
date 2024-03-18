@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5511 $
+Ccc   * $Rev: 5553 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-10-12 23:34:51 +0200 (Do, 12 Okt 2023) $
+Ccc   * $Date: 2024-03-19 00:15:23 +0100 (Di, 19 Mär 2024) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1840,7 +1840,7 @@ Ccc
       character*108 name_of_file
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=161)
+      parameter (ndreac=90, ndkeys=162)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1878,7 +1878,7 @@ C
      &  'WEQNOR', 'WEMNOR', 'FISTGA', 'UOMPDS', 'FCCRED', 'FCORED',
      &  'CELRED', 'CINRED', 'FISAT1', 'FISAT2', 'FISAT3', 'FISVE1',
      &  'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3', 'FISVF1',
-     &  'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3'/
+     &  'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3', 'GDRWA '/
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1909,7 +1909,7 @@ C
      &  'R'     , 'R'     , 'R'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     /
+     &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction

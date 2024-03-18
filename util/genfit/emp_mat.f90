@@ -2,7 +2,7 @@
 
       use c4_io
       use endf_io
-        use endf_util
+      use endf_util
       use empire_parameters
       use endf_distributions
 
@@ -38,32 +38,32 @@
             integer*4 ix                              ! Minuit scale parameter index
             integer*4 ix2                             ! Minuit width parameter index (for ene dists)
             integer*4 ndat                            ! # data points
-            real*8 e                            ! incident energy for ang dist, PFNS, etc
-            real*8 cth                          ! cos(theta) for outgoing energy distributions
-            real*8 sig                          ! relative width to sqrt(E) of ene dists
-            real*8 dsig                         ! unc relative width to sqrt(E) of ene dists
-            real*8 xcl                          ! systematic scale factor
-            real*8 dxcl                         ! systematic scale factor unc
-            real*8 unc                          ! systematic relative uncertainty to weight fit
-            real*8 chi2                         ! group total chi2
-            character*8 flag                    ! pmeta,x4stat,cm,fid C4 flags
-            character*1 pmeta                   ! product meta-stable flag (M=metastable)
+            real*8 e                                  ! incident energy for ang dist, PFNS, etc
+            real*8 cth                                ! cos(theta) for outgoing energy distributions
+            real*8 sig                                ! relative width to sqrt(E) of ene dists
+            real*8 dsig                               ! unc relative width to sqrt(E) of ene dists
+            real*8 xcl                                ! systematic scale factor
+            real*8 dxcl                               ! systematic scale factor unc
+            real*8 unc                                ! systematic relative uncertainty to weight fit
+            real*8 chi2                               ! group total chi2
+            character*8 flag                          ! pmeta,x4stat,cm,fid C4 flags
+            character*1 pmeta                         ! product meta-stable flag (M=metastable)
             character*1 x4stat                        ! EXFOR status flag
             character*1 cm                            ! center-of-mass flag (C=cm,blank=lab)
             character*3 fid                           ! identification flag for dat7 & dat8.
             character*2 dum                           ! for alignment
             type (data_point), pointer :: pt(:)       ! data points
-            type (data_point), pointer :: econ(:)           ! continuum energy dist from MF6
-            type (data_point), pointer :: edsr(:)           ! discreet energies, cross sect from MF4
+            type (data_point), pointer :: econ(:)     ! continuum energy dist from MF6
+            type (data_point), pointer :: edsr(:)     ! discreet energies, cross sect from MF4
       end type
 
       type data_set
             type (data_set), pointer :: next          ! next data set
-            real*8 uns                          ! sysetmatic unc to subtract from C4 total err
+            real*8 uns                                ! sysetmatic unc to subtract from C4 total err
             integer*4 id                              ! dataset index
             integer*4 ngrp                            ! # of group (unique MF,MT)
-            character*1 tmeta                   ! target meta-stable flag (M=metastable)
-            character*25 ref                    ! reference (first author, year)
+            character*1 tmeta                         ! target meta-stable flag (M=metastable)
+            character*25 ref                          ! reference (first author, year)
             character*5 ent                           ! EXFOR entry number
             character*3 sub                           ! EXFOR sub-entry number
             character*1 mdf                           ! multi-dimensional data flag
@@ -80,13 +80,13 @@
       type data_plot
             integer*4 mf                              ! MF number
             integer*4 mt                              ! MT number
-            type (ext_curve), pointer :: ex                 ! external curves
+            type (ext_curve), pointer :: ex           ! external curves
             type (data_point) pt(0:nen)               ! curve & sensitivities
       end type
 
       type rxn_scl
-            real*8 xl                           ! scale factor for reaction (MT)
-            real*8 unc                          ! uncertainty in scale factor
+            real*8 xl                                 ! scale factor for reaction (MT)
+            real*8 unc                                ! uncertainty in scale factor
             logical*4 fit                             ! true if fitted
             integer*4 mt                              ! MT
             integer*4 ix                              ! Minuit prm index
@@ -95,8 +95,8 @@
       end type
 
       type material
-            character*80 dir                    ! material directory (1:ndr)
-            character*32 proj                   ! project name (1:npr)
+            character*80 dir                          ! material directory (1:ndr)
+            character*32 proj                         ! project name (1:npr)
             integer*4 atgt                            ! material A
             integer*4 ztgt                            ! material Z
             integer*4 ndr                             ! # chars in directory
@@ -109,8 +109,8 @@
             integer*4 nes                             ! # energies in Empire calc
             integer*4 iof                             ! Minuit parameter offset
             logical*4 fit                             ! material included in fit
-            real*8 chi2                         ! material total chi2
-            real*8 leve(mlev)                   ! excited state energies
+            real*8 chi2                               ! material total chi2
+            real*8 leve(mlev)                         ! excited state energies
             real*8, allocatable :: ene(:)             ! Empire calc energies (nes)
             type (rxn_scl) rxl(200)                   ! scale params for each reaction (MT)
             type (data_point), allocatable :: sen(:,:)      ! sensitivies for reaction cov (nes,nmt)
@@ -123,9 +123,9 @@
             integer*4 mf                              ! MF number
             integer*4 mt                              ! MT number
             integer*4 ndat                            ! # data points
-            real*8 e                            ! incident energy for ang dist, PFNS, etc
-            real*8 cth                          ! cos(theta) for ene dists
-            character*8 flag                    ! pmeta,x4stat,cm,fid C4 flags
+            real*8 e                                  ! incident energy for ang dist, PFNS, etc
+            real*8 cth                                ! cos(theta) for ene dists
+            character*8 flag                          ! pmeta,x4stat,cm,fid C4 flags
             type (mf_3), pointer :: mf3
             type (mf_4), pointer :: mf4
       end type

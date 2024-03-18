@@ -376,9 +376,9 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 9
+    integer*4, parameter :: nrs = 10
     character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV  ','RESNOR','FCCRED',&
-        'ELARED','CELRED'/)
+        'ELARED','CELRED','GDRWA '/)
 
     integer*4 i
 

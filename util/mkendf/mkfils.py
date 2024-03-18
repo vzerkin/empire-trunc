@@ -51,7 +51,7 @@ pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU')
 
 # global parameters do not specify Z,A of isotope
 Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED','TUNETL',
-           'ELARED','CELRED','CINRED','PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU')
+           'ELARED','CELRED','CINRED','PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU','GDRWA',)
 # not a complete list yet!
 
 

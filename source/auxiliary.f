@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5507 $
+Ccc   * $Rev: 5553 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-10-12 23:04:24 +0200 (Do, 12 Okt 2023) $
+Ccc   * $Date: 2024-03-19 00:15:23 +0100 (Di, 19 Mär 2024) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -333,6 +333,7 @@ Ccc
       GDRspl    = 0.d0
       GDRwa1    = 0.d0
       GDRwa2    = 0.d0
+      GDRwa     = 1.d0
       GDRweis   = 0.d0
       GGDr1     = 0.d0
       GGDr2     = 0.d0

@@ -1,6 +1,6 @@
-! $Rev: 5478 $
+! $Rev: 5553 $
 ! $Author: mwherman $
-! $Date: 2023-05-17 01:20:32 +0200 (Mi, 17 Mai 2023) $
+! $Date: 2024-03-19 00:15:23 +0100 (Di, 19 Mär 2024) $
 !
 !     The global variable EMPIREDIR is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -117,7 +117,7 @@
 !                      DDXS arrays defined only for neutrons and protons&  
 !    &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,         &
 !    &                 0:ndexclus),                                     &
-     &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,       &
+     &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll, GDRwa,&
      &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      &
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,     &
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,  &
@@ -238,7 +238,7 @@
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,&
      &                 EMInmsd, ATIlnoz, DXSred, SHLlnor, PEQcont,PL_CN,&
      &                 PL_CNcont, FCCred0, FUSred0, ELAred0, FCOred0,   &
-     &                 TOTred0, DEPart, CSMinim, EDDfig
+     &                 TOTred0, DEPart, CSMinim, EDDfig, GDRwa
       COMMON /GLOBAL1/ EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,        &
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,      &
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,    &
