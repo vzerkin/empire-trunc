@@ -20,7 +20,7 @@ fi
 # Checking if input file available
 if [ ! -f $file-e.endf ]; then
 echo ' '
-echo 'ERROR: Input file '$file'-e.endf is missing'
+echo 'ERROR: Input file '$file'.endf is missing'
 echo 'Formatting (EMPEND) should be run first ! '
 echo ' '
 echo ' Press any key to exit or <CTRL>-C to abort ...'
@@ -32,7 +32,7 @@ fi
 ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
 
 rm empire.end endf.dat 2>/dev/null
-ln -sf $file-e.endf empire.end
+ln -sf $file.endf empire.end
 $EMPIREDIR/util/endres/endres <ENDRES.INP
 #clean up:
 rm empire.end ENDRES.DAT ENDRES.INP
