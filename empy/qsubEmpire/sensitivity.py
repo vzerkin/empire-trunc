@@ -49,7 +49,7 @@ fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
 # these global parameters don't need Z,A of isotope specified
-Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED','CELRED','CINRED')
+Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','GDRWA','RESNOR','FCCRED', 'ELARED','CELRED','CINRED')
 # not a complete list yet!!
 
 # these parameters have additional options but they are not linked to specific nuclei
