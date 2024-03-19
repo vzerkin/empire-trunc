@@ -203,31 +203,7 @@ for k in $MT; do
        cp ${file}-parCorr.kal fort.52
     fi
 
-   #  if [ "$EXPDAT" != 0 ]; then
-   #      kalinp=''
-   #      if [ -s $file-inp.kal ]; then
-   #          echo -n "Use existing Kalman input? (Y/N) > "
-   #          read kalinp
-   #      fi
-   #      if [ -n "$kalinp" ] && ( [ ${kalinp:0:1} = "y" ] || [ ${kalinp:0:1} = "Y" ] ); then
-   #          cp $file-inp.kal KALMAN.INP
-   #      else
-   #          echo 'EDIT KALMAN INPUT, CLOSE EDITOR '
-   #          echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
-   #       #   gvim KALMAN.INP
-   #       #  on Mac use MacVim or any other editor
-   #          open -a MacVim KALMAN.INP
-   #          read go 
-   #          cp KALMAN.INP $file-inp.kal
-   #          echo 'EDIT PARAMETER UNCERTAINTIES, CLOSE EDITOR '
-   #          echo 'CLICK ON THIS WINDOW AND HIT ANY BUTTON'
-   #          open -a MacVim fort.52
-   #          read go 
-   #      fi
-   #  fi
-
     echo  "Running kalman"
-    # if ! $EMPIREDIR/util/kalman/kalman3.exe < KALMAN.INP > $file-out.kal
     if ! $EMPIREDIR/util/kalman/kalman
     then
       echo " Error running kalman"
@@ -236,25 +212,17 @@ for k in $MT; do
       exit 10
     fi
 
-    
     cat fort.16 fort.32 > fort.48
- 
-    echo "Kalman run done - continue with Kalend (y/n)?"
-    read a
+    mv KALMAN.OUT $file-out.kal
+    mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
+    mv fort.14 $file-cov.kal
+    mv fort.12 $file-expCorr.kal
+    mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
+    mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal and adding sensitivities from original -parCorr.kal
+    rm ENERGYANDINDEX.TMP 2>/dev/null
+    #rm -f fort.{1*,50,75}
 
-    
-   #  if [ ! $a -eq "y" ]; then
-      mv KALMAN.OUT $file-out.kal
-      mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
-      mv fort.14 $file-cov.kal
-      mv fort.12 $file-expCorr.kal
-      mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
-      mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal.
-      rm INPUT.D
-      rm ENERGYANDINDEX.TMP 2>/dev/null
-      #rm -f fort.{1*,50,75}
-      exit 11
-   #  fi
+    echo "Kalman run done - continue with Kalend"
 
     echo  "Running kalend"
     if ! $EMPIREDIR/util/kalman/kalend < INPUT.D
@@ -265,36 +233,36 @@ for k in $MT; do
       exit 12
     fi
 
-    if [ $PFNS -eq 0 ]; then
-      cp ${file}-${k}-c4.gpd expxscplot.d
-    else
-      cp ${file}-PFNS-${INDEX}-c4.gpd expxscplot.d
-    fi
+   #  if [ $PFNS -eq 0 ]; then
+   #    cp ${file}-${k}-c4.gpd expxscplot.d
+   #  else
+   #    cp ${file}-PFNS-${INDEX}-c4.gpd expxscplot.d
+   #  fi
 
-    #PLOT DATA ONLY WITH EXPERIMENTAL DATA
+   #  #PLOT DATA ONLY WITH EXPERIMENTAL DATA
 
-    if [ "$EXPDAT" != 0 ]; then
-      if [ "$PFNS" -eq 0 ]
-      then
-        gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
-      else
-        gnuplot $EMPIREDIR/util/kalman/corr-pfns.gp >/dev/null
-      fi
-    fi
+   #  if [ "$EXPDAT" != 0 ]; then
+   #    if [ "$PFNS" -eq 0 ]
+   #    then
+   #      gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
+   #    else
+   #      gnuplot $EMPIREDIR/util/kalman/corr-pfns.gp >/dev/null
+   #    fi
+   #  fi
 
     # Should consider a different name for these files in the pfns case, but which? 
     #  mv corrplot.d $file-${k}-cov.gpd
     #  mv xscplot.d  $file-${k}-xsc.gpd
 
-    mv KALMAN.OUT $file-out.kal
-    mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
-    mv fort.14 $file-cov.kal
-    mv fort.12 $file-expCorr.kal
-    mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
-    mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal.
-    #rm INPUT.D
+   #  mv KALMAN.OUT $file-out.kal
+   #  mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
+   #  mv fort.14 $file-cov.kal
+   #  mv fort.12 $file-expCorr.kal
+   #  mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
+   #  mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal and adding sensitivitties from tthe original -parCorr.kal
+    rm INPUT.D
     rm ENERGYANDINDEX.TMP 2>/dev/null
-    #rm -f fort.{1*,50,75}
+    rm -f fort.{1*,50,75}
 
     echo 'COMPLETE ...'
 done
