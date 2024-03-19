@@ -159,15 +159,18 @@ program genkal
       IF (TMP(LT1:LT2) .NE. PN(LT1:LT2)) then
          write (0, *) 'WRONG PARAMETER found in ', FILE(L1:L2)//trim(MATSEN)
          write (0, *) TMP(LT1:LT2), ' vs ', PN(LT1:LT2)
-         write (0, *) 'Order in -inp.sen file might differ from -mat.sen '
-         write (0, *) 'Check also for double blank lines if sensitivities were added'
+         write (0, *) 'If you got to this point it is most likely because of adding new parameters'
+         write (0, *) '- Order of parameters in -inp.sen must be the same as in -mat.sen '
+         write (0, *) '- Be sure that .xcs file has the same energies as -mat.sen '
+         write (0, *) '- Energies in -mat.sen must be the same for all parameters'
+         write (0, *) '- Check for double blank lines, there should be a single one between paramter blocks'
+         write (0, *) '- There will be NO blank line at the top of -mat.sen and WILL be one at the end'
          stop 1
       end if
       READ (10, *) ! THIRD LINE
-      ! print *,"Sensitivities for parameter # ", i 
+      print *,"Sensitivities for parameter # ", i 
       DO j = 1, ie
          READ (10, *) E(j), (SENS(i, j, k), k=1, nreac)
-         ! print *,  E(j), (SENS(i, j, k), k=1, 5)
       end do
       READ (10, *)!EMPTY LINE
    end do

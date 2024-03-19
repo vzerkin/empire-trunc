@@ -17,8 +17,7 @@ program kalend
     !! failed to understand why 'next' in the linked-list is not 
     !! incremented. 
     !!
-    !! NEED TO DO:
-    !! - complete creation of plots (nameing outside kalend)
+
 
     use endf_io
     use rctn, only: retReactionMT, retReactionName, strLength
@@ -904,89 +903,6 @@ contains
         
     end subroutine processKalmanCovarX
 
-    ! subroutine writeCovPlotFileXOLD()
-    !     !! Write KALMAN cross-reaction covariances to files for plotting with gnuplot.
-    !     !! Write the cov matrix as given from KALMAN. Only convert to
-    !     !! correlation matrix for plotting, rather than covariance.
-    !     !!
-    !     !! Calls:  => strLength
-        
-    !     integer*4 :: i, j, m1, m2, m1s, m2s
-    !     integer*4 :: k
-    !     integer*4 :: ist    !! threshold position of first non-zero cross section for mt
-    !     integer*4 :: ist1   !! threshold position of first non-zero cross section for mt1
-    !     integer*4 :: pos    !! position of mt-mt   in covk drived type
-    !     integer*4 :: pos1   !! position of mt1-mt1 in covk drived type
-
-    !     real*8 :: xx,dei,dej
-    !     character*3 :: chr3, chr3s
-        
-    !     write(*,*) 'Got into write_Xcov_plotfile'
-    !     ! Locate position of reactions in covk
-    !     k = crossReactionPosition(mt, mt1)          ! cross-reaction 
-    !     pos = crossReactionPosition(mt, mt)         ! first reaction 
-    !     pos1 = crossReactionPosition(mt1, mt1)      ! second reaction 
-
-    !     write(*,*) " mt, mt1, k = ", mt, mt1, k
-    !     ! write(*,*) " mt,      k = ", mt, pos
-    !     ! write(*,*) "mt1,      k = ", mt1, pos1
-
-    !     k = abs(k)
-    !     write(chr3,'(I3)') mt
-    !     write(chr3s,'(I3)') mt1
-        
-    !     ! Diagonal cov subsection
-    !     if(mt == mt1) then
-    !         call strLength(chr3,m1,m2)
-    !         open(18,file=file(l1:l2)//'-'//chr3(m1:3)//'-err.kal',status='UNKNOWN',action='WRITE')
-
-    !         do i = 1,ken
-    !             if(covk(k)%y(i) < 1.D-03) then
-    !                 xx = 0.D0
-    !             else
-    !                 xx = 100.D0*min(sqrt(covk(k)%w(i,i))/covk(k)%y(i),1.0D0)
-    !             endif
-
-    !             write(18,20) covk(k)%x(i),xx
-    !         end do
-    !         write(18,*)
-    !         close(18)
-    !     endif
-        
-    !     ! locate  reaction threshold (>1.0D-0 mb)
-    !     ist = 1
-    !     do while((covk(pos)%y(ist) <= 1.D-03) .and. (ist <= ken))
-    !         ist = ist + 1
-    !     end do
-    !     ist1 = 1
-    !     do while((covk(pos1)%y(ist1) <= 1.D-03) .and. (ist1 <= ken))
-    !         ist1 = ist1 + 1
-    !     end do
-    !     write(*,*) "thresholds ist, ist1 ", ist, ist1
-        
-    !     ! Create corrplot.d with correlations for gnuplot
-    !     call strLength(chr3,m1,m2)         ! 1st reqaction
-    !     call strLength(chr3s,m1s,m2s)      ! 2nd reaction
-    !     open(25,file=file(l1:l2)//'-'//chr3(m1:3)//'x'//chr3s(m1s:3)//'-corrplot.d',status='UNKNOWN',action='WRITE')
-        
-    !     do i = ist1,ken
-    !         do j = ist,ken
-    !             if((covk(pos)%w(i,i) > 0.D0) .and. (covk(pos1)%w(j,j) > 0.D0)) then
-    !                 xx = covk(k)%w(i,j)/dsqrt(covk(pos)%w(i,i)*covk(pos1)%w(j,j))       !! WE NEED TO USE rea()%dsig() HERE !!!
-    !                 ! xx = covk(k)%w(i,j)
-    !             else
-    !                 xx = 0.D0
-    !             endif
-    !             write(25,20) covk(pos)%x(i), covk(pos1)%x(j), xx
-    !         end do
-    !         write(25,*)
-    !     end do
-    !     close(25)
-        
-    !     return
-    !     20 FORMAT(3(1X,1PE13.6))
-        
-    ! end subroutine writeCovPlotFileXOLD
     
     subroutine writeCovPlotFileX()
         !! Write KALMAN cross-reaction covariances to files for plotting with gnuplot.
