@@ -13,14 +13,14 @@ program genkal
    integer*4, parameter :: ne = 1500              ! maximum # energies allowed for each reaction
    integer*4, parameter :: np = 200               ! maximum # of varied empire parameters
 
-   integer*4 i, j, k, mt, mt1, ios, nreac, ie, mat, nex, npfns, l1, l2
-   integer*4 ln1, ln2, la1, la2, lb1, lb2, lc1, lc2, nparm, lt1, lt2
-   CHARACTER*4 IA, IB, IC
-   CHARACTER*6 PN, TMP
-   CHARACTER*8 INPSEN
-   CHARACTER*15 MATSEN, XSC
-   CHARACTER*12 REACTION(NR), PNAME(NP)
-   CHARACTER*25 FILE
+   integer*4 :: i, j, k, mt1, ios, nreac, ie, mat, nex, npfns, l1, l2
+   integer*4 :: ln1, ln2, la1, la2, lb1, lb2, lc1, lc2, nparm, lt1, lt2
+   CHARACTER*4 :: IA, IB, IC
+   CHARACTER*6 :: PN, TMP
+   CHARACTER*8 :: INPSEN
+   CHARACTER*15 :: MATSEN, XSC
+   CHARACTER*12 :: REACTION(NR), PNAME(NP)
+   CHARACTER*25 :: FILE
    real*8 E(NE), CSEC(NE, NR), PERTB(NP), SENS(NP, NE, NR), SW(NP), W(NP, NP)
 
    INPSEN = '-inp.sen'
@@ -63,25 +63,6 @@ program genkal
    end do
    10 CLOSE (10)
    ie = i - 1
-
-   ! CHECKING IF THE REQUESTED MT1 IS PRESENT IN THE FILE.XSC FILE
-   ! This check is only necessary when fitting cross sections, not pfns
-
-   ! IF (NPFNS .EQ. 0) THEN
-   !    j = 0
-   !    DO i = 1, nreac
-   !       mt = retReactionMT(REACTION(i))
-   !       IF (MT .EQ. MT1) THEN
-   !          j = 1
-   !          exit
-   !       END IF
-   !    end do
-   !    IF (j .EQ. 0) THEN
-   !       WRITE (0, *) 'REACTION( MT=', MT1, ') NOT FOUND IN ', FILE(L1:L2)//trim(XSC)
-   !       write (0, *)
-   !       STOP 1
-   !    END IF
-   ! END IF
 
    ! write the cross section file for kalman
 
@@ -177,10 +158,10 @@ program genkal
    CLOSE (10)
    
    print *, "sensitivities for nparm, ie, nreac ", nparm, ie, nreac
+
    ! i=> 1-nparm (57)    PARAMETERS
    ! k => 1-nreac (39)   reactions
    ! j +> 1-ie (56)      energies
-
    do k = 1, nreac
       WRITE (52, '(A12,13X,I5)') REACTION(k), ie
       do j = 1, ie
