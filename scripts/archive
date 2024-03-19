@@ -3,7 +3,7 @@
 # for later comparison with other calculations. All input files needed to
 # reproduce calculations are preserved.
 # Usage:
-# memorize dir root
+# archive dir root
 # where:
 #    dir - name of the directory (subdirectory of the ./Archive directory)
 #    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp 
