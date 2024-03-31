@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: zerkin $
-Ccc   * $Date: 2023-06-14 18:24:41 +0200 (Mi, 14 Jun 2023) $
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2024-03-31 14:45:33 +0200 (So, 31 Mär 2024) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -174,6 +174,7 @@ C-M  23/03 - Do not suppress small reaction cross sections when
 C-M          isomers are also given.
 C-M        - Reverse the order to "descending" for discrete photons
 C-M          in MF 6.
+C-M  24/03 Fix MT assignment for discrete levels of (n,He-3) in EMTIZA.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -1610,7 +1611,7 @@ C*       --Discrete levels (z,d') cross section
 C*       --Discrete levels (z,p') cross section
            MT =700
            IF(MEQ.GT.0) MT =0
-        ELSE IF(JZA  .EQ. IZA+IZI-2002) THEN
+        ELSE IF(JZA  .EQ. IZA+IZI-2003) THEN
 C*       --Discrete levels (z,He3') cross section
            MT =750
            IF(MEQ.GT.0) MT =0
@@ -4685,8 +4686,8 @@ C* Reconstruct Q-values from MT and the binding energies
       IF(QQ.EQ.0 .AND. (MT.NE.9151 .AND. MT.NE.91 .AND. MT.NE.456)) THEN
 C*      If undefined, reconstruct Q-values from MT and binding energies
         CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
-        WRITE(LER,*)'WARNING - Q-val. for MT',MT,' calculated with QVAL'
-     &              ,' from particle binding energies QQ=',QQ
+        WRITE(LER,*) 'WARNING - Q-val. for MT',MT,' calculated with'
+     &              ,' QVAL from particle binding energies QQ=',QQ
       END IF
 C...
 C...  if(jza.eq.71178) then
