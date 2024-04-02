@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5553 $
+Ccc   * $Rev: 5561 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2024-03-19 00:15:23 +0100 (Di, 19 Mär 2024) $
+Ccc   * $Date: 2024-04-02 18:31:28 +0200 (Di, 02 Apr 2024) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -272,7 +272,7 @@ Ccc
       TISomer   = 0.d0
       EDDfig    = 0.d0
       FNasomp   = 0.d0
-      CSMinim   = 0.d0
+      ! CSMinim   = 0.d0
       FNrvomp   = 0.d0
       CANGle    = 0.d0
       FNrwvomp  = 0.d0
