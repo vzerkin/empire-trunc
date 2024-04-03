@@ -1,4 +1,4 @@
-ccc   * $Rev: 5553 $
+ccc   * $Rev: 5563 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -138,7 +138,7 @@ C
       CSO  = (HHBarc/AMPi)**2
       PI   = 4.D0*DATAN(1.D0)
       PIx4 = 4.D0*PI
-      CSMinim = 1.d-7  ! Minimum cross section
+      CSMinim = 1.0d-7  ! Minimum cross section
 
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
@@ -2294,7 +2294,7 @@ C-----------precise grid at low energies. from the 5-th element on the step
 C-----------is de (bin width).
 C-----------determination of etl matrix
             netl = 6
-            ! if (NEX(nnuc) == 0) CYCLE
+            if (NEX(nnuc) == 0) CYCLE
             IF ((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).lt.0) CYCLE
             IF (NEX(nnuc).GT.0) netl =
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
