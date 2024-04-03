@@ -269,7 +269,7 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    LOGICAL  :: CALctl        !! controls use of calculated transmission coefficients for both projectile and ejectiles
    LOGICAL  :: DYNam         !! dynamically deformed
    LOGICAL  :: COLfile       !! file with collective levels exists
-   LOGICAL  SENsita       !! calculate sensitivities for Kalman
+   LOGICAL  :: SENsita       !! calculate sensitivities for Kalman
 
    real*8 :: EXCessmass(0:130,0:400)    !!   
    real*8 :: RESmas(0:130,0:400)        !!
@@ -590,6 +590,7 @@ character*72  :: EMPtitle = 'Default calculation title - please change it'
    real*8  :: POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus) !! population energy spectrum (exclusive nuclei)  
    real*8  :: POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus)  !! population energy ??? spectrum (exclusive nuclei)
    real*8  :: POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus) !! fraction of energy_angle spectrum from the CN emission
+
    real*8  :: GDRpar(ndgdrpm,0:ndnuc)  !! Giant Dipol Resonance parametrs
    real*8  :: GMRpar(ndgmrpm,0:ndnuc)  !! Giant Magnetic Resonance parametrs 
    real*8  :: GQRpar(ndgqrpm,0:ndnuc)  !! Giant Quadrupole Resonance parametrs
