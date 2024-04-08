@@ -1,6 +1,6 @@
-!cc   * $Rev: 5523 $
+!cc   * $Rev: 5564 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2023-12-11 20:00:50 +0100 (Mo, 11 Dez 2023) $
+!cc   * $Date: 2024-04-09 00:03:51 +0200 (Di, 09 Apr 2024) $
 
 ! c   ********************************************************************
 !!c   *                                                                  *
@@ -1279,22 +1279,23 @@ subroutine printDiscreteGammas(imax, discGamma)
    sumGamma = SUM(discGamma(1:imax)%gXsc)
 
    ! Print discrete gammas to *.out file for ENDF-6 formatting
-   
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
-   write(12, '(3x,"Discrete g emission cross section ",G10.5)') sumGamma
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
-   write(12, '(9x,''i'',7x,''Egam         Disc.g CS'')')
-   write(12, '('' '')')
-   do i = 2, imax+1
-      write(12, '(i10,2G15.6)') i-1, discGamma(i)%Eg, discGamma(i)%gXsc
-   end do 
-   write(12, '('' '')')
-   write(12, '(10x,40(''-''))')
-   write(12, '('' '')')
+   if(sumGamma > 1.0d0) then  !! Print only if sum of gamma cross section is at least 10 mb
+      write(12, '('' '')')
+      write(12, '(10x,40(''-''))')
+      write(12, '('' '')')
+      write(12, '(3x,"Discrete g emission cross section ",G10.5)') sumGamma
+      write(12, '('' '')')
+      write(12, '(10x,40(''-''))')
+      write(12, '('' '')')
+      write(12, '(9x,''i'',7x,''Egam         Disc.g CS'')')
+      write(12, '('' '')')
+      do i = 2, imax+1
+         write(12, '(i10,2G15.6)') i-1, discGamma(i)%Eg, discGamma(i)%gXsc
+      end do 
+      write(12, '('' '')')
+      write(12, '(10x,40(''-''))')
+      write(12, '('' '')')
+   endif
 
    return
 end subroutine printDiscreteGammas
