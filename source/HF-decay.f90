@@ -2,6 +2,16 @@ MODULE HFdecay
     !  * : 5291 $
     !  * : capote $
     !  * : 2021-07-06 04:54:43 -0600 (Tue, 06 Jul 2021) $
+
+!!c   ********************************************************************
+!!c   *                                                                  *
+!!c   *            H F - d e c a y   m o d u l e                         *
+!!c   *                                                                  *
+!!c   * HF-decay module deals with decay of a whole nucleus, rather than *
+!!c   * individual cells in the continuum that is done by HF-decay.      *
+!!c   *                                                                  *
+!!c   ********************************************************************
+
     USE empcess, ONLY: CSDirsav, CSHms
     use width_fluct
 
@@ -53,10 +63,15 @@ contains
         if (nnuc == mt91 .or. nnuc == mt649 .or. &
             nnuc == mt699 .or. nnuc == mt749 .or. nnuc == mt799 .or. &
             nnuc == mt849) primeResidue = .true.
+        if (ENDf(nnuc) == 2) primeResidue = .false.
 
+        !-----Print CN header
         if (nnuc == 1) call printCompoudHeader(nnuc)
-        if (FITomp <= 0 .and. nnuc /= 1) call printPrimeLevelsBeforeCascade (nnuc, totcorr)
 
+        
+        if (FITomp <= 0 .and. nnuc /= 1 .and. ENDf(nnuc) == 1 .and. primeResidue)   &
+            !-----Print population of prime emission levels before continuum cascade
+            call printPrimeLevelsBeforeCascade (nnuc, totcorr)
 
         !-----Jump to end of loop after elastic when first OM fitting run
         If (FITomp < 0 .and. nnuc == mt2) then
@@ -64,17 +79,8 @@ contains
             RETURN
         end if
 
-        POPmax(nnuc) = POPmax(nnuc)*0.0001d0 ! why is decreased ?
-        if (POPmax(nnuc) == 0.d0) goto 1500 ! nnuc continuum has not been populated, skipping
-
-        !   if (nnuc>1) then
-        !     write (8,*) ' '
-        !     write (8,*) ' -------------------------------------'
-        !     write (8,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)') nnuc,
-        !  &             ia, SYMb(nnuc)
-        !     write (8,*) ' -------------------------------------'
-        !     write (8,*) ' '
-        !   endif
+        POPmax(nnuc) = POPmax(nnuc)*1.0d-5      ! Confusing notation should be POPmin(nnuc) = POPmax(nnuc)*...
+        if (POPmax(nnuc) == 0.0d+0) goto 1500   ! nnuc continuum has not been populated, skipping
 
         !-----Calculate compound nucleus level density at saddle point
         if (NINT(FISshi(nnuc)) == 1) then
@@ -87,7 +93,9 @@ contains
                 end if
             end if
         end if
-        call HFdecayNucleus(nnuc)   
+
+        ! Hauser-Feshbach decay of a nucleus
+        call HFdecayNucleus(nnuc) 
         if (IOUt > 0) write (8, '(1X,/,'' Population neglected because too'', '' small '',G12.5,/)') popleft*DE
 
         1500 continue  ! no continuum population - HF decay has been skipped, deal with discrete levels 
@@ -95,32 +103,46 @@ contains
         do il = 1, NLV(nnuc)
             CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il, nnuc)  
         end do
-
-        if (nnuc == 1) call discLevelAngularDistr() ! Updating discrete level double differential cross sections
+        
+        ! Update discrete-level double-differential cross sections
+        if (nnuc == 1) call discLevelAngularDistr() 
 
         csum = 0.d0
         if (CSPrd(nnuc) > 0) then
             if (.not. primeResidue .and. nnuc /= 1) then
-                call printMultipleEmissionHeader(nnuc)
-            else
+                call printDecayingNucleusHeader(nnuc)       ! call only if nucleus is exclusive
+            elseif (primeResidue .and. ENDf(nnuc) == 1) then ! call only if nucleus is exclusive
                 call printPrimeResiduesAfterCascade(nnuc)
             end if
+
             ! Primary gammas printout
             if (nnuc == 1 .and. NPRim_g > 0) call printPrimaryGammas(nnuc)
-            CALL DECAYD(nnuc) ! Gamma decay of discrete levels
+
+            ! Gamma decay of discrete levels
+            CALL DECAYD(nnuc) 
         end if 
 
+        ! Print cross sections related to prime exclusive reactions
         if ((CSPrd(nnuc) > 0) .or. (csum > 0)) call primeExclusiveReactions(nnuc)
 
+        ! Print fission cross sections
         if (CSFis /= 0.0D0) call printFission(nnuc)
         TOTcsfis = TOTcsfis + CSFis
 
+        ! Print elastic angular distributions
         if (nnuc == 1 .and. INT(AEJc(0)) /= 0 .and. ncollx > 0) call printElasticAngDistr(nnurec, nejcec)
+
+        ! Print isomeric cross sections
         if (CSPrd(nnuc) > 0) call printIsomericCrossSections(nnuc)
+
         if (CSFis > 0.) write (12, '(1X, I3, ''-'', A2, ''-'', I3, ''fission cross section'', G12.6, ''  mb'')') &
                                   iz, SYMb(nnuc), ia, CSFis
+
+        ! Print inclusive production cross sections
         if (CSPrd(nnuc) > 0) call printInclusiveProductionXSec(nnuc)
         xcross(0, jz, jn) = CSEmis(0, nnuc)
+
+        ! Integrate spectra and print AUERST plots 
         if (CSPrd(nnuc) > 0) call integrateXSections(nnuc)
 
         RETURN
@@ -255,6 +277,10 @@ contains
 
 
     subroutine printPrimeLevelsBeforeCascade (nnuc, totcorr)
+        !! Prints population of discrete levels in a nucleus after
+        !! a single particle emission from CN. It also calls DECAYD_DIR
+        !! to decay these levels without adding gammas to the spectra 
+        !! according to ENDF-6 rules.
         implicit none
         integer, intent(in) :: nnuc
         real*8, intent(in) ::  totcorr
@@ -450,7 +476,7 @@ contains
     end subroutine printPrimeResiduesAfterCascade
 
 
-    subroutine printMultipleEmissionHeader(nnuc)
+    subroutine printDecayingNucleusHeader(nnuc)
         integer, intent(in) :: nnuc
 
         write (12, *)
@@ -479,7 +505,7 @@ contains
         write (12, *)
         write (8, *)
 
-    end subroutine printMultipleEmissionHeader
+    end subroutine printDecayingNucleusHeader
 
 
     subroutine primeExclusiveReactions(nnuc)
@@ -588,13 +614,13 @@ contains
             if (nejc == 0) then
                 ftmp = -1.d0
                 ftmp_disc = 0.d0
-                !  if (nnuc==mt91 ) ftmp_disc = CSDirlev(1,1)
-                !  if (nnuc==mt649) ftmp_disc = CSDirlev(1,2)
+                ! if (nnuc == mt91 ) ftmp_disc = CSDirlev(1, 1)
+                ! if (nnuc == mt649) ftmp_disc = CSDirlev(1, 2)
                 if (nnuc == mt849) ftmp_disc = CSDirlev(1, 3)
                 if (nnuc == mt699) ftmp_disc = CSDirlev(1, 4)
                 if (nnuc == mt749) ftmp_disc = CSDirlev(1, 5)
                 if (nnuc == mt799) ftmp_disc = CSDirlev(1, 6)
-                ftmp = (POPcs(3, INExc(nnuc)) + ftmp_disc)/CSPrd(nnuc)
+                ftmp = (POPcs(3, INExc(nnuc)) + ftmp_disc)/CSPrd(nnuc)   !! HERE Ι don't understend why only 3 
                 CSGinc(3) = POPcs(0, INExc(nnuc))*ftmp
                 dtmp = (1.d0 - ftmp)*POPcs(nejc, INExc(nnuc))
                 if (dtmp < 1.d-7) then
@@ -953,8 +979,8 @@ contains
                 if (ISIsom(its, Nnuc) == 1) then
                     ilv = ilv + 1
                     write (12, '(1X,I3,''-'',A2,''-'',I3, '' isomer state population  '',G12.6, &
-                           & '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'')'')') &
-                            iz, SYMb(nnuc), ia, POPlv(its, Nnuc), ilv, ELV(its, Nnuc), LVP(its, Nnuc)*XJLv(its, Nnuc)
+                           & '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'' # '',I2,'')'')') &
+                            iz, SYMb(nnuc), ia, POPlv(its, Nnuc), ilv, ELV(its, Nnuc), LVP(its, Nnuc)*XJLv(its, Nnuc), its-1
                     ftmp_gs = ftmp_gs - POPlv(its, Nnuc)
                 end if
             end do
@@ -1099,7 +1125,7 @@ contains
         do il = 1, NLV(nnuc)
             cspg = cspg + CSEpg(il)
         end do
-        if (cspg > 0) then
+        if (cspg > 0.0d+0) then
             write (12, *)
             write (12, '(1X,/,10X,40(1H-),/)')
             write (12, '(2x, '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
@@ -1301,7 +1327,8 @@ contains
 
 
     subroutine printCompoudHeader(nnuc)
-        !! Prints to 8 and 12 CN header and spin distribution of the capture state
+        !! Prints CN header to 8 & 12 and spin distribution of the capture state
+        !! and to 8 
 
         integer, intent(in) :: nnuc   ! index of the nucleus (actually 1) 
         integer :: i
@@ -1322,8 +1349,7 @@ contains
                   nnuc, INT(Z(nnuc)), SYMb(nnuc), ia, AMAss(nnuc), &
                   QPRod(nnuc) + ELV(LEVtarg, 0), REAction(nnuc)
         end if
-        write (8, *) &
-            ' ---------------------------------------------------------------'
+        write (8, *) ' ---------------------------------------------------------------'
         write (8, *)
 
         if (IOUt > 1) then
@@ -1340,8 +1366,7 @@ contains
             end do
             write (8, *) ' '
         end if
-        write (12, *) &
-            ' ---------------------------------------------------------------'
+        write (12, *) ' ---------------------------------------------------------------'
         if (abs(QPRod(nnuc) + ELV(LEVtarg, 0)) > 99.99) then
             write (12, &
                    '(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F10.6,'' Q-value='',F10.5)') &
@@ -1350,8 +1375,7 @@ contains
             write (12, '(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F10.6,'' Q-value='',F10.6)') &
                         INT(Z(nnuc)), SYMb(nnuc), ia, AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg, 0)
         end if
-        write (12, *) &
-            ' ---------------------------------------------------------------'
+        write (12, *) ' ---------------------------------------------------------------'
     end SUBROUTINE printCompoudHeader
 
 
@@ -1415,10 +1439,8 @@ contains
             izares = INT(1000.0*zres + ares)
             CALL WHERE (izares, nnur, iloc)
             if (iloc == 1) cycle
-            !--------Decay to continuum
-            !--------recorr is a recoil correction factor that
-            !--------divides outgoing energies
-            !        recorr = DBLE(ares)/AEJc(nejc)
+            !--------Decay to continuum recorr is a recoil correction factor that
+            !--------divides outgoing energies recorr = DBLE(ares)/AEJc(nejc)
             recorr = AMAss(Nnuc)/EJMass(nejc)
 
             exqcut = EX(Ke, Nnuc) - Q(nejc, Nnuc) - ECUt(nnur)
@@ -1465,7 +1487,7 @@ contains
                             !------------------------
                             ! if(irec==5 .and. RECcse(irec,0,nnur)>0
                             ! &               .and.na==10) then
-                            ! write(8,*) '       Parent bin', Ke, 'Nnuc', Nnuc
+                            ! write(8,*) 'Parent bin', Ke, 'Nnuc', Nnuc
                             ! write(8,*) 'Recoil bin', ire
                             ! write(8,*) 'Erecoil ', erecoil, erecod, nnuc
                             ! write(8,*) 'RECcse, RECcse par, REClev',
@@ -1506,6 +1528,7 @@ contains
         end do                  !over levels
         RETURN
     end subroutine getRecoil
+
 
     subroutine printRecoil(Nnuc, React) !,qout)
         !! Prints recoil spectrum of nnuc residue
@@ -1650,6 +1673,7 @@ contains
         97548 format(3X, ' Disc. popul. with cont. g-casc. ', G12.6, ' mb')
         RETURN
     end subroutine printRecoil
+
 
     subroutine printBinaryRecoil(Nnuc, React) !,qout)
         !! Prints recoil spectrum of (n,n) or (n,p) residue
