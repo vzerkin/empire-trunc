@@ -1,6 +1,6 @@
-!cc   * $Rev: 5564 $
+!cc   * $Rev: 5566 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2024-04-09 00:03:51 +0200 (Di, 09 Apr 2024) $
+!cc   * $Date: 2024-04-09 18:49:32 +0200 (Di, 09 Apr 2024) $
 
 ! c   ********************************************************************
 !!c   *                                                                  *
@@ -1279,7 +1279,7 @@ subroutine printDiscreteGammas(imax, discGamma)
    sumGamma = SUM(discGamma(1:imax)%gXsc)
 
    ! Print discrete gammas to *.out file for ENDF-6 formatting
-   if(sumGamma > 1.0d0) then  !! Print only if sum of gamma cross section is at least 10 mb
+   if(sumGamma > 0.0d0) then  !! Print only if sum of gamma cross section is at least 10 mb
       write(12, '('' '')')
       write(12, '(10x,40(''-''))')
       write(12, '('' '')')
