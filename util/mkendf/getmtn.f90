@@ -1,8 +1,8 @@
    program mat_number
 
-   ! this little routine takes as input an endf file
-   ! if there is no extension to file, it appends filename with ".endf" 
-   ! it then reads the file and writes to stdout the MAT number
+   ! This little code takes as input an endf file's name.
+   ! If there is no extension to the file-name, it appends filename with ".endf". 
+   ! Then it reads the file and writes the MAT number to stdout.
 
    implicit none
 
@@ -32,4 +32,5 @@
 
    write(6,'(A4)') line(67:70)
 
-100   end
+   100 print *, "Error reading endf file"  
+   end
