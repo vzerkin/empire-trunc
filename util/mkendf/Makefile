@@ -15,14 +15,14 @@ endif
 libdir = $(EMPIREDIR)/lib
 
 all:
-	$(MAKE) add_endf
+	# $(MAKE) add_endf
 	$(MAKE) getmtn
 	# $(MAKE) mk_ace
 	$(MAKE) mk_xsdir
 	$(MAKE) read_allnjoy
 	# $(MAKE) read_kal
 	$(MAKE) read_mcnp
-	$(MAKE) mk_nubar
+	# $(MAKE) mk_nubar
 
 add_endf: add_endf.f90 $(libdir)/libendfio.a ../crs/libcrs.a
 	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -I ../crs -o $@ add_endf.f90 -lendfio ../crs/libcrs.a $(STATIC)
@@ -30,8 +30,8 @@ add_endf: add_endf.f90 $(libdir)/libendfio.a ../crs/libcrs.a
 getmtn: getmtn.f90
 	$(FC) $(FFLAGS) -o $@ getmtn.f90 $(STATIC)
 
-#mk_ace: mk_ace.f90
-#	$(FC) $(FFLAGS) -o $@ mk_ace.f90 $(STATIC)
+mk_ace: mk_ace.f90
+	$(FC) $(FFLAGS) -o $@ mk_ace.f90 $(STATIC)
 
 mk_xsdir: mk_xsdir.f90
 	$(FC) $(FFLAGS) -o $@ mk_xsdir.f90 $(STATIC)
@@ -43,8 +43,8 @@ mk_nubar: mk_nubar.f90 $(libdir)/libendfio.a
 	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ mk_nubar.f90 -lendfio $(STATIC)
 
 # tailor read_kal for each material
-#read_kal: read_kal.f90
-#	$(FC) $(FFLAGS) -o $@ read_kal.f90 $(STATIC)
+read_kal: read_kal.f90
+	$(FC) $(FFLAGS) -o $@ read_kal.f90 $(STATIC)
 
 read_mcnp: read_mcnp.f90
 	$(FC) $(FFLAGS) -o $@ read_mcnp.f90 $(STATIC)
