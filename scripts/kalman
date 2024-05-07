@@ -25,7 +25,7 @@ if [ -z $EMPIREDIR ]; then
 fi
 
 if [ -z $file ]; then
-  echo "INPUT FILE STEM NOT SPECIFIED!"
+  echo "INPUT FILE (ROOT-NAME) NOT SPECIFIED!"
   exit
 fi
 
@@ -38,20 +38,23 @@ fi
 
 if [ -z $MT -o "$MT" = "0" ]; then
    MTset="1 2 3 4 11 16 17 1 22 24 45 102 103 105 105 106 107 112 207 251 456 5 851"   # MTset is used only for exp. data selection
-   MT="0"                                                         # MT=0 KALMAN for all available reactions 
+   MT="0"                       # MT=0 KALMAN for all available reactions 
    EXPDAT="2"
-elif [ "$MT" = "1000" ]; then                                     # MT=100 KALMAN for all reactions but ignore exp. data
+elif [ "$MT" = "1000" ]; then    # MT=1000 KALMAN for all reactions but ignore exp. data
    MTset="0"
    MT="0"
    EXDAT="3"
-else                                                              # KALMAN and using input MT exp.data only
+else                            # KALMAN and using input MT exp.data only
    MTset=$MT
    EXPDAT="1"
 fi
 
 
-if [ -z $MAT -o "$MAT" = "0" ]; then
-   MAT=$($EMPIREDIR/util/mkendf/getmtn ${file}.endf)
+echo "Getting MAT"
+if [ -z $MAT ]; then  # Getting MAT from the ENDF file 
+LINE=`tail -3 ${file}.endf | head -1`
+MAT=${LINE:66:4}
+echo "MAT from the ENDF file" $MAT
 fi
 
 # if [ -z $EXPDAT ]; then
@@ -117,7 +120,7 @@ rm -f fort.*  ENERGYANDINDEX.TMP *.gpd
 
 for k in $MT; do
 
-    echo "MT= ${k}"
+    echo "MT=" ${k} "MAT=" $MAT
     echo $file ${k} $MAT $EXPDAT $PFNS $EINC > INPUT.D
     rm expxscplot*.d
     rm -f KALMAN.INP
@@ -223,6 +226,7 @@ for k in $MT; do
     #rm -f fort.{1*,50,75}
 
     echo "Kalman run done - continue with Kalend"
+    read a
 
     echo  "Running kalend"
     if ! $EMPIREDIR/util/kalman/kalend < INPUT.D
@@ -232,6 +236,7 @@ for k in $MT; do
       read errkey
       exit 12
     fi
+    echo "Kalend done :)"
 
    #  if [ $PFNS -eq 0 ]; then
    #    cp ${file}-${k}-c4.gpd expxscplot.d
@@ -260,11 +265,13 @@ for k in $MT; do
    #  mv fort.12 $file-expCorr.kal
    #  mv fort.52 $file-parCorr.kal     # Generated input to Kalman (parameter names, values, uncertainties, & correlations) 
    #  mv fort.21 $file-parCorrOut.kal  # Same format as -parCorr.kal => can be used as the input to Kalamn by renameing it to -parCorr.kal and adding sensitivitties from tthe original -parCorr.kal
-    rm INPUT.D
+
+#    rm INPUT.D
     rm ENERGYANDINDEX.TMP 2>/dev/null
-    rm -f fort.{1*,50,75}
+    rm -f fort.{48,50,75}
 
     echo 'COMPLETE ...'
+    read a
 done
 
 exit
