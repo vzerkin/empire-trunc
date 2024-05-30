@@ -259,8 +259,8 @@ C* Process all C4 records and check for changes
    30 READ (LEX,901,END=40) REC
       IF(REC(1:1).EQ.'#') GO TO 30
       IF(REC(1:40).EQ.BLNK) GO TO 40
-!	ind=index(REC,',')		!patch:gfortran-10.2: 902 format:A26
-!	if (ind.gt.0) REC(ind:ind)=' '	!patch:gfortran-10.2
+      ind=index(REC,',')		!patch:gfortran-10.2: 902 format:A26
+      if (ind.gt.0) REC(ind:ind)=' '	!patch:gfortran-10.2
       READ (REC,902,ERR=11112)
      & IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
