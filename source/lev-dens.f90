@@ -1,6 +1,6 @@
-   !cc   * $Author: mwherman $
-   !cc   * $Date: 2023-12-11 20:00:50 +0100 (Mo, 11 Dez 2023) $
-   !cc   * $Id: lev-dens.f90 5523 2023-12-11 19:00:50Z mwherman $
+   !cc   * $Author: gnobre $
+   !cc   * $Date: 2024-06-04 19:07:20 +0200 (Di, 04 Jun 2024) $
+   !cc   * $Id: lev-dens.f90 5573 2024-06-04 17:07:20Z gnobre $
    
    
    
@@ -1973,7 +1973,7 @@
          enddo
       enddo
       write(filename, 99005)iz
-      99005 format('/RIPL/DENSITIES/TOTAL/LEVEL-DENSITIES-HFB/Z', i3.3, '.TAB')
+      99005 format('/RIPL/densities/total/level-densities-hfb/z', i3.3, '.tab')
       lenst = len(trim(filename))
       open(unit = 34, file = trim(EMPiredir)//filename(1:lenst), err = 300)
       do while (.true.)
