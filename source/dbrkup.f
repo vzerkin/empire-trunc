@@ -120,9 +120,9 @@
 
       double precision ylmi
 
-      double precision ps(nol,3),dps(nol,3,NDEX)
-      double precision dbf1(NDAngecis,NDEX),dbf2(NDAngecis,NDEX)
-      double precision dsigt(3,NDEX),sigt(5)
+      double precision ps(nol,3),dps(nol,3,NDEX+25)
+      double precision dbf1(NDAngecis,NDEX+25),dbf2(NDAngecis,NDEX+25)
+      double precision dsigt(3,NDEX+25),sigt(5)
 
       double precision sigi(NDAngecis,4)
 
@@ -131,7 +131,6 @@
       common/main/ebnd,ecm,dex
       common/angles/ylmi(ndlmx,NDAngecis),thi(NDAngecis),nthi
       common/intcons/ijkl(3),wxyz(18),lll(5),lmxwf(3)
-
 
       data iwrt/8/
 
@@ -156,12 +155,8 @@
 
 c     define number of energy intervals
       ext=ecm-ebnd       
-      nxx=ext/dex
-      ex0=ext-nxx*dex
-      IF(ex0.LT.0.5*dex) THEN
-        ex0=ex0+dex
-        nxx=nxx-1
-       ENDIF
+      nxx=MIN(INT(ext/dex),NDEX+25)
+      ex0=0.5*(ext-nxx*dex+dex)
 
       ps=0.0d0
       sigi=0.0d0
@@ -255,7 +250,7 @@ c      write(iwrt,*)
       OPEN(45, FILE=ctmp, STATUS='unknown')
 
 C neutron-proton energy grid      
-      WRITE(45,'(i6,f12.5)') nxx,dex
+      WRITE(45,'(i6,2f12.5)') nxx,dex,ex0
       
 C cross sections - bu, bf,n bf,p incl,n incl,p
       WRITE(45,'(5e12.5)') (sigt(i),i=1,5)
@@ -264,7 +259,7 @@ C  Deuteron breakup-fusion loss
       WRITE(45,'(i6)') lmxwf(1)
       WRITE(45,'(6e12.5)') (ps(ld,1),ld=1,lmxwf(1))
 
-C  Proton fusion occupations
+C    Proton fusion occupations
       WRITE(45,'(2i6,e14.5)') lmxwf(2) !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
 C  Neutron DDX
@@ -274,9 +269,9 @@ C  Neutron spectrum
 C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(2,nx),nx=1,nxx)
 
-C    Neutron fusion occupations
+C  Neutron fusion occupations
       WRITE(45,'(2i6,e14.5)') lmxwf(3) !,nxx,ex0
-      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(2)),nx=1,nxx)
+      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
 C  Proton DDX
       WRITE(45,'(2i6,e14.5)') nthi !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dbf2(nti,nx),nti=1,nthi),nx=1,nxx) 
@@ -383,11 +378,12 @@ c thetai
         call ylms(thi(n),max(lmxwf(2),lmxwf(3))-1,ylmi(1,n))
        end do
 
-      ecm = EIN
-      dex = DE
+!      ecm = (mf+2.0)*EIN/mf
+       ecm = EIN
+       dex = DE
 
       IF(IOUT.GT.1) THEN
-        write(iwrt,*) 'Ecm, dEx:'
+        write(iwrt,*) 'Elab, dEx:'
         write(iwrt,*) ecm, dex
 
         write(iwrt,
@@ -485,6 +481,8 @@ c thetai
       call setpoints(ed,e1)
       call axswf(nptmx,nol)
 
+!      WRITE(*,'(3f12.4)') ed,e1,e2
+      
       call dscat(1,ed,lmxd,0,sigrd,sigfldd)
 c      write(iwrt,'(/,''   Ea='',f12.4,'' MeV    lmaxa='', i3,
 c     1    ''    sigra='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
@@ -537,12 +535,14 @@ c     1    ''    sigrx='',f12.4,'' mb'',/)') e2,lmx(5)-1,sigr5
               sqx123=fase*sqx12*cg(1)
 
               id=id+1
+
               if(l1.gt.lmx(2). and. l2.gt.lmx(3)) then
                 brkup=sqx123*ovrlp0(ld,l1,l2,bfwf(1,1,id),bfwf(1,2,id))
                else
                 brkup=sqx123*ovrlp(ld,l1,l2,bfwf(1,1,id),bfwf(1,2,id))
                endif
-
+              if(e1.lt.0.0025d0*zf) brkup = 0.0d0
+               
               tb(id)=brkup
 c
 c  loops for calculation of inclusive angular distributions when nthi.gt.0
@@ -554,7 +554,7 @@ c
                   bf1=sqx123**2*bfint(2,ld,l1,l2,ld,l1,l2,
      1                                     bfwf(1,1,id),bfwf(1,1,id))
                  endif
-                if(l2.gt.lmx(3)) then
+                if(l2.gt.lmx(3).or.e1.lt.0.0025d0*zf) then
                   bf2=0.0d0
                  else
                   bf2=sqx123**2*bfint(3,ld,l1,l2,ld,l1,l2,
@@ -624,7 +624,7 @@ c accumulate inclusive angular distributions for particle 2
 
                           call cleb(l1p-1,l2p-1,ldp-1,cgp) 
 
-                          if(l2.gt.lmx(3)) then
+                          if(l2.gt.lmx(3).or.e1.lt.0.0025d0*zf) then
                             bf2=0.0d0
                            else
                             mp=l1p+l2p-ldp-1
@@ -782,7 +782,10 @@ C      data iwrt/8/
         zz=zd(ip)*zf
         eta(ip)=max(0.15748603*zz*sqrt(mu/ecm(ip)),1.01e-6)
         rmax2=max(rmax2,
-     1       (eta(ip)+sqrt(eta(ip)**2+lmxwf(ip)*(lmxwf(ip)+1.)))/ak(ip))
+     1   1.2*(eta(ip)+sqrt(eta(ip)**2+lmxwf(ip)*(lmxwf(ip)+1.)))/ak(ip),
+     2       (9.0+0.4777*log(eta(ip))+1.2*eta(ip))/ak(ip))
+c formula for accuracy 10^(-8) of Coulomb wave function expansion for l=0
+c         rmax2=max(rmax2,(9.0+0.4777*log(eta(ip))+1.2*eta(ip))/ak(ip))
        end do
 
       akmx=ak(1)+ak(2)+ak(3)
@@ -1281,6 +1284,14 @@ c
       rcut=rv(1)+5.0/mf**(1./3.)-1.0
       acut=1.0
 c      acut=0.5
+
+      iprtpot = 0
+      IF(iprtpot == 1 .AND. ip < 4) THEN 
+         WRITE(iwrt,'(i5,5x,2f10.5)') ip, el, rv(5)
+         WRITE(iwrt,'(3f10.5)') rv(1), a(1), pote(1)
+         WRITE(iwrt,'(3f10.5)') rv(3), a(3), pote(3)
+         WRITE(iwrt,'(3f10.5)') rv(4), a(4), pote(4)
+      ENDIF
 
 c     calcul des potentiels
 c
@@ -2540,7 +2551,7 @@ c
       rxl=rho-1.5d0
       if(abs(rho).gt.2.0d0*sqrt(exl2)) ierr=0
 
-      jmx=min(int(abs(rxl)+sqrt(max(abs(rxl)**2-exl2,0.0d0))),50)
+      jmx=min(int(abs(rxl)+sqrt(max(abs(rxl)**2-exl2,0.0d0))),100)
       dwfp=cwfp
       roi2=(0.0d0,2.0d0)*rho
       ep=(0.0d0,1.0d0)*eta+1.0d0
@@ -2553,13 +2564,13 @@ c
         if(abs(dwfp/cwfp).lt.1.0d-12) go to 10
         em=em+1.0d0
        end do
-      if(abs(dwfp/cwfp).lt.1.0d-10) go to 10
-      ierr=1
+      if(abs(dwfp/cwfp).lt.1.0d-5) go to 10
+c      ierr=1
       write(iwrt,*) ' No convergence in dbrkup:hcpwf'
       write(iwrt,*) ' j,jmx:',j,jmx
       write(iwrt,*) ' rho,eta,lmax,dwfp,cwfp:',rhor,rhoi,etas,lmax,
      1                      abs(dwfp),abs(cwfp),abs(dwfp/cwfp)
-      stop
+c      stop
 
  10   hcp(2)=cwfp
 
