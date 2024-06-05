@@ -12,11 +12,13 @@
 
 
 file=$1         # Empire input file stem (no extension) - required.
-MT=$2           # MT for plotting. If not present or 0 -> plot all.
+MT=$2           # MT number, MT=0 loops over all reactions in KALEND. KALMAN always runs over all reactions from EMPIRE
 MAT=$3          # MAT of material. If not present or 0 -> use MAT in ENDF file.
 # EXPDAT=$4       # 1=fit only specifed MT; 2=fit all MTs; other=fit no exp data.
 PFNS=$4         # set non-zero (true) to fit PFNS data.
 EINC=$5         # Incident energy for which to fit PFNS (in MeV).
+
+echo "file, MT, MAT, PFNS, EINC" $file ' ' $MT ' ' $MAT ' ' $PFNS ' ' $EINC
 
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
@@ -40,15 +42,22 @@ if [ -z $MT -o "$MT" = "0" ]; then
    MTset="1 2 3 4 11 16 17 1 22 24 45 102 103 105 105 106 107 112 207 251 456 5 851"   # MTset is used only for exp. data selection
    MT="0"                       # MT=0 KALMAN for all available reactions 
    EXPDAT="2"
-elif [ "$MT" = "1000" ]; then    # MT=1000 KALMAN for all reactions but ignore exp. data
-   MTset="0"
-   MT="0"
-   EXDAT="3"
+# For the time being 4 lines below are disabled. To run without experimental data 
+# create -kal.c4 file with one fake experimental point for any considered(!) reaction 
+# located outside the evaluation energy range. KALMAN will ignore it and no adjustment 
+# will be done but parameter ucertainties will be prpagated to cross-sections and covariances
+# will be produced. It is a temporary solution until we teach c4tokal how to ignore missing c4 file.
+#
+# elif [ "$MT" = "1000" ]; then    # MT=1000 KALMAN for all reactions but ignore exp. data
+#    MTset="0"
+#    MT="0"
+#    EXPDAT="0"
 else                            # KALMAN and using input MT exp.data only
    MTset=$MT
    EXPDAT="1"
 fi
 
+echo "EXPDAT" $EXPDAT
 
 echo "Getting MAT"
 if [ -z $MAT ]; then  # Getting MAT from the ENDF file 
@@ -113,19 +122,17 @@ fi
 # clean up anything left around from a previous run
 rm -f fort.*  ENERGYANDINDEX.TMP *.gpd
 
-# now loop through the kalman fitting, repeating the fit for each plotted
-# MT. Note that all the data in the C4 and and XSC file are fitted for each
-# pass redundantly - only the MT plot changes for each pass through the loop.
-
+# With the "new scenic route" in kalend the do-loop below is redundant
+# since looping happens inside KALEND when MT=0 and KALMAN needs to be run only once. 
 
 for k in $MT; do
 
     echo "MT=" ${k} "MAT=" $MAT
     echo $file ${k} $MAT $EXPDAT $PFNS $EINC > INPUT.D
-    rm expxscplot*.d
+   #  rm expxscplot*.d
     rm -f KALMAN.INP
 
-    if [ "$PFNS" -eq 0 ]
+    if [ "$PFNS" -eq 0 -a "$EXPDAT" -gt 0 ]
     then
       # c4tokal reads the C4 file and writes data, unc & corr to
       # fort.10, .11 & .12. Also creates new KALMAN.INP
@@ -138,7 +145,8 @@ for k in $MT; do
          exit 7
       fi
 
-    else
+    elif [ "$PFNS" -ne 0 ]
+    then
       # pnt2kal perpares PFNS data for fitting with kalman
       # data, unc, corr written to fort.10,11,12 & makes new KALMAN.INP
       echo  "Running pnt2kal"
@@ -272,6 +280,6 @@ for k in $MT; do
 
     echo 'COMPLETE ...'
     read a
-done
+done  
 
 exit
