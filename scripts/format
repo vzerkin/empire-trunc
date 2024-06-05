@@ -24,22 +24,24 @@ if [ "$2" = "" ]; then
   MATid='1111'
 fi
 # For multirun Pt isotopes only (addjust for other isotope chains)
-if [ "$file" = "za78190Pt" ]; then
+if   [ "$file" = "Pt190" ]; then
    MATid='7825'
-elif [ "$file" = "za78191Pt" ]; then
+elif [ "$file" = "Pt191" ]; then
    MATid='7828'
-elif [ "$file" = "za78192Pt" ]; then
+elif [ "$file" = "Pt192" ]; then
    MATid='7831'
-elif [ "$file" = "za78194Pt" ]; then
+elif [ "$file" = "Pt193" ]; then
    MATid='7834'
-elif [ "$file" = "za78195Pt" ]; then
+elif [ "$file" = "Pt194" ]; then
    MATid='7837'
-elif [ "$file" = "za78196Pt" ]; then
+elif [ "$file" = "Pt195" ]; then
    MATid='7840'
-elif [ "$file" = "za78197Pt" ]; then
+elif [ "$file" = "Pt196" ]; then
    MATid='7843'
-elif [ "$file" = "za78198Pt" ]; then
-   MATid='7846'   
+elif [ "$file" = "Pt197" ]; then
+   MATid='7846'
+elif [ "$file" = "Pt198" ]; then
+   MATid='7849'   
 fi
 
 
@@ -70,8 +72,8 @@ $file-e.endf
 -1.0
 $MATid
 -1
-LABLABLABL EVAL-${tDat} AUTHORAUTHORAUTHORAUTHORAUTHORAUT
-849
+LANL       EVAL-${tDat} M.Herman & T.Kawano              
+91
 EOF
 
 
