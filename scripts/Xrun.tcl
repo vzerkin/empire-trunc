@@ -1,6 +1,6 @@
-# $Rev: 5545 $
+# $Rev: 5576 $
 # $Author: mwherman $
-# $Date: 2024-03-10 07:46:38 +0100 (So, 10 Mär 2024) $
+# $Date: 2024-06-05 23:50:11 +0200 (Mi, 05 Jun 2024) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -9022,8 +9022,12 @@ cd $workdir} \
     $site_3_0.men80 add command \
         -command { editFile $file-mat.sen } -label "View/Edit sensitivity matrix" 
     $site_3_0.men80 add command \
+        -command { editFile $file.xsc } -label "View EMPIRE cross sections" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-kal.c4 } -label "View C4 file for KALMAN" 
+    $site_3_0.men80 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
-        -label {Manipulate C4 file for KALMAN} 
+        -label "Manipulate C4 file for KALMAN"
 
     $site_3_0.men80 add cascade \
         -menu "$site_3_0.men80.men89" \
@@ -9150,8 +9154,8 @@ cd $workdir} \
     $site_3_0.men80 add command \
         -command { editFile $file-parCorr.kal } -label "Edit parameter uncertainties (*-parCorr.kal)" 
 
-    $site_3_0.men80 add command \
-        -command {editFile $file-inp.kal } -label "Edit KALMAN input (*-inp.kal)"         
+    # $site_3_0.men80 add command \
+    #     -command {editFile $file-inp.kal } -label "Edit KALMAN input (*-inp.kal)"         
 
     $site_3_0.men80 add command \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file $nMT $mat } -label "Run KALMAN " 
@@ -9265,8 +9269,8 @@ $site_3_0.men80 add command \
 
 # HERE1
     $site_3_0.men80 add command \
-        -command {exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.gp &} \
-        -label "Gnuplot covariance" 
+        -command {tk_messageBox -message "Change to GUI tab 'Files' and double-click a file name in the 'Available files:' box. You may use 'Filter:' to restrict selection, e.g. '*.d' shows only Gnuplot, covariance related files." -title "Covariance plotting"} \
+        -label "Plotting covariances" 
 
     $site_3_0.men80 add separator \
 
