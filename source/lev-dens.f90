@@ -1,6 +1,6 @@
-   !cc   * $Author: gnobre $
-   !cc   * $Date: 2024-06-04 19:07:20 +0200 (Di, 04 Jun 2024) $
-   !cc   * $Id: lev-dens.f90 5573 2024-06-04 17:07:20Z gnobre $
+   !cc   * $Author: mwherman $
+   !cc   * $Date: 2024-06-05 23:42:55 +0200 (Mi, 05 Jun 2024) $
+   !cc   * $Id: lev-dens.f90 5575 2024-06-05 21:42:55Z mwherman $
    
    
    
@@ -91,36 +91,36 @@
    
    
    subroutine ROEMP(Nnuc, Cf, Asaf)
-      !CC
-      !CC   *****************************************************************
-      !CC   *                                                      CLASS:PPU*
-      !CC   *                         R O E M P                             *
-      !CC   *                                                               *
-      !CC   *                                                               *
-      !CC   * Calculates table of energy and spin dependent level densities *
-      !CC   * using Empire-specific level density model. The fission lvel   *
-      !CC   * densities are for the Heavy Ion reactions. For light particle *
-      !CC   * induced fission saddle point level densities within Empire    *
-      !CC   * specific model are provided by the DAMI_ROFIS routine.        *
-      !CC   *                                                               *
-      !CC   *                                                               *
-      !CC   * INPUT:                                                        *
-      !CC   *  NNUC - index of the nucleus                                  *
-      !CC   *  CF   - 1. for the saddle point, 0. otherwise                 *
-      !CC   *  ASAF - controls a=parameter at a saddle point                *
-      !CC   *       - if ASAF.GE.0 it corresponds to the gamma-param.       *
-      !CC   *         in the Ignatyuk formula (ASAF=0 selects               *
-      !CC   *         asymptotic value for a)                               *
-      !CC   *       - if ASAF.lt.0 asymptotic value of a-parameter          *
-      !CC   *         times ABS(ASAF) is taken for at the saddle point      *
-      !CC   *  BF controls shape of the nucleus                             *
-      !CC   *     BF=0. stands for the saddle point                         *
-      !CC   *     BF=1. stands for the oblate   yrast state                 *
-      !CC   *     BF=2. stands for the prolate  yrast state                 *
-      !CC   *     BF=3. stands for the triaxial yrast state                 *
-      !CC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)      *
-      !CC   *                                                               *
-      !CC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
+      !!C
+      !!C   *****************************************************************
+      !!C   *                                                      CLASS:PPU*
+      !!C   *                         R O E M P                             *
+      !!C   *                                                               *
+      !!C   *                                                               *
+      !!C   * Calculates table of energy and spin dependent level densities *
+      !!C   * using Empire-specific level density model. The fission lvel   *
+      !!C   * densities are for the Heavy Ion reactions. For light particle *
+      !!C   * induced fission saddle point level densities within Empire    *
+      !!C   * specific model are provided by the DAMI_ROFIS routine.        *
+      !!C   *                                                               *
+      !!C   *                                                               *
+      !!C   * INPUT:                                                        *
+      !!C   *  NNUC - index of the nucleus                                  *
+      !!C   *  CF   - 1. for the saddle point, 0. otherwise                 *
+      !!C   *  ASAF - controls a=parameter at a saddle point                *
+      !!C   *       - if ASAF.GE.0 it corresponds to the gamma-param.       *
+      !!C   *         in the Ignatyuk formula (ASAF=0 selects               *
+      !!C   *         asymptotic value for a)                               *
+      !!C   *       - if ASAF.lt.0 asymptotic value of a-parameter          *
+      !!C   *         times ABS(ASAF) is taken for at the saddle point      *
+      !!C   *  BF controls shape of the nucleus                             *
+      !!C   *     BF=0. stands for the saddle point                         *
+      !!C   *     BF=1. stands for the oblate   yrast state                 *
+      !!C   *     BF=2. stands for the prolate  yrast state                 *
+      !!C   *     BF=3. stands for the triaxial yrast state                 *
+      !!C   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)      *
+      !!C   *                                                               *
+      !!C   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
       !CC   *                                                               *
       !CC   *                                                               *
       !CC   *     ROEMP                                                     *
@@ -391,11 +391,11 @@
 
 
    function ROBCS(A, U, Aj, Mompar, Momort, A2, T, Bf)
-      !CC   
-      !CC   ********************************************************************
-      !CC   *                                                         CLASS:APU*
-      !CC   *                        R O B C S                                 *
-      !CC   * Calculates level densities in the framework of the BCS model     *
+      !!C   
+      !!C   ********************************************************************
+      !!C   *                                                         CLASS:APU*
+      !!C   *                        R O B C S                                 *
+      !!C   * Calculates level densities in the framework of the BCS model     *
       !CC            ROBCS
       !CC            |-> COLL_KQ_EGSM
       !CC                |-> VIB_K_EGSM
@@ -458,25 +458,25 @@
 
 
    function RODEF(A, E, Ac, Aj, Mompar, Momort, T, Yrast, Ss, Bf, Expmax, A2, Egsm)
-      !CC   
-      !cc   *********************************************************************
-      !cc   *                                                         class:ppu *
-      !cc   *                         R O D E F                                 *
-      !CC   *        RODEF
-      !CC            |-> COLL_KQ_EGSM
-      !CC                |-> VIB_K_EGSM
-      !CC                |-> VIB_Q_EGSM
-      !CC                |-> ROT_Q_EGSM
-      !cc   *                                                                   *
-      !cc   *  Calculates spin dependent level densities (for a single parity)  *
-      !cc   *  in the dynamical approach.                                       *
-      !cc   *  Different deformation at each spin could be considered if        *
-      !cc   *  'egsm' is set to 1 in DAMIRO.                                    *
-      !cc   *  Collective enhancement effects are taken into account including  *
-      !cc   *  their energy fade-out.                                           *
-      !cc   *                                                                   *
-      !cc   *********************************************************************
-      !cc
+      !!c   *********************************************************************
+      !!c   *                                                         class:ppu *
+      !!c   *                         R O D E F                                 *
+      !!c   *                                                                   *
+      !!c   *  Calculates spin dependent level densities (for a single parity)  *
+      !!c   *  in the dynamical approach.                                       *
+      !!c   *  Different deformation at each spin could be considered if        *
+      !!c   *  'egsm' is set to 1 in DAMIRO.                                    *
+      !!c   *  Collective enhancement effects are taken into account including  *
+      !!c   *  their energy fade-out.                                           *
+      !!c   *                                                                   *
+      !!C   *        RODEF
+      !!C            |-> COLL_KQ_EGSM
+      !!C                |-> VIB_K_EGSM
+      !!C                |-> VIB_Q_EGSM
+      !!C                |-> ROT_Q_EGSM
+      !!c   *                                                                   *
+      !!c   *********************************************************************
+      !!c
       
       implicit none
 
@@ -605,10 +605,9 @@
 
 
    subroutine COLL_KQ_EGSM(A, T, Momo, A2, U, Vib_kq, Rot_k, Rot_q)
-      !
-      !CC***************************************************************
-      !CC   Calculates collective enhancements and damping for EGSM and GSM
-      !CC***************************************************************
+      !!C***************************************************************
+      !!C   Calculates collective enhancements and damping for EGSM and GSM
+      !!C***************************************************************
       !
       
       implicit none
@@ -643,7 +642,6 @@
 
 
    subroutine VIB_K_EGSM(A, T, Vibrk)
-      !
       !CCC  *****************************************************************
       !CCC  *  Liquid drop vibrational enhancement of level densities
       !CCC  *****************************************************************
@@ -666,11 +664,10 @@
 
 
    subroutine VIB_Q_EGSM(T, Q)
-      !
-      !CC   *****************************************************************
-      !CC   *         DAMPING FOR VIBRATIONAL EFFECTS                       *
-      !CC   * Q=0 FOR T=0, Q=1/2 FOR T=THALF   , Q=1 FOR T=INFINITY        *
-      !CC   *****************************************************************
+      !!C   *****************************************************************
+      !!C   *         DAMPING FOR VIBRATIONAL EFFECTS                       *
+      !!C   * Q=0 FOR T=0, Q=1/2 FOR T=THALF   , Q=1 FOR T=INFINITY        *
+      !!C   *****************************************************************
       !
       
       implicit none
@@ -690,11 +687,10 @@
 
 
    subroutine ROT_Q_EGSM(E1, Qk)
-      !
-      !CCC  *****************************************************************
-      !CCC  * damping of rotational  effects with Fermi function independent
-      !CCC  * of deformation and mass number (consistent with the builtin systematics)
-      !CCC  *****************************************************************
+      !!CC  *****************************************************************
+      !!CC  * damping of rotational  effects with Fermi function independent
+      !!CC  * of deformation and mass number (consistent with the builtin systematics)
+      !!CC  *****************************************************************
       
       implicit none
  
@@ -808,43 +804,42 @@
 
 
    subroutine SIGMAK(A, Z, B, Bf, E, Ac, Aj, Mompar, Momort, A2, Stab, Cigor)
-      !CC   
-      !ccc  ******************************************************************
-      !cccc *                                                                *
-      !cccc *                    S I G M A K                                 *
-      !cccc *                                                                *
-      !ccc  *  Paralel and orthogonal spin cut-off paprameters calculated    *
-      !ccc  *  following Vigdor and Karwowski (Phys.Rev.C26(1982)1068)       *
-      !ccc  *  Calculates also def. parameter alpha2 (leg. pol. expansion)   *
-      !ccc  *  in function of spin in terms of the ldm + dampped g.s. defor. *
-      !cccc *                                                                *
-      !cccc *  Input: A - nucleus mass number                                *
-      !cccc *         Z - nucleus atomic number                              *
-      !cccc *         B - ground state deformation (beta2)                   *
-      !cccc *        Bf >  0 yrast states                                    *
-      !cccc *           =  0 outer saddle (    AXIAL SYMMETRY,MASS  SYMMETRY *
-      !cccc *           = -1 outer saddle (    AXIAL SYMMETRY,MASS ASYMMETRY *
-      !cccc *           = -2 inner  point (NON-AXIAL SYMMETRY,MASS  SYMMETRY *
-      !cccc *         E - excitation energy                                  *
-      !cccc *        Ac - level density parameter                            *
-      !cccc *        Aj - spin                                               *
-      !cccc *                                                                *
-      !cccc * Output: Mompar - parallel moment of inertia                    *
-      !cccc *         Momort - orthgonal moment of inertia                   *
-      !cccc *             A2 - nuclear deformation EPS including damped      *
-      !cccc *                  static and dynamical deformation              *
-      !cccc *           Stab - maximum spin ensuring stability against       *
-      !cccc *                  fission                                       *
-      !cccc *          Cigor - ratio of the longest and shortest axis        *
-      !cccc *                  to calculate Igor's factor accounting         *
-      !cccc *                  for increase of the lev. den. parameter       *
-      !cccc *                  due to increased nuclear surface              *
-      !cccc *                                                                *
-      !cccc *                                                                *
-      !cccc *                                                                *
-      !cccc *                                                                *
-      !ccc  ******************************************************************
-      !CC   
+      !!cc  ******************************************************************
+      !!ccc *                                                                *
+      !!ccc *                    S I G M A K                                 *
+      !!ccc *                                                                *
+      !!cc  *  Paralel and orthogonal spin cut-off paprameters calculated    *
+      !!cc  *  following Vigdor and Karwowski (Phys.Rev.C26(1982)1068)       *
+      !!cc  *  Calculates also def. parameter alpha2 (leg. pol. expansion)   *
+      !!cc  *  in function of spin in terms of the ldm + dampped g.s. defor. *
+      !!ccc *                                                                *
+      !!ccc *  Input: A - nucleus mass number                                *
+      !!ccc *         Z - nucleus atomic number                              *
+      !!ccc *         B - ground state deformation (beta2)                   *
+      !!ccc *        Bf >  0 yrast states                                    *
+      !!ccc *           =  0 outer saddle (    AXIAL SYMMETRY,MASS  SYMMETRY *
+      !!ccc *           = -1 outer saddle (    AXIAL SYMMETRY,MASS ASYMMETRY *
+      !!ccc *           = -2 inner  point (NON-AXIAL SYMMETRY,MASS  SYMMETRY *
+      !!ccc *         E - excitation energy                                  *
+      !!ccc *        Ac - level density parameter                            *
+      !!ccc *        Aj - spin                                               *
+      !!ccc *                                                                *
+      !!ccc * Output: Mompar - parallel moment of inertia                    *
+      !!ccc *         Momort - orthgonal moment of inertia                   *
+      !!ccc *             A2 - nuclear deformation EPS including damped      *
+      !!ccc *                  static and dynamical deformation              *
+      !!ccc *           Stab - maximum spin ensuring stability against       *
+      !!ccc *                  fission                                       *
+      !!ccc *          Cigor - ratio of the longest and shortest axis        *
+      !!ccc *                  to calculate Igor's factor accounting         *
+      !!ccc *                  for increase of the lev. den. parameter       *
+      !!ccc *                  due to increased nuclear surface              *
+      !!ccc *                                                                *
+      !!ccc *                                                                *
+      !!ccc *                                                                *
+      !!ccc *                                                                *
+      !!cc  ******************************************************************
+      !!C   
       
       implicit none
  
@@ -950,29 +945,29 @@
 
 
    subroutine ROGSM(Nnuc)
-      !CC   
-      !CC*********************************************************
-      !CC
-      !CC                R O G S M
-      !CC
-      !CC   Generlaised Superfluid Model following A. Ignatyuk
-      !CC   BCS calculations below critical eneergy and Fermi gass
-      !CC   including vibration and reotational collective enhancements
-      !CC   above critical energy.
-      !CC
-      !CC    ROGSM
-      !CC    |-> GSMsys
-      !CC    |-> PRERORITO
-      !CC    |-> DAMIRO_CRT
-      !CC    |-> BCS_FG
-      !CC        |-> FSHELL
-      !CC        |-> VIB_KQ_GSM
-      !CC        |-> ROT_KQ_GSM
-      !CC    |-> PLOT_ZVV_GSLD
-      !CC    |-> PLOT_ZVV_NumCumul
-      !CC
-      !CC*********************************************************
-      !CC   
+      !!C   
+      !!C*********************************************************
+      !!C
+      !!C                R O G S M
+      !!C
+      !!C   Generlaised Superfluid Model following A. Ignatyuk
+      !!C   BCS calculations below critical eneergy and Fermi gass
+      !!C   including vibration and reotational collective enhancements
+      !!C   above critical energy.
+      !!C
+      !!C    ROGSM
+      !!C    |-> GSMsys
+      !!C    |-> PRERORITO
+      !!C    |-> DAMIRO_CRT
+      !!C    |-> BCS_FG
+      !!C        |-> FSHELL
+      !!C        |-> VIB_KQ_GSM
+      !!C        |-> ROT_KQ_GSM
+      !!C    |-> PLOT_ZVV_GSLD
+      !!C    |-> PLOT_ZVV_NumCumul
+      !!C
+      !!C*********************************************************
+      !!C   
 
       
       implicit none
@@ -1133,24 +1128,24 @@
 
 
    subroutine VIB_KQ_GSM(T, Om, Cga, Lam, Q)
-      !CC   
-      !cc   ********************************************************************
-      !cc   *                                                          class:pu*
-      !cc   *                      Q V I B R                                   *
-      !cc   *                                                                  *
-      !cc   * Calculates level density vibrational enhancement factor  using   *
-      !cc   * Ignatyuk's formula including damping (see RIPL's)                *
-      !cc   *                                                                  *
-      !cc   * input: T - nuclear temperature                                   *
-      !cc   *       OM - energy of the vibrational level                       *
-      !cc   *      LAM - multipolarity (5 for 2+; 7 for 3- states)             *
-      !cc   *                                                                  *
-      !cc   * output: Q - vibrational enhancement factor due to the OM state   *
-      !cc   *                                                                  *
-      !cc   * calls:none                                                       *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !cc
+      !!C   
+      !!c   ********************************************************************
+      !!c   *                                                          class:pu*
+      !!c   *                      Q V I B R                                   *
+      !!c   *                                                                  *
+      !!c   * Calculates level density vibrational enhancement factor  using   *
+      !!c   * Ignatyuk's formula including damping (see RIPL's)                *
+      !!c   *                                                                  *
+      !!c   * input: T - nuclear temperature                                   *
+      !!c   *       OM - energy of the vibrational level                       *
+      !!c   *      LAM - multipolarity (5 for 2+; 7 for 3- states)             *
+      !!c   *                                                                  *
+      !!c   * output: Q - vibrational enhancement factor due to the OM state   *
+      !!c   *                                                                  *
+      !!c   * calls:none                                                       *
+      !!c   *                                                                  *
+      !!c   ********************************************************************
+      !!c
       
       implicit none
  
@@ -1180,9 +1175,9 @@
 
 
    subroutine ROT_KQ_GSM(A, Bet, Sig4, U, Qr)
-      !CC   ********************************************************************
-      !      QROT INCLUDING DAMPING 
-      !CC   
+      !!CC   ********************************************************************
+      !!      QROT INCLUDING DAMPING 
+      !!CC   ********************************************************************
       
       implicit none
  
@@ -1259,34 +1254,34 @@
 
 
    subroutine PRERO(Nnuc)
-      !CC
-      !CC   ********************************************************************
-      !CC   *                                                         CLASS:APU*
-      !CC   *                        P R E R O                                 *
-      !CC   *                                                                  *
-      !CC   *                                                                  *
-      !CC   * Prepares for level density calculations. checks for the          *
-      !CC   * energy table determination, sets yrast energies, fission         *
-      !CC   * barriers, scaling factor, and cleans up level density tables.    *
-      !CC   *                                                                  *
-      !CC   *                                                                  *
-      !CC   * INPUT:NNUC - index of the nucleus                                *
-      !CC   *       CF   - 1 for saddle point, 0 otherwise                     *
-      !CC   *                                                                  *
-      !CC   * calls: BARFIT                                                    *
-      !CC   *           LPOLY                                                  *
-      !CC   *        SHCFADE                                                   *
-      !CC   *        SIGMAK                                                    *
-      !CC   *                                                                  *
-      !CC   * AUTHOR: M.HERMAN                                                 *
-      !CC   * DATE:   11.NOV.1998                                              *
-      !CC   * REVISION:1    BY:M Herman                 ON:08.Feb.2000         *
-      !CC   *   Liquid drop stability limit revised. Myers & Swiatecki fission *
-      !CC   * barriers for Z>102 introduced.                                   *
-      !CC   *                                                                  *
-      !CC   *                                                                  *
-      !CC   ********************************************************************
-      !CC
+      !!C
+      !!C   ********************************************************************
+      !!C   *                                                         CLASS:APU*
+      !!C   *                        P R E R O                                 *
+      !!C   *                                                                  *
+      !!C   *                                                                  *
+      !!C   * Prepares for level density calculations. checks for the          *
+      !!C   * energy table determination, sets yrast energies, fission         *
+      !!C   * barriers, scaling factor, and cleans up level density tables.    *
+      !!C   *                                                                  *
+      !!C   *                                                                  *
+      !!C   * INPUT:NNUC - index of the nucleus                                *
+      !!C   *       CF   - 1 for saddle point, 0 otherwise                     *
+      !!C   *                                                                  *
+      !!C   * calls: BARFIT                                                    *
+      !!C   *           LPOLY                                                  *
+      !!C   *        SHCFADE                                                   *
+      !!C   *        SIGMAK                                                    *
+      !!C   *                                                                  *
+      !!C   * AUTHOR: M.HERMAN                                                 *
+      !!C   * DATE:   11.NOV.1998                                              *
+      !!C   * REVISION:1    BY:M Herman                 ON:08.Feb.2000         *
+      !!C   *   Liquid drop stability limit revised. Myers & Swiatecki fission *
+      !!C   * barriers for Z>102 introduced.                                   *
+      !!C   *                                                                  *
+      !!C   *                                                                  *
+      !!C   ********************************************************************
+      !!C
       
       implicit none
 
@@ -1440,16 +1435,16 @@
 
 
    function SHCFADE(J, Shrj, Shrd)
-      !CC   
-      !cc   ********************************************************************
-      !cc   *                                                         CLASS:PPU*
-      !cc   *                      S H C F A D E                               *
-      !cc   *                                                                  *
-      !cc   * calculates angular momentum (J) fade-out of the shell            *
-      !cc   * correction to the fission barrier                                *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !CC   
+      !!C   
+      !!c   ********************************************************************
+      !!c   *                                                         CLASS:PPU*
+      !!c   *                      S H C F A D E                               *
+      !!c   *                                                                  *
+      !!c   * calculates angular momentum (J) fade-out of the shell            *
+      !!c   * correction to the fission barrier                                *
+      !!c   *                                                                  *
+      !!c   ********************************************************************
+      !!C   
       !
       implicit none
 
@@ -1468,28 +1463,28 @@
 
 
    subroutine ROGC(Nnuc, Scutf)
-      !CC   
-      !CC   ********************************************************************
-      !CC   *                                                         CLASS:PPU*
-      !CC   *                         R O G C                                  *
-      !CC   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
-      !CC   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
-      !CC   *                                                                  *
-      !CC   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
-      !CC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
-      !CC   *                                                                  *
-      !CC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
-      !CC   *                                                                  *
-      !CC   *   ROGC
-      !CC   *   |-> PRERO
-      !CC   *   |-> FSHELL
-      !CC   *       |-> SHCFADE
-      !CC   *   |-> PARITY_FRACTION (commented)
-      !CC   *   |-> PLOT_ZVV_NumCumul
-      !CC   *   |-> PLOT_ZVV_GSLD
-      !CC   *
-      !CC   *                                                                  *
-      !CC   ********************************************************************
+      !!   
+      !!   ********************************************************************
+      !!   *                                                         CLASS:PPU*
+      !!   *                         R O G C                                  *
+      !!   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES    *
+      !!   * FOR NUCLEUS NNUC ACCORDING TO GILBERT-CAMERON                    *
+      !!   *                                                                  *
+      !!   * INPUT:NNUC - INDEX OF THE NUCLEUS                                *
+      !!   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
+      !!   *                                                                  *
+      !!   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
+      !!   *                                                                  *
+      !!   *   ROGC
+      !!   *   |-> PRERO
+      !!   *   |-> FSHELL
+      !!   *       |-> SHCFADE
+      !!   *   |-> PARITY_FRACTION (commented)
+      !!   *   |-> PLOT_ZVV_NumCumul
+      !!   *   |-> PLOT_ZVV_GSLD
+      !!   *
+      !!   *                                                                  *
+      !!   ********************************************************************
       !CC
       
       implicit none
@@ -1788,31 +1783,31 @@
 
 
    subroutine PARITY_FRACTION(E, A1, B1, C1, Ratio, Igs)
-      !cc
-      !cc   ********************************************************************
-      !cc   *                                                          class:au*
-      !cc   *             P A R I T Y _ F R A C T I O N                        *
-      !cc   *                                                                  *
-      !cc   * Calculates ratio of parities for level density (non-g.s to g.s)) *
-      !cc   *                                                                  *
-      !cc   * input: E  - excitation energy                                    *
-      !cc   *        a1 - parameter in parity distribution formula             *
-      !cc   *        b1 - parameter in parity distribution formula             *
-      !cc   *        c1 - parameter in parity distribution formula             *
-      !cc   *        Igs - ground-state parity (1 for plus, 2 for negative,    *
-      !cc   *             3 to return equal probability )                      *
-      !cc   *                                                                  *
-      !cc   * output:Ratio(1) - fraction of positive parity                    *
-      !cc   *        Ratio(2) - fraction of negative parity                    *
-      !cc   *                                                                  *
-      !cc   *  Ground state parity fration is assumed to be 0.5                *
-      !cc   *  Only non-ground-state parity fraction is changed                *
-      !cc   *  If inputed parity factors are all 0 equal parity is returned    *
-      !cc   *                                                                  *
-      !cc   * calls:none                                                       *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !cc
+      !!c
+      !!c   ********************************************************************
+      !!c   *                                                          class:au*
+      !!c   *             P A R I T Y _ F R A C T I O N                        *
+      !!c   *                                                                  *
+      !!c   * Calculates ratio of parities for level density (non-g.s to g.s)) *
+      !!c   *                                                                  *
+      !!c   * input: E  - excitation energy                                    *
+      !!c   *        a1 - parameter in parity distribution formula             *
+      !!c   *        b1 - parameter in parity distribution formula             *
+      !!c   *        c1 - parameter in parity distribution formula             *
+      !!c   *        Igs - ground-state parity (1 for plus, 2 for negative,    *
+      !!c   *             3 to return equal probability )                      *
+      !!c   *                                                                  *
+      !!c   * output:Ratio(1) - fraction of positive parity                    *
+      !!c   *        Ratio(2) - fraction of negative parity                    *
+      !!c   *                                                                  *
+      !!c   *  Ground state parity fration is assumed to be 0.5                *
+      !!c   *  Only non-ground-state parity fraction is changed                *
+      !!c   *  If inputed parity factors are all 0 equal parity is returned    *
+      !!c   *                                                                  *
+      !!c   * calls:none                                                       *
+      !!c   *                                                                  *
+      !!c   ********************************************************************
+      !!c
       
       implicit none
 
@@ -1843,21 +1838,21 @@
 
 
    subroutine READ_SHELL_CORR
-      !cc
-      !cc   ********************************************************************
-      !cc   *                                                          class:au*
-      !cc   *             R E A D _ S H E L L _ C O R R                        *
-      !cc   *                                                                  *
-      !cc   * Reads MS Shell Corrections from RIPL                           *
-      !cc   *                                                                  *
-      !cc   * input: none (implicit - all considered nuclei)                   *
-      !cc   *                                                                  *
-      !cc   * output:none (implicit - shell corrections for considered nuclei) *
-      !cc   *                                                                  *
-      !cc   * calls:none                                                       *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !cc
+      !!c
+      !!c   ********************************************************************
+      !!c   *                                                          class:au*
+      !!c   *             R E A D _ S H E L L _ C O R R                        *
+      !!c   *                                                                  *
+      !!c   * Reads MS Shell Corrections from RIPL                           *
+      !!c   *                                                                  *
+      !!c   * input: none (implicit - all considered nuclei)                   *
+      !!c   *                                                                  *
+      !!c   * output:none (implicit - shell corrections for considered nuclei) *
+      !!c   *                                                                  *
+      !!c   * calls:none                                                       *
+      !!c   *                                                                  *
+      !!c   ********************************************************************
+      !!c
       
       implicit none
 
@@ -1902,36 +1897,36 @@
 
 
    subroutine ROHFB(Nnuc)
-      !CC
-      !CC   *********************************************************************
-      !CC   *                                                         CLASS:PPU *
-      !CC   *                      R O H F B                                    *
-      !CC   *                                                                   *
-      !CC   *  Reads level densities numerically calculated by a combinatorial  *
-      !CC   *  method using Hartree-Fock-Bogoliubov single particle levels      *
-      !CC   *            (to be included within RIPL-3)                         *
-      !CC   *                                                                   *
-      !CC   *     S.Hilaire and S. Goriely, Nucl.Phys.A 779 (2006) 63-81        *
-      !CC   *  "Global microscopic nuclear level densities within the HFB plus  *
-      !CC   *   combinatorial method for practical applications"                *
-      !CC   *                                                                   *
-      !CC   *  Interpolates LDs linearily in log to the EMPIRE energy grid.     *
-      !CC   *                                                                   *
-      !CC   *  INPUT:                                                           *
-      !CC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
-      !CC   *                                                                   *
-      !CC   *                                                                   *
-      !CC   * OUTPUT:NONE                                                       *
-      !CC   *
-      !CC   *      ROHFB
-      !CC   *      |-> PRERO
-      !CC   *          |-> SHCFADE
-      !CC   *      |-> scale_ld
-      !CC   *      |-> PLOT_ZVV_GSLD
-      !CC   *      |-> PLOT_ZVV_NumCumul
-      !CC   *                                                                   *
-      !CC   *********************************************************************
-      !CC
+      !!C
+      !!C   *********************************************************************
+      !!C   *                                                         CLASS:PPU *
+      !!C   *                      R O H F B                                    *
+      !!C   *                                                                   *
+      !!C   *  Reads level densities numerically calculated by a combinatorial  *
+      !!C   *  method using Hartree-Fock-Bogoliubov single particle levels      *
+      !!C   *            (to be included within RIPL-3)                         *
+      !!C   *                                                                   *
+      !!C   *     S.Hilaire and S. Goriely, Nucl.Phys.A 779 (2006) 63-81        *
+      !!C   *  "Global microscopic nuclear level densities within the HFB plus  *
+      !!C   *   combinatorial method for practical applications"                *
+      !!C   *                                                                   *
+      !!C   *  Interpolates LDs linearily in log to the EMPIRE energy grid.     *
+      !!C   *                                                                   *
+      !!C   *  INPUT:                                                           *
+      !!C   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
+      !!C   *                                                                   *
+      !!C   *                                                                   *
+      !!C   * OUTPUT:NONE                                                       *
+      !!C   *
+      !!C   *      ROHFB
+      !!C   *      |-> PRERO
+      !!C   *          |-> SHCFADE
+      !!C   *      |-> scale_ld
+      !!C   *      |-> PLOT_ZVV_GSLD
+      !!C   *      |-> PLOT_ZVV_NumCumul
+      !!C   *                                                                   *
+      !!C   *********************************************************************
+      !!C
       
       implicit none
 
@@ -2453,21 +2448,21 @@
 
 
    subroutine DAMI_RO_HFB_FIS(Nnuc, Ib, Rafis)
-      !
-      !CC  ******************************************************************
-      !CC
-      !CC          D A M I _ R O _ H F B _ F I S
-      !CC
-      !CC   Provides tables of saddle-point level densities extracted
-      !CC   from the RIPL-3 Hartree-Fock-Bogolyubov file and interpolated to
-      !CC   the currentenergy grid.
-      !CC
-      !CC    DAMI_RO_HFB_FIS
-      !CC    |-> HFB_FIS
-      !CC    |-> PLOT_ZVV_SadLD
-      !CC
-      !CC  ******************************************************************
-      !
+      !!
+      !!CC  ******************************************************************
+      !!CC
+      !!CC          D A M I _ R O _ H F B _ F I S
+      !!CC
+      !!CC   Provides tables of saddle-point level densities extracted
+      !!CC   from the RIPL-3 Hartree-Fock-Bogolyubov file and interpolated to
+      !!CC   the currentenergy grid.
+      !!CC
+      !!CC    DAMI_RO_HFB_FIS
+      !!CC    |-> HFB_FIS
+      !!CC    |-> PLOT_ZVV_SadLD
+      !!CC
+      !!CC  ******************************************************************
+      !!
       
       implicit none
 
@@ -2573,21 +2568,21 @@
 
    subroutine HFB_FIS(Ib, Nnuc)
       
-      !CC
-      !CC   *********************************************************************
-      !CC   *                                                         CLASS:PPU *
-      !CC   *                      R O H F B_FIS                                *
-      !CC   *                                                                   *
-      !CC   *  Reads level densities numerically calculated by a combinatorial  *
-      !CC   *  method using Hartree-Fock-Bogoliubov single particle levels      *
-      !CC   *            (to be included within RIPL-3)                         *
-      !CC   *                                                                   *
-      !CC   *     S.Hilaire and S. Goriely, Nucl.Phys.A 779 (2006) 63-81        *
-      !CC   *  "Global microscopic nuclear level densities within the HFB plus  *
-      !CC   *   combinatorial method for practical applications"                *
-      !CC   *                                                                   *
-      !CC   *  Interpolates LDs linearily in log to the EMPIRE energy grid.     *
-      !CC   *********************************************************************
+      !!C
+      !!C   *********************************************************************
+      !!C   *                                                         CLASS:PPU *
+      !!C   *                      R O H F B_FIS                                *
+      !!C   *                                                                   *
+      !!C   *  Reads level densities numerically calculated by a combinatorial  *
+      !!C   *  method using Hartree-Fock-Bogoliubov single particle levels      *
+      !!C   *            (to be included within RIPL-3)                         *
+      !!C   *                                                                   *
+      !!C   *     S.Hilaire and S. Goriely, Nucl.Phys.A 779 (2006) 63-81        *
+      !!C   *  "Global microscopic nuclear level densities within the HFB plus  *
+      !!C   *   combinatorial method for practical applications"                *
+      !!C   *                                                                   *
+      !!C   *  Interpolates LDs linearily in log to the EMPIRE energy grid.     *
+      !!C   *********************************************************************
       
       
       implicit none
@@ -2742,30 +2737,30 @@
 
 
    subroutine DAMI_ROFIS(Nnuc, Ib, Mmod, Rafis)
-      !
-      !CC  ************************************************************
-      !CC  *
-      !CC  *            D A M I _ R O F I S
-      !CC  *
-      !CC  *   Provides saddle point level densities using Empire
-      !CC  *   specific level density model (BCS below critical energy
-      !CC  *   and Fermi gas with collectiobe enhacements above)
-      !CC  *
-      !CC  *    DAMI_ROFIS
-      !CC  *    |-> EGSMsys
-      !CC  *    |-> DAMIRO_CRT
-      !CC  *    |-> PLOT_ZVV_SadLD
-      !CC  *    |-> FSHELL
-      !CC  *    |-> SIGMAK
-      !CC  *    |->RODEFF
-      !CC  *        |-> RODEF
-      !CC  *        |-> COLL_KQ_FIS
-      !CC  *    |-> ROBCSF
-      !CC  *        |-> ROBCS
-      !CC  *        |-> COLL_KQ_FIS
-      !CC  *
-      !CC  **************************************************************
-      !
+      !!
+      !!CC  ************************************************************
+      !!CC  *
+      !!CC  *            D A M I _ R O F I S
+      !!CC  *
+      !!CC  *   Provides saddle point level densities using Empire
+      !!CC  *   specific level density model (BCS below critical energy
+      !!CC  *   and Fermi gas with collectiobe enhacements above)
+      !!CC  *
+      !!CC  *    DAMI_ROFIS
+      !!CC  *    |-> EGSMsys
+      !!CC  *    |-> DAMIRO_CRT
+      !!CC  *    |-> PLOT_ZVV_SadLD
+      !!CC  *    |-> FSHELL
+      !!CC  *    |-> SIGMAK
+      !!CC  *    |->RODEFF
+      !!CC  *        |-> RODEF
+      !!CC  *        |-> COLL_KQ_FIS
+      !!CC  *    |-> ROBCSF
+      !!CC  *        |-> ROBCS
+      !!CC  *        |-> COLL_KQ_FIS
+      !!CC  *
+      !!CC  **************************************************************
+      !!
       
       implicit none
 
@@ -3088,14 +3083,14 @@
 
 
    subroutine GSMsys(Nnuc, Ap1, Ap2, Gamma, Del, Delp, Om2, Om3, Cga)
-      !ccc 
-      !ccc  ********************************************************************
-      !ccc  *                    R O G S M_sys                                 *
-      !ccc  *                                                                  *
-      !ccc  * GSM level density systematics  from RIPL-2             .         *
-      !ccc  *                                                                  *
-      !ccc  ********************************************************************
-      !ccc 
+      !!cc 
+      !!cc  ********************************************************************
+      !!cc  *                    R O G S M_sys                                 *
+      !!cc  *                                                                  *
+      !!cc  * GSM level density systematics  from RIPL-2             .         *
+      !!cc  *                                                                  *
+      !!cc  ********************************************************************
+      !!cc 
       
       implicit none
 
@@ -3149,34 +3144,33 @@
 
 
    subroutine EGSMsys(Ap1, Ap2, Gamma, Del, Delp, Nnuc)
-      !ccc 
-      !ccc  ********************************************************************
-      !ccc  *                                                          class:au*
-      !ccc  *                    E G S M s y s                                 *
-      !ccc  *                                                                  *
-      !ccc  * EGSM level density systematics fitted to Do from RIPL-3.         *
-      !ccc  *                                                                  *
-      !ccc  * Set coefficients in the level-density-parameter formula          *
-      !ccc  * used in the EMPIRE-specific (EGSM) model:                        *
-      !ccc  * atil = ap1*A(Nnuc) + ap2*A(nnuc)**2/3                            *
-      !ccc  * gamma = gam/A(nnuc)**1/3                                         *
-      !ccc  *                                                                  *
-      !ccc  * Using liquid drop vibrational enhancement factor (EMPIRE-2.19)   *
-      !ccc  *                                                                  *
-      !ccc  * MINUIT fit results:                                              *
-      !ccc  * EXT PARAMETER                                                    *
-      !ccc  * NO.   NAME        VALUE                                          *
-      !ccc  *  1     A1        0.74055E-01                                     *
-      !ccc  *  2     A2        0.28598E-03                                     *
-      !ccc  *  3     gam       0.57248                                         *
-      !ccc  *                                                                  *
-      !ccc  *  frm=1.70   Chi**2=36 (per degree of freedom)                    *
-      !ccc  *                                                                  *
-      !ccc  * author: M.Herman                                                 *
-      !ccc  * date:   December 2008                                            *
-      !ccc  ********************************************************************
-      !
-      
+      !!cc 
+      !!cc  ********************************************************************
+      !!cc  *                                                          class:au*
+      !!cc  *                    E G S M s y s                                 *
+      !!cc  *                                                                  *
+      !!cc  * EGSM level density systematics fitted to Do from RIPL-3.         *
+      !!cc  *                                                                  *
+      !!cc  * Set coefficients in the level-density-parameter formula          *
+      !!cc  * used in the EMPIRE-specific (EGSM) model:                        *
+      !!cc  * atil = ap1*A(Nnuc) + ap2*A(nnuc)**2/3                            *
+      !!cc  * gamma = gam/A(nnuc)**1/3                                         *
+      !!cc  *                                                                  *
+      !!cc  * Using liquid drop vibrational enhancement factor (EMPIRE-2.19)   *
+      !!cc  *                                                                  *
+      !!cc  * MINUIT fit results:                                              *
+      !!cc  * EXT PARAMETER                                                    *
+      !!cc  * NO.   NAME        VALUE                                          *
+      !!cc  *  1     A1        0.74055E-01                                     *
+      !!cc  *  2     A2        0.28598E-03                                     *
+      !!cc  *  3     gam       0.57248                                         *
+      !!cc  *                                                                  *
+      !!cc  *  frm=1.70   Chi**2=36 (per degree of freedom)                    *
+      !!cc  *                                                                  *
+      !!cc  * author: M.Herman                                                 *
+      !!cc  * date:   December 2008                                            *
+      !!cc  ********************************************************************
+      !!      
       implicit none
 
       include 'dimension.h'
