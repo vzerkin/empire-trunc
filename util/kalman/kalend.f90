@@ -57,10 +57,9 @@ program kalend
 
 
     ! The below list of requested MTs may be adjusted according to the needs 
-    ! integer*4, parameter :: nrs = 4                 !! number of reactions (MTs)
-    integer*4, parameter :: nrs = 12                  !! number of reactions (MTs)
+    integer*4, parameter :: nrs = 9                   !! number of reactions (MTs)
     integer*4 :: ncovk = (nrs+1)*nrs/2                !! number of cross-reaction sections in covk structure
-    integer*4, parameter :: mts(nrs) = (/1,2,4,5,16,17,22,102,103,106,107,112/) !! MT selected for ENDF formating
+    integer*4, parameter :: mts(nrs) = (/1,2,4,16,17,22,102,103,107/) !! MT selected for ENDF formating
     ! integer*4, parameter :: mts(nrs) = (/1,2,3,4,11,16,17,18,22,24,45,102,103,105,105,106,107,112,207,251,456, 5, 851/) !! full MTs selected for ENDF formating
     character*9 :: reacName(nrs) = '         '        !! List reaction names corresponding to mts
 
@@ -92,7 +91,7 @@ program kalend
     type (reaction), allocatable, target :: rea(:)  !! reaction info (energies & x-sec from EMPIRE)
 
 
-    !=====================================================================================================
+    !== End of declarations ===================================================================================================
 
 
     read(5,*) file, mt, matr, kExp, npfns   ! KALEND input - filename, mt, mat, nex & npfns from stdin
@@ -107,7 +106,7 @@ program kalend
     write(*,*) "Considered reactions:"
     do i = 1, nrs   ! create list of reaction names for requested mts
         call retReactionName(reacName(i),mts(i))
-        write(*,*) mts(i), reacName(i)
+        ! write(*,*) mts(i), reacName(i)
     enddo
 
     open(16,file='fort.16',status='OLD',action='READ')        ! open KALMAN produced file
@@ -121,13 +120,12 @@ program kalend
         call readCovarSubsection                    ! read MT self-covariance data (subsection)
         call writeCovPlotFile                       ! write covariances to plot file
         call processKalmanCovariances               ! preprocess cov data, create and insert into ENDF structure, write ENDF file
-    else                                !full covariance matrix with cross-reaction correlations (eventually!)
+    else                                !full covariance matrix with cross-reaction correlations
         write(*,*) ' New, all inclusive, scenic route'
         call readEndfSource                         ! read EMPIRE endf file and create endf structure
         call initReactions                          ! set basic parameters of reactions
         call readKalmanCovarX                       ! read full set of Kalman covariance data for selected reactions 
         call writeCovPlotFileX                      ! write all covariances to plot files
-        stop
         call createMF33X                            ! create and insert MF33 structure, write ENDF file
     end if
 
@@ -216,6 +214,12 @@ contains
             end do
             if(.not.associated(mat)) call errorMessage(22, matr)
         endif
+
+        ! print *, mat%mat
+        ! print *, mat%mf2%nis
+        ! print *, mat%mf2%iso(1)%ner
+        ! print *, mat%mf2%iso(1)%rng(1)%eh
+        ! print *, mat%mf2%iso(1)%rng(2)%ur%lssf
 
     end subroutine readEndfSource
 
@@ -1181,14 +1185,16 @@ contains
 
     real*8 function endfThreshold(mat,mt)
         !! Return effective energy threshold in MeV for specifed MT
-        !! considering also cut-off imposed by resonance region
-        !! WARNING!!!: URR for self-shielding not considered, 
-        !! WARNING!!!: MT=51,... if extend into URR/RR are treated as fast
+        !! considering also cut-off imposed by the resonance region.
+        !! Automatically detects whether URR is used for cross sections
+        !! or for self-shielding only.
+        !! WARNING!!!: MT=51,..., even if extend into URR/RR are treated as fast.
 
         type (endf_mat), pointer :: mat
         integer*4, intent(in) :: mt
 
         integer*4 :: i,j
+        integer*4 :: lssf=1  !! URR for xsc (0) or self-shielding only (1)
         real*8 :: eth
         type (mf_3), pointer :: mf3
         type (tab1), pointer :: tb
@@ -1205,10 +1211,19 @@ contains
             ! use highest upper boundary for our reaction threshold
             do i = 1,mat%mf2%nis
                 do j = 1,mat%mf2%iso(i)%ner
-                    eth = max(eth,mat%mf2%iso(i)%rng(j)%eh)
+                    print *,'lru ', mat%mf2%iso(i)%rng(j)%lru
+                    if (mat%mf2%iso(i)%rng(j)%lru == 1 ) then
+                        eth = max(eth,mat%mf2%iso(i)%rng(j)%eh)
+                        print *,'E_th RRR i, j', eth, i, j 
+                    elseif (mat%mf2%iso(i)%rng(j)%lru == 2) then
+                        lssf = mat%mf2%iso(i)%rng(j)%ur%lssf
+                        print *, 'lssf = ', lssf
+                        if (lssf == 0 ) eth = max(eth,mat%mf2%iso(i)%rng(j)%eh)  ! use max URR top energy if LSSF=0
+                        print *,'E_th URR i, j', eth, i, j
+                    endif
                 end do
             end do
-
+            print *,'E_thrsh', eth 
         else
 
             ! find first non-zero cross section in MF3 for MT
@@ -1240,9 +1255,9 @@ contains
 
 
     logical*4 function res(mt)
-        !! Return .true. only for MT's that have resonance region
+        !! Return .true. only for MT's that extend over the resonance region
         integer*4, intent(in) :: mt
-        res = (mt == 1) .or. (mt == 2) .or. (mt == 3) .or. (mt == 18) .or. (mt == 102)
+        res = (mt == 1) .or. (mt == 2) .or. (mt == 3) .or. (mt == 18) .or. (mt == 102) .or. (mt == 107)
         return
     end function res
 
