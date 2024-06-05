@@ -30,7 +30,7 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'ELARED', 'FISAT1', 'FISAT2', 'FISAT3', 'CELRED','CINRED',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
         'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3',
-        'ROHFBA', 'ROHFBP', 'TUNETL', 'UOMPDS')
+        'ROHFBA', 'ROHFBP', 'TUNETL', 'UOMPDS', 'MAXHOL')
 
 # restricted: variations allowed only when default value provided
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
@@ -49,7 +49,7 @@ fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
 # these global parameters don't need Z,A of isotope specified
-Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','GDRWA','RESNOR','FCCRED', 'ELARED','CELRED','CINRED')
+Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','GDRWA','RESNOR','FCCRED', 'ELARED','CELRED','CINRED','MAXHOL')
 # not a complete list yet!!
 
 # these parameters have additional options but they are not linked to specific nuclei
@@ -292,11 +292,12 @@ def run(proj, mail=False):
         if pnam.startswith("UOM") or pnam.startswith("DEFNUC"):
             return False
         else:
-            return True
+        #   return True
+            return False
 
     print ("Starting original input")
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
-    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), hold=True, mail=mail, jnm="cent_")
+    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), hold=False, mail=mail, jnm="cent_")
 
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
