@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2.7
 # encoding: utf-8
 
 """
@@ -177,13 +177,13 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
 
         log = join(dir, "empire.log")
 #        cmd = "qsub -N %s%s -o %s -l ncpus=1 -v dir=%s,file=%s,energy=%s"
-        cmd = "sbatch --job-name=%s%s --output=%s --mincpus=1 --export=dir=%s,file=%s,energy=%s"
+        cmd = "sbatch --job-name=%s%s --output=%s --mincpus=1 --export=dir=%s,file=%s,energy=%s,empirepath=%s"
         if clean: cmd += ",clean=Y"
         if len(jbid) != 0: cmd += " -W depend=afterok:" + jbid[ene]
         if hold: cmd += " -H"
         if mail: cmd += " --mail-user='arcilla@bnl.gov' --mail-type=FAIL"
         else:    cmd += " "
-        cmd = cmd % (jnm, ene, log, dir, proj, ene)
+        cmd = cmd % (jnm, ene, log, dir, proj, ene, os.environ['EMPIREDIR'])
 #       cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
         cmd += fullName(os.environ['EMPIREDIR']+"/empy/qsubEmpire/runEmpire.sh")
 

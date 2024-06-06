@@ -18,6 +18,10 @@
 ## Set the name of the output file
 #SBATCH --output=%x.%j.out
 
+#SBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --export=ALL
+
 ########SBATCH --ntasks-per-node=36
 
 ##########PBS -m a
@@ -31,6 +35,7 @@
 #SCRIPT TO RUN FULL EMPIRE PACKAGE
 
 origDir=`pwd`
+export EMPIREDIR=$empirepath
 
 echo " Running on node "$HOSTNAME
 
