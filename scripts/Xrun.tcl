@@ -1,6 +1,6 @@
-# $Rev: 5576 $
+# $Rev: 5581 $
 # $Author: mwherman $
-# $Date: 2024-06-05 23:50:11 +0200 (Mi, 05 Jun 2024) $
+# $Date: 2024-06-21 02:20:56 +0200 (Fr, 21 Jun 2024) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6080,7 +6080,10 @@ adjourn .top75} \
     button $site_3_0.but76 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #dcdcdc -command {adjourn .top75
-ddlist} -cursor hand2 \
+ddlist 
+init $argc $argv
+} \
+        -cursor hand2 \
         -font {Helvetica -12} -foreground darkgreen \
         -highlightbackground #dcdcdc \
         -image [vTcl:image:get_image [file join / Users herman empire scripts reload.gif]] \
@@ -6088,7 +6091,7 @@ ddlist} -cursor hand2 \
     vTcl:DefineAlias "$site_3_0.but76" "Button132" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but76 "$site_3_0.but76 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but76 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Update lists of files (do after running any code) }
+        set ::vTcl::balloon::%W {Update lists of plots & reload config file .Xrunrc }
     }
     button $site_3_0.cpd68 \
         -activebackground #eccceccceccc -activeforeground limegreen \
