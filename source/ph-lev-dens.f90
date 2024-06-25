@@ -14,16 +14,14 @@ module ph_lvl_dens
 contains
 
     real*8 function WT(In, Ip, Ih, X)
-
         implicit none
+        !! Calculates conditional p-h state densities according
+        !! to Nucl. Phys. A430(1984)69 (including all necessary factors)
 
-        ! calculates conditional p-h state densities according
-        ! to Nucl. Phys. A430(1984)69 (including all necessary factors)
-
-        integer*4, intent(in) :: In   !!
+        integer*4, intent(in) :: In   !! exciton number
         integer*4, intent(in) :: IP   !! particle number
         integer*4, intent(in) :: IH   !! hole number
-        real*8, intent(in) :: X    !! excitation energy
+        real*8, intent(in) :: X       !! excitation energy
 
         WT = W(Ip, Ih, X)/fact(Ip)/fact(Ih)*sp_den**In
 
@@ -31,11 +29,9 @@ contains
     end function WT
 
     real*8 function W(Ip, Ih, X)
-
+    !! calculates conditional p-h state densities according
+    !! to Nucl. Phys. A430(1984)69 without g**n/p!/h!
         implicit none
-
-        ! calculates conditional p-h state densities according
-        ! to Nucl. Phys. A430(1984)69 without g**n/p!/h!
 
         integer*4, intent(in) :: IP   !! particle number
         integer*4, intent(in) :: IH   !! hole number
@@ -190,10 +186,10 @@ contains
 
         implicit none
 
-        ! calculates gamma down for multistep compound according to
-        ! Nucl. Phys. A435(1985)67
-        ! the actual version accounts for the factor 1/2 as pointed
-        ! out by Oblozinsky (Nucl. Phys. A453(1986)127)
+        !! calculates gamma down for multistep compound according to
+        !! Nucl. Phys. A435(1985)67
+        !! the actual version accounts for the factor 1/2 as pointed
+        !! out by Oblozinsky (Nucl. Phys. A453(1986)127)
 
         integer*4, intent(in) :: IP   !! particle number
         integer*4, intent(in) :: IH   !! hole number
@@ -262,17 +258,15 @@ contains
 
 
     real*8 function WOBL(Ip, Ih, U, Ni)
-
+        !! calculates conditional state densities according to Oblozinsky
+        !! Nucl. Phys. A453(1986)127 formula 13; without factor
+        !! g**(p+h)/p!h!(n-1)! and neglecting well depth
         implicit none
-
-        ! calculates conditional state densities according to Oblozinsky
-        ! Nucl. Phys. A453(1986)127 formula 13; without factor
-        ! g**(p+h)/p!h!(n-1)! and neglecting well depth
 
         integer*4, intent(in) :: Ip   !! particle number
         integer*4, intent(in) :: Ih   !! hole number
-        integer*4, intent(in) :: Ni   !
-        real*8, intent(in) :: U    !
+        integer*4, intent(in) :: Ni   !! 
+        real*8, intent(in) :: U       !! excitation energy
 
         integer*4 i, ipm, n
         real*8 s, w
@@ -308,9 +302,9 @@ contains
 
         implicit none
 
-        ! calculates density of accessible states (conditional) for internal
-        ! backward transitions  (without g/w(p,h,e,-1) factor)
-        ! using Oblozinsky's formula for cond. st. den.
+        !! Calculates density of accessible states (conditional) for internal
+        !! backward transitions  (without g/w(p,h,e,-1) factor)
+        !! using Oblozinsky's formula for cond. st. den.
 
         integer*4, intent(in) :: Ip   !! particle number
         integer*4, intent(in) :: Ih   !! hole number
@@ -340,17 +334,17 @@ contains
 
         implicit none
 
-        ! calculates avrage of imaginary part of o.m. pot. given as W=C*E**2
-        ! exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
-        ! weighting funtion in the case of particles (analogous for holes)
+        !! calculates avrage of imaginary part of o.m. pot. given as W=C*E**2
+        !! exciton distribution function OM(P-1,H,E-EP)/OM(P,H,E) is used as
+        !! weighting funtion in the case of particles (analogous for holes)
 
         integer*4, intent(in) :: Ip   !! particle number
         integer*4, intent(in) :: Ih   !! hole number
         real*8, intent(in) :: U    !! excitiation energy
 
         real*8, parameter :: c = 3.0D-3 !! Mahaux factor in imaginary potential depth W=c*E^2
-        real*8 :: cfact = 1.0d+0  !! factor allowing to scale c and adjust Gamma down  
-
+        real*8 :: cfact = 0.2d+0  !! factor allowing to scale c and adjust Gamma down  
+        ! cfact = 0.2d+0 seems to work well for n+Ta181 preserving gradual absorption
         integer*4 ih1, ip1, n
         real*8 ub, x, w1, w2, w3, w4, w5, w6, w7, w8
 
@@ -420,8 +414,8 @@ contains
 
         implicit none
 
-        ! calculates p-h state densities according to williams formula
-        ! (without g**n/p!h! factor which is contained in omj)
+        !! calculates p-h state densities according to williams formula
+        !! (without g**n/p!h! factor which is contained in omj)
 
         integer*4, intent(in) :: n
         real*8, intent(in) :: x
@@ -438,19 +432,19 @@ contains
 
         implicit none
 
-        ! calculates spin dependent factor in state density including
-        ! 1/2 for parity and g**n/p!h! missing in w function
-        ! the latter factor is set to 1 when microscopic densities are
-        ! used (ngs=1)
+        !! Calculates spin dependent factor in state density including
+        !! 1/2 for parity and g**n/p!h! that are missing in W function.
+        !! The latter factor is set to 1 when microscopic densities are
+        !! used (ngs=1)
 
-        real*8, parameter :: pi = 3.1415926535897932D0 ! until we have base class
+        real*8, parameter :: pi = 3.1415926535897932D0 !! until we have base class
 
         integer*4, intent(in) :: N    !
         integer*4, intent(in) :: Ip   !! particle number
         integer*4, intent(in) :: Ih   !! hole number
         integer*4, intent(in) :: J    !
-        integer*4, intent(in) :: Ngs  !
-        real*8, intent(in) :: S    !
+        integer*4, intent(in) :: Ngs  !! 1 for microscopic p-h level densities
+        real*8, intent(in) :: S       !
 
         real*8 sig, w, xj
 
@@ -473,25 +467,25 @@ contains
 
         implicit none
 
-        !**************************************************************************
-        !*                                                              class:PPU *
-        !*                            W O B 1                                     *
-        !*                                                                        *
-        !* Calculates the partial nuclear state density of a given excited        *
-        !* particle-hole configuration by means of the Betak-Dobes formula        *
-        !* [1] accounting for nuclear potential finite-depth, for one-            *
-        !* component Fermi-gas. If the nucleon binding energy is specified        *
-        !* the bound-state densities according to Oblozinsky [2] are calculated.  *
-        !*                                                                        *
-        !* [1] C  2. E. Betak and J. Dobes, Z. Phys. A279, 319 (1976)             *
-        !* [2] P.Oblozinsky, Nucl.Phys. A453,127(1986), Eqs.(7,9)                 *
-        !*                                                                        *
-        !* Coded by M. AVRIGEANU, INPE-BUCHAREST, SEPTEMBER 1997.                 *
-        !* Extracted from RIPL-1.                                                 *
-        !*                                                                        *
-        !* Output: WOB1 - p-h level density at X                                  *
-        !*                                                                        *
-        !**************************************************************************
+        !! *************************************************************************
+        !!                                                              class:PPU *
+        !!                             W O B 1                                     *
+        !!                                                                         *
+        !!  Calculates the partial nuclear state density of a given excited        *
+        !!  particle-hole configuration by means of the Betak-Dobes formula        *
+        !!  [1] accounting for nuclear potential finite-depth, for one-            *
+        !!  component Fermi-gas. If the nucleon binding energy is specified        *
+        !!  the bound-state densities according to Oblozinsky [2] are calculated.  *
+        !!                                                                         *
+        !!  [1] C  2. E. Betak and J. Dobes, Z. Phys. A279, 319 (1976)             *
+        !!  [2] P.Oblozinsky, Nucl.Phys. A453,127(1986), Eqs.(7,9)                 *
+        !!                                                                         *
+        !!  Coded by M. AVRIGEANU, INPE-BUCHAREST, SEPTEMBER 1997.                 *
+        !!  Extracted from RIPL-1.                                                 *
+        !!                                                                         *
+        !!  Output: WOB1 - p-h level density at X                                  *
+        !!                                                                         *
+        !! *************************************************************************
 
         integer*4, intent(in) :: np    !! number of particles
         integer*4, intent(in) :: nh    !! number of holes
