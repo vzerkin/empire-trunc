@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5425 $
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-01-13 04:57:37 +0100 (Fr, 13 Jän 2023) $
+Ccc   * $Rev: 5583 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2024-06-28 21:02:39 +0200 (Fr, 28 Jun 2024) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -658,6 +658,9 @@ C        Skipping cross sections if MSD and MSC active
                IF (wb.le.0 .or. em(h1).le.0) cycle
                hh = h1 - 1
                p  = h1 - 1 + ap
+               
+               if(p.eq.0) CYCLE
+
                emis = emis + wb*em(h1)
 C
 C              Exciton distribution weighted by emission rates
@@ -671,8 +674,11 @@ C              by Chadwick and Blann SIG ~ N*A^(2/3) being SIG the spin cut-off 
                if(nnn.gt.0) XNAver(nejc,ienerg) =
      >           XNAver(nejc,ienerg) + nnn*wb*em(h1)
             ENDDO          
-            if(emis.gt.0.d0) XNAver(nejc,ienerg) =
-     >                  NINT(XNAver(nejc,ienerg)/emis) 
+
+            if(emis.le.0.d0) CYCLE
+
+            XNAver(nejc,ienerg) = NINT(XNAver(nejc,ienerg)/emis) 
+C
 C           if(nejc.eq.1) then 
 C             write(*,*) 
 C    >       'nejc,IE,naver=',nejc,ienerg, NINT(xnaver(nejc,ienerg))

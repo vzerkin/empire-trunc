@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5501 $
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-09-01 06:38:38 +0200 (Fr, 01 Sep 2023) $
+Ccc   * $Rev: 5583 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2024-06-28 21:02:39 +0200 (Fr, 28 Jun 2024) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3255,18 +3255,21 @@ C---------------     Bin population by MSD (spin/parity integrated)
             ENDDO
          ENDIF
 C--------storing continuum recoils
-         IF (ENDf(1).GT.0 .and. nejc.ne.0 .and. RECOIL.GT.0) THEN
+         IF (ENDf(1).GT.0 .and. nejc.GT.0 .and. RECOIL.GT.0) THEN
+C
+            ecm = EINl - EIN
+            if(ecm.le.0.d0) RETURN 
 C
 C           No recoils from gamma emission for the time being
 C
             coeff = 2*pi*pi/FLOAT(NDANG - 1)/DERec
-            ecm = EINl - EIN
+C           ecm = EINl - EIN
 C-----------recorr is a recoil correction factor that
 C-----------divides outgoing energies
             recorr = EJMass(Nejc)/AMAss(1)
             DO ie = 1, nexrt
-               echannel = (ie - 1)*DE*recorr
-               DO na = 1, NDANG
+              echannel = (ie - 1)*DE*recorr
+              DO na = 1, NDANG
                   erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
      &               *CANgler(na)
                   irec = erecoil/DERec + 1.001
@@ -3337,6 +3340,7 @@ C
             ENDDO
          ENDDO
       ENDIF
+C
 C-----distribution of the MSD/PCROSS contribution to discrete levels
 C-----
       csm1 = 0.d0
@@ -3346,8 +3350,6 @@ C-----
       enddo
       IF(csm1.le.1.d-6) RETURN
 
-
-      
       IF(Nejc.eq.NPRoject) then
 C
 C        Inelastic channel 
@@ -3358,11 +3360,12 @@ C------  noninteger spin nuclei) using arbitrary weights (most to 2+ and very
 C------  little to 4+). Angular distributions for these levels are those
 C------  provided by TRISTAN or PCROSS at the closest bin.
 C
-         csmsdl = 0.d0
-         DO ie = istart, next
-           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-         ENDDO
-         !   csmsdl = csmsdl + 0.5*DE*(CSEmsd(istart,Nejc)+CSEmsd(next,Nejc))
+         csmsdl = csm1
+C        csmsdl = 0.d0
+C        DO ie = istart, next
+C          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
+C        ENDDO
+C        !   csmsdl = csmsdl + 0.5*DE*(CSEmsd(istart,Nejc)+CSEmsd(next,Nejc))
 C
 C        Inelastic channel
 C

@@ -1,6 +1,6 @@
-!cc   * $Rev: 5360 $
+!cc   * $Rev: 5583 $
 !cc   * $Author: capote $
-!cc   * $Date: 2022-05-10 15:42:38 +0200 (Di, 10 Mai 2022) $
+!cc   * $Date: 2024-06-28 21:02:39 +0200 (Fr, 28 Jun 2024) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -56,7 +56,9 @@
      &,NDERO=NDEX                                                       &
      &,NDCC=10                                                          &
      &,NDROPM=7                                                         &
-     &,NDGDRPM=10,NDGQRPM=8,NDGMRPM=8                                   &
+!    &,NDGDRPM=10,NDGQRPM=8,NDGMRPM=8                                   &
+!      3GDR
+     &,NDGDRPM=13,NDGQRPM=8,NDGMRPM=8                                   &
      &,NDKNTR=3,NMAsse=9066                                             &
      &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=99                    &     
 !    &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &

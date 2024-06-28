@@ -1,7 +1,3 @@
-Ccc   * $Rev: 5421 $
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2023-01-13 04:37:46 +0100 (Fr, 13 Jän 2023) $
-
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
      &   Eexcitf,Temperf,Egamma,Keyshape,Nnuc)
@@ -277,11 +273,14 @@ C COMMON variables
 C
       DOUBLE PRECISION AKS0, ALPha, BC, CS1, CS2, DEG, DMEf, EG0, EG1,
      &                 EG2, EGDr, FACtor, GGDr, GW0, GW1, GW2, GWAll
+      DOUBLE PRECISION CS3, EG3, GW3
       INTEGER KEYfbc, KEYset, NG
+      INTEGER FLAG3RD
       COMMON /HELP  / EGDr, GGDr
       COMMON /INPUTKEY/ KEYset, KEYfbc
       COMMON /INPUTPAR/ FACtor, BC, AKS0, DEG, DMEf
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /PARGDR3RD/ EG3, GW3, CS3, FLAG3RD
       COMMON /WHELP / EG0, GW0, ALPha, GWAll
 C
 C Dummy arguments
@@ -291,8 +290,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cross(2), e10, e11, ee, ef, egiant(2), er2,
-     &                 gamwidth(2), pi24, siggam, sigma0, ttf
+      DOUBLE PRECISION cross(3), e10, e11, e12, ee, ef, egiant(3), er2,
+     &                 gamwidth(3), pi24, siggam, sigma0, ttf
       DOUBLE PRECISION EGLO, GFL, MLO1, MLO2, MLO3, SLO, SMLO
       INTEGER nreson
       DATA pi24/39.47841761D0/
@@ -306,6 +305,9 @@ C
       egiant(2) = EG2
       cross(2) = CS2
       gamwidth(2) = GW2
+      egiant(3) = EG3
+      cross(3) = CS3
+      gamwidth(3) = GW3
       ee = Egamma
       ef = Eexcitf
       ttf = Temperf
@@ -344,6 +346,15 @@ C        - problem in the EGLO model
          ENDIF
         e10 = e10 + e11
       ENDDO
+      IF(FLAG3RD.EQ.1) THEN
+       EGDr = egiant(3)
+       GGDr = gamwidth(3)
+       sigma0 = cross(3)
+       er2 = EGDr*EGDr
+       siggam = GGDr*sigma0
+       e12 = siggam * SLO(ee)
+       e10 = e10 + e12
+      ENDIF
       E1_GSA = 8.674D-08*e10
       END
 

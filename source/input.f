@@ -1,4 +1,4 @@
-ccc   * $Rev: 5563 $
+ccc   * $Rev: 5583 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -6530,6 +6530,105 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'EGDR3 ') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(11,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' GDR third hump energy in all nuclei set to '',F5.2)')
+     &        val
+              WRITE (12,
+     &        '('' GDR third hump energy in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     & '('' WARNING: NORMALIZATION OF GDR third hump energy IGNORED'')')
+               GOTO 100
+            ENDIF
+              GDRpar(11,nnuc) = val
+              IF(AEJc(0).LT.1.0) GDRpar(11,0) = val
+              WRITE (8,
+     &      '('' GDR third hump energy in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val
+              WRITE (12,
+     &      '('' GDR third hump energy in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'GGDR3 ') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(12,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' GDR third hump width in all nuclei set to '',F5.2)')
+     &        val
+              WRITE (12,
+     &        '('' GDR third hump width in all nuclei set to '',F5.2)')
+     &        val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'', Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     &  '('' WARNING: NORMALIZATION OF GDR THIRD HUMP WIDTH IGNORED'')')
+               GOTO 100
+            ENDIF
+              GDRpar(12,nnuc) = val
+              IF(AEJc(0).LT.1.0) GDRpar(12,0) = val
+              WRITE (8,
+     &      '('' GDR third hump width in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val
+              WRITE (12,
+     &      '('' GDR third hump width in '',I3,A2,'' set to '',F5.2)'
+     &        ) i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'CSGDR3') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(13,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' GDR third hump cross section in all nuclei set to ''
+     &        ,F7.2)') val
+              WRITE (12,
+     &        '('' GDR third hump cross section in all nuclei set to ''
+     &        ,F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'', Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     &     '('' WARNING: NORMALIZATION OF GDR THIRD HUMP XS IGNORED'')')
+               GOTO 100
+            ENDIF
+              GDRpar(13,nnuc) = val
+              IF(AEJc(0).LT.1.0) GDRpar(13,0) = val
+              WRITE (8,
+     &      '('' GDR third hump cross section in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+              WRITE (12,
+     &      '('' GDR third hump cross section in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'MSD   ') THEN
             MSD = val
             IF (MSD.GT.0) WRITE (8,
@@ -12364,6 +12463,8 @@ C           READ (81,'(2I4, 10x,7f8.3,/,18x,7f8.3)',END = 60 ,ERR = 60)
 
      &           dHE2(i), dHGW2(i),dcs2  !dHCS(i)
 
+            IF(NNA(i).eq.0) CYCLE ! skipping natural elements
+
             IF(HE2(i).LT.0.1) NNG(i)=1
             sig_TRK= 60.*NNZ(i)*(NNA(i)-NNZ(i))/dble(float(NNA(i)))
             const = 2.d0 * sig_TRK / pi
@@ -12395,6 +12496,8 @@ C           READ (81,'(2I4, 10x,7f8.3,/,18x,7f8.3)',END = 70 ,ERR = 70)
      &           dHE1(i), dHGW1(i),dcs1,
 
      &           dHE2(i), dHGW2(i),dcs2  !dHCS(i)
+
+            IF(NNA(i).eq.0) CYCLE ! skipping natural elements
 
             IF(HE2(i).LT.0.1) NNG(i)=1
             sig_TRK= 60.*NNZ(i)*(NNA(i)-NNZ(i))/dble(float(NNA(i)))
@@ -12683,7 +12786,9 @@ C
 
       DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
       INTEGER NG
+      INTEGER FLAG3RD
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+      COMMON /PARGDR3RD/ EG3, GW3, CS3, FLAG3RD
 
       DOUBLE PRECISION BETagfl2, S2Plusgfl
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
@@ -12704,6 +12809,13 @@ C
       TE1 = GDRpar(7,Nnuc)
       TE2 = GQRpar(7,Nnuc)
       TM1 = GMRpar(7,Nnuc)
+
+      EG3 = GDRpar(11, Nnuc)
+      GW3 = GDRpar(12, Nnuc)
+      CS3 = GDRpar(13, Nnuc)
+      FLAG3RD = 0
+      IF ((EG3.NE.-1.0D0).AND.(GW3.NE.-1.0D0).AND.(CS3.NE.-1.0D0))
+     & FLAG3RD = 1
 
       CE1 = GDRpar(8,Nnuc)
       CE2 = GQRpar(8,Nnuc)
