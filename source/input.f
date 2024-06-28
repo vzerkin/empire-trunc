@@ -1,4 +1,4 @@
-ccc   * $Rev: 5583 $
+ccc   * $Rev: 5584 $
 ccc   * $Author: mwherman $
 ccc   * $Date: 2022-06-05 19:43:09 -0600 (Sun, 05 Jun 2022) $
 
@@ -12780,7 +12780,8 @@ C
       INCLUDE 'global.h'
 
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1,
-     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1
+     &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1,
+     &                 EG3, GW3, CS3
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L,
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 
