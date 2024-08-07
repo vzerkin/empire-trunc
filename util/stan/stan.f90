@@ -173,19 +173,19 @@
             select case (mf10%mt)
             case(103)
                 mf10%fst%qm = Q103
-                mf10%fst%qi = Q103
+                ! mf10%fst%qi = Q103
             case(104)
                 mf10%fst%qm = Q104
-                mf10%fst%qi = Q104
+                ! mf10%fst%qi = Q104
             case(105)
                 mf10%fst%qm = Q105
-                mf10%fst%qi = Q105
+                ! mf10%fst%qi = Q105
             case(106)
                 mf10%fst%qm = Q106
-                mf10%fst%qi = Q106
+                ! mf10%fst%qi = Q106
             case(107)
                 mf10%fst%qm = Q107
-                mf10%fst%qi = Q107
+                ! mf10%fst%qi = Q107
             end select
             mf10 => mf10%next
         end do
