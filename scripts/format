@@ -16,7 +16,7 @@ echo 'Inputs ready to run'
 echo ' '
 ls *out
 echo ' '
-echo -n 'Choose one of the above (without .out extention!): '
+echo -n 'Choose one of the above (without .out extension!): '
 read file
 fi
 
