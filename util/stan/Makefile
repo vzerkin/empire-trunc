@@ -2,8 +2,8 @@
 #
 
 # set default compiler:
-#FC     =  gfortran
-FC     =  ifort
+FC     =  gfortran
+#FC     =  ifort
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
