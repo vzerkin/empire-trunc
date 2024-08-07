@@ -1,6 +1,6 @@
-!cc   * $Rev: 5566 $
+!cc   * $Rev: 5590 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2024-04-09 18:49:32 +0200 (Di, 09 Apr 2024) $
+!cc   * $Date: 2024-08-07 23:46:38 +0200 (Mi, 07 Aug 2024) $
 
 ! c   ********************************************************************
 !!c   *                                                                  *
@@ -1230,15 +1230,12 @@ subroutine DECAYD_DIR(Nnuc , Nejc)
             if(j1>=l)return
             gacs = popl*BR(l , j , 2 , Nnuc)
             CSDirlev(j1 , Nejc) = CSDirlev(j1 , Nejc) + gacs
-            !  gacs_noicc = gacs                      ! no int. conversion
+            !gacs_noicc = gacs                      ! no int. conversion
             gacs = gacs/(1.D0 + BR(l , j , 3 , Nnuc)) ! int. conversion
             CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
          enddo
       else
          !-----------Well... let it go down to the ground state
-         !  gacs = CSDirlev(l,nejc)
-         !  CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
-         !  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
          CSDirlev(1 , Nejc) = CSDirlev(1 , Nejc) + popl
          CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
       endif
@@ -1279,7 +1276,7 @@ subroutine printDiscreteGammas(imax, discGamma)
    sumGamma = SUM(discGamma(1:imax)%gXsc)
 
    ! Print discrete gammas to *.out file for ENDF-6 formatting
-   if(sumGamma > 0.0d0) then  !! Print only if sum of gamma cross section is at least 10 mb
+   if(sumGamma > 0.0d0) then  !! Print only if sum of gamma cross section is above the threshold
       write(12, '('' '')')
       write(12, '(10x,40(''-''))')
       write(12, '('' '')')
