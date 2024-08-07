@@ -29,8 +29,8 @@ contains
     end function WT
 
     real*8 function W(Ip, Ih, X)
-    !! calculates conditional p-h state densities according
-    !! to Nucl. Phys. A430(1984)69 without g**n/p!/h!
+        !! calculates conditional p-h state densities according
+        !! to Nucl. Phys. A435 (1985) 67-76 without g**n/p!/h!
         implicit none
 
         integer*4, intent(in) :: IP   !! particle number
@@ -67,7 +67,6 @@ contains
 
 
     real*8 function W1(J, L, K, X)
-
         implicit none
 
         integer*4, intent(in) :: j, k, l
@@ -108,7 +107,6 @@ contains
 
 
     real*8 function W2(J, L, K, X)
-
         implicit none
 
         integer*4, intent(in) :: j, k, l
@@ -141,7 +139,6 @@ contains
 
 
     real*8 function W3(J, L, K, X)
-
         implicit none
 
         integer*4, intent(in) :: j, k, l
@@ -183,7 +180,6 @@ contains
 
 
     real*8 function GDOWN(Ip, Ih, X)
-
         implicit none
 
         !! calculates gamma down for multistep compound according to
@@ -217,7 +213,6 @@ contains
 
 
     real*8 function ZERO(Ip, Ih, X)
-
         implicit none
 
         integer*4, intent(in) :: Ip   !! particle number
@@ -414,7 +409,7 @@ contains
 
         implicit none
 
-        !! calculates p-h state densities according to williams formula
+        !! calculates p-h state densities according to Williams formula
         !! (without g**n/p!h! factor which is contained in omj)
 
         integer*4, intent(in) :: n
@@ -428,10 +423,27 @@ contains
     end function WILLI
 
 
-    real*8 function OMJ(N, Ip, Ih, J, S, Ngs)
-
+   real*8 function willit(n,ip,ih, x)
         implicit none
+        !! calculates full p-h state densities according to Williams formula
+        !! including g**n/p!h! factor 
 
+        integer*4, intent(in) :: n
+        integer*4, intent(in) :: ip
+        integer*4, intent(in) :: ih
+        real*8, intent(in) :: x
+
+        WILLIT = 0.D0
+        IF ((X <= 0.D0) .OR. (N <= 0)) RETURN
+        WILLIT = WILLI(N,X)*sp_den**N/fact(Ip)/fact(Ih)
+
+        return
+    end function willit
+
+
+
+    real*8 function OMJ(N, Ip, Ih, J, S, Ngs)
+        implicit none
         !! Calculates spin dependent factor in state density including
         !! 1/2 for parity and g**n/p!h! that are missing in W function.
         !! The latter factor is set to 1 when microscopic densities are
@@ -464,7 +476,6 @@ contains
 
 
     real*8 function WOB1(X, Np, Nh, F)
-
         implicit none
 
         !! *************************************************************************
