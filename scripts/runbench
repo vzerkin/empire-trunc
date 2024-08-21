@@ -1,27 +1,23 @@
 #! /bin/sh -
-# Script to run Empire for all the input files in benchmarks directory, 
-# keeping only the original files and the .lst, .out and .xsc files
-#
-echo
-echo "Type one of the following commands:"
-echo
-echo " 'runbench run all' to run ALL benchmarks"
-echo " 'runbench run bench-name' to run benchmark bench-name"
-echo " 'runbench clean all' to remove all files except the original benchmark inputs (WARNING: benchmark results reset!)"
-echo " 'runbench diff bench-name' to compare benchmarks output with existing reference files (using diff command)"
-echo " 'runbench kompare bench-name' to compare benchmarks output with existing reference files (using kompare)"
-echo " 'runbench replace all' to replace existing reference files with benchmarks outputs"
-echo
-echo "Current parameters:"
-echo "Command line:" $0 $1 $2 $3
-#echo par1=$0
-#echo par2=$1
-#echo par3=$2
-#echo par3=$3
-echo EMPIREDIR=$EMPIREDIR
-echo ' '
-echo ' Press <Enter> key to  to execute the command ...'
-read yes
+if [[ "$1" = "" || "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]
+then
+   echo " Script to run Empire for all the input files in benchmarks directory, "
+   echo " keeping only the original files and the .lst, .out and .xsc files"
+   echo " "
+   echo " "
+   echo "Type one of the following commands:"
+   echo " "
+   echo " 'runbench run all' to run ALL benchmarks"
+   echo " 'runbench run bench-name' to run benchmark bench-name"
+   echo " 'runbench clean all' to remove all files except the original benchmark inputs (WARNING: benchmark results reset!)"
+   echo " 'runbench diff bench-name' to compare benchmarks output with existing reference files (using diff command)"
+   echo " 'runbench kompare bench-name' to compare benchmarks output with existing reference files (using kompare)"
+   echo " 'runbench replace all' to replace existing reference files with benchmarks outputs"
+   echo
+   echo EMPIREDIR=$EMPIREDIR
+   echo ' '
+   exit
+fi
 option=$1
 targetfile=$2
 
@@ -50,7 +46,7 @@ filelist="a-ni58-pcross
           u238-HFB-par-fis    
           u238-rigid-soft-omp 
           u238-rot-CC-direct-2
-		  nb93-high-spin"
+          nb93-high-spin"
 
 echo option    =$option
 echo targetfile=$targetfile

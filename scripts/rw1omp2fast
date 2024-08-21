@@ -1,5 +1,12 @@
 #! /bin/sh -
-#script to split RIPL optical model database
+if [[ "$1" = "" || "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]
+then
+  echo " Script to split RIPL optical model database into individual files "
+  echo " for each set of potential parametters. Significantly speeds-up "
+  echo " OM calculations. To be run once after EMPIRE installation "
+  echo " or after each update of the RIPL optical segment. "
+  echo " "
+fi
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -9,7 +16,6 @@ fi
 work=`pwd`
 cd $EMPIREDIR/RIPL/optical/om-data
 
-#run gam2zvd to produce ZVView plots
 if [ -f "om-parameter-u.dat" ]; then
   $EMPIREDIR/util/rw1omp2fast/rw1omp2fast.exe
 fi

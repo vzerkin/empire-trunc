@@ -1,17 +1,23 @@
 #! /bin/sh -
-# SCRIPT TO RUN STANDARD NJOY TEST
-# Usage: runjoy file_name [MAT_number]
-#
+if [[ "$1" = "" || "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]
+then
+   echo " Script to run standard NJOY test."
+   echo " Usage: "
+   echo " runjoy file_name [MAT_number]"
+   echo " "
+fi
+
 MAT=$2
 if [ "$2" = "" ]
-   then
-exec 3< $1.endf        #open file $1
-read <&3               #read first line
-read -n 66 <&3         #read 66 chracters from the second line
-read -n 4 MAT <&3      #read MAT number
-exec 3>&-              #close the file
-echo 'Set MAT to '$MAT
+then
+   exec 3< $1.endf        #open file $1
+   read <&3               #read first line
+   read -n 66 <&3         #read 66 chracters from the second line
+   read -n 4 MAT <&3      #read MAT number
+   exec 3>&-              #close the file
+   echo 'Set MAT to '$MAT
 fi
+
 cp $1.endf tape20
 cat>njoyinput <<EOF
  moder
@@ -68,15 +74,18 @@ cat>njoyinput <<EOF
  33 36/
  stop
 EOF
+
 xnjoy<njoyinput
 mv output $1-njoy.out
 #mv tape29 $1-29 
 mv tape30 $1-njoy.chk 
 mv tape31 $1-njoy.ps 
-
 mv tape34 $1.ace
 mv tape35 $1.xsdir
 mv tape36 $1-acer.ps
 mv tape70 $1-heater.ps
-rm tape* njoyinput
+ps2pdf $1-njoy.ps
+ps2pdf $1-acer.ps
+ps2pdf $1-heater.ps
+rm tape* njoyinput *.ps
 
