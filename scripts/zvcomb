@@ -25,7 +25,7 @@ if [ "$file" = "" ]; then
 fi
 if [ ! -f ps01.tit ]; then
    cp $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
-!  ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+   #ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 fi
 
 $EMPIREDIR/util/c4zvd/zvview.exe ps01.tit/c $file
@@ -39,7 +39,7 @@ $EMPIREDIR/util/c4zvd/zvview.exe ps01.tit/c $file
         echo -n "___Pause. Press any key..."; read yes
     fi
 
-!rm ps01.tit
+# rm ps01.tit
 if [ -f zv00.ps ]; then
    mv zv00.ps $1-mrg.ps
 fi
@@ -52,4 +52,11 @@ fi
 rename 'zvd.ps' ps $1-mrg*
 rename 'zvd.eps' eps $1-mrg*
 rename 'zvd.zvd' zvd $1-mrg*
+
+if [ -f $1-mrg.ps ]; then
+   ps2pdf -dEPSCrop $1-mrg.ps
+fi
+if [ -f $1-mrg.eps ]; then
+   ps2pdf -dEPSCrop $1-mrg.eps
+fi
 exit
