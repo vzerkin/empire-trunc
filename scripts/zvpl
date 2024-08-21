@@ -114,9 +114,12 @@ rm ps01.tit
 # store PostScript
 if [ -f zv00.ps ]; then
    mv zv00.ps $file-emp.ps
+   ps2pdf -dEPSCrop $file-emp
 fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $file-emp.eps
+   ps2pdf -dEPSCrop $file-emp
+
 fi
 
 exit

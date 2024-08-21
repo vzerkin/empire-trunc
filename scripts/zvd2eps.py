@@ -67,9 +67,9 @@ for i in range(len(fileList)):
     # replace_string('92-U-238', '{+238}U', file)
     # replace_string('92-U-235', '{+235}U', file)
     root = file[:-4]
-    command = "zvv " + file
+    command = "zvv " + file # type: ignore
     os.system(command)
-    out_file = file + '.eps'
+    out_file = file + ".eps" # type: ignore
     os.rename(out_file, 'zv.eps')
 
     # Make plot axes thiner
@@ -81,10 +81,10 @@ for i in range(len(fileList)):
     os.system(
         "sed 's/%%BoundingBox: 60 60 541 455/%%BoundingBox: 60 60 541 445/' zv.eps > zvd.eps 2>/dev/null"
     )
-    eps_file = root + '.eps'
+    eps_file = root + '.eps' # type: ignore
     os.rename('zvd.eps', eps_file)
     os.system("rm zv.eps zvc.eps")
-    command = 'epstopdf ' + eps_file
+    command = 'ps2pdf -dEPSCrop' + eps_file
     os.system(command)
 
 # if os.path.isfile("ps01.tit-mem"):
