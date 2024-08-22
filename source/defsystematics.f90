@@ -13,7 +13,7 @@
           implicit none
 
           integer :: z, a, n
-          real, parameter :: alpha = 3.2d0 !fm
+          real(kind=8), parameter :: alpha = 3.2d0 !fm
           real(kind=8) :: r0c, beta2, beta3, delta2, delta3, d2z, d2n
 
           real, dimension(2:156) :: D2
