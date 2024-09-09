@@ -1,13 +1,13 @@
 #! /bin/sh -
 #script to produce groupwise ENDF-6 file from a pointwise ENDF-6 file  
 
-if [ "$1" = "-h" ]
-   then
-echo 'This script runs GROUPIE code on the ENDF formatted file, with extension .endf or -s.endf to produce groupwise cross sections.'
-echo 'Group structure may be selected in the GROUPIE.INP file acccessible from the GUI under Options menue.'
-echo 'Script argumet should be a name of the ENDF file WITHOUTOUT extension .endf or -s.endf'
-echo 'If a file with -s.endf ending is available it will be used instead of .endf eliminating runs of RECENT and LINEAR. '
-exit
+if [[ "$1" = "" || "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]
+then
+	echo 'This script runs GROUPIE code on the ENDF formatted file, with extension .endf or -s.endf to produce groupwise cross sections.'
+	echo 'Group structure may be selected in the GROUPIE.INP file acccessible from the GUI under Options menue.'
+	echo 'Script argumet should be a name of the ENDF file WITHOUTOUT extension .endf or -s.endf'
+	echo 'If a file with -s.endf ending is available it will be used instead of .endf eliminating runs of RECENT and LINEAR. '
+	exit
 fi
 
 
