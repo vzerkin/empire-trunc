@@ -1,0 +1,27 @@
+#!/bin/bash
+#Script to ...
+if [[  "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]
+then
+   echo " Run Xrun.tcl (EMPIRE GUI) on Mac with Tcl/Tk installed from"
+   echo " Viktor Zerkin's Tcl/Tk  distribution for Mac/Linux."
+   echo " Script assumes that Tcl/Tk distribution is located in empire/Tcl"
+   echo " directory. Otherwise, adjust tslPath variable below"
+   echo " Usage:"
+   echo " "
+   echo " Xrun.mac "
+   echo " "
+else
+   if [ -z $EMPIREDIR ]; then
+    echo "EMPIREDIR not set, exiting "
+    exit
+  fi
+
+  # Set path to Tcl 
+  tclPath="$EMPIREDIR/Tcl"
+
+  source $tclPath/tcltk-vars.sh
+  setTclTk $tclPath
+  wish $EMPIREDIR/scripts/Xrun.tcl &
+fi
+
+exit
