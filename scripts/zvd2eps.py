@@ -3,9 +3,11 @@
 """
 zvd2eps.py: automatically converts all zvd files in the directory to eps format
 when called without any arguments. If a file names are given as an argumet only
-these files are prcessed. 
+these files are processed. 
 It corrects position of the y-axes label and can be extended to convert
 any given string in the zvd file to another one e.g., 94-Pu-239 to 239Pu.
+
+If ps2pdf command is available all eps files will be converted into pdf format. 
 """
 import sys
 import glob
@@ -84,8 +86,9 @@ for i in range(len(fileList)):
     eps_file = root + '.eps' # type: ignore
     os.rename('zvd.eps', eps_file)
     os.system("rm zv.eps zvc.eps")
-    command = 'ps2pdf -dEPSCrop' + eps_file
-    os.system(command)
+
+command = 'ps2pdf -dEPSCrop' + eps_file
+os.system(command)
 
 # if os.path.isfile("ps01.tit-mem"):
 #     os.system("mv -f ps01.tit-mem ps01.tit")  # restore interactive ps01.tit
