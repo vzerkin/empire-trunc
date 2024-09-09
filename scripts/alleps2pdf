@@ -1,0 +1,38 @@
+#!/bin/bash
+# Convert all eps files in the current directory to pdf.
+#
+if [[ "$1" = "-h" || "$1" = "--help" || "$1" = "-help" ]]; then
+   echo " Convert all eps files in the current directory to pdf."
+   echo " Usage:"
+   echo " "
+   echo " alleps2pdf [-deleps]"
+   echo " "
+   echo " if optional parameter '-deleps' is included all eps files will be deleted."
+   echo " Note that eps files can be manually edited while pdf ones NOT! "   
+   echo " "
+   echo " This script is especially useful on Mac running OSX Ventura or later "
+   echo " which dropped support for the Postscript. This script requires"
+   echo " ps2pdf (being part of the ghostscript) to be installed."
+   echo " If missing ps2pdf can be installed with Homebrew by typing a line command:"
+   echo " "
+   echo " brew install ghostscript"
+   exit
+fi
+
+if [ -x ps2pdf ]; then
+   find . -type f -name '*.eps' -exec ps2pdf -dEPSCrop {} \;
+   if [ "$1" = "-deleps" ]; then
+      rm *.eps
+   fi
+else; then
+   echo " Unable to make conversion of eps to pdf since ps2pdf command is missing."
+   echo " On Mac you may use Homebrew to install ghostscript with a line command "
+   echo "  "
+   echo " brew install ghostscript"
+   echo "  "
+fi
+
+# remove empty files
+find . -empty -type f -delete
+
+exit
