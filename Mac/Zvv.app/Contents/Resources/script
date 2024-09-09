@@ -1,0 +1,22 @@
+#!/bin/bash
+#if [ -z $DISPLAY ]; then export DISPLAY=:0; fi
+#export DISPLAY=:0
+set -x
+blank=" "
+list=""
+for file in $*
+do
+list=$list$file$blank
+done
+./zvview -p:$file $list ps01.tit/c
+    errCode=$?
+    #echo -n "___Pause. Press any key..."; read yes
+    #if [ $errCode -ne 0 ]; then
+    if [ $errCode -ne 0 -a $errCode -ne 1 ]; then
+        set +x
+        echo    "___ERROR running ZVView: errCode=$errCode"
+        echo    "___DISPLAY=$DISPLAY"
+        echo -n "___Pause. Press any key..."; read yes
+    fi
+#rm ps01.tit
+exit

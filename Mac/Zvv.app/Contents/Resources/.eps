@@ -1,0 +1,2111 @@
+%!PS-Adobe-2.0 EPSF-2.0
+%%Title: DINAMO
+%%Creator: DINAMO
+%%CreationDate: August 2001
+%%Orientation: Portrait
+%%BoundingBox: 60 60 541 455 
+%%Pages: Atend
+%%EndComments
+
+/lwpoint 1.0 def    %---2016: line width for symbols
+/ax_lenmul1 0.9 def  %---2016: length factor for axes strokes: big
+/ax_lenmul2 0.9 def  %---2016: length factor for axes strokes: small
+/ax_lenmul3 0.9 def  %---2016: length factor for axes strokes: smallest
+/ax_lw 1.5 def  %---2017: line width for axes
+/axy_left -12 def  %---2018: shift Y-axis text to the left
+/pipe0line {0.2 slw [] 0 setdash} bind def
+/pipe1line {0.8 slw [] 0 setdash} bind def
+/pipe2line {0.8 slw [6 3] 3 setdash} bind def
+
+/p2cloud {
+ /yy exch def
+ /xx exch def
+ gs
+  1 setlinecap
+  .33 setlinewidth
+  xx yy moveto
+  0 0 rlineto
+  stroke
+ gr
+} bind def
+/cp {closepath} bind def
+/ef {eofill} bind def
+/gr {grestore} bind def
+/gs {gsave} bind def
+/sa {save} bind def
+/rs {restore} bind def
+/l {lineto} bind def
+/m {moveto} bind def
+/rm {rmoveto} bind def
+/rl {rlineto} bind def
+/n {newpath} bind def
+/s {stroke} bind def
+/sh {show} bind def
+/slc {setlinecap} bind def
+/slj {setlinejoin} bind def
+/slw {setlinewidth 1 setlinejoin} bind def
+/srgb {setrgbcolor} bind def
+/rot {rotate} bind def
+/sc {scale} bind def
+/sd {setdash} bind def
+/ff {findfont} bind def
+/sf {setfont} bind def
+/scf {scalefont} bind def
+/sw {stringwidth} bind def
+/tr {translate} bind def
+
+/srgb {setrgbcolor} bind def
+/colb {0 setgray} bind def
+/colw {1 setgray} bind def
+/col0 {0 0 0 srgb} bind def
+/col1 {0 0 0.667 srgb} bind def
+/col2 {0 0.667 0 srgb} bind def
+/col3 {0 0.667 0.667 srgb} bind def
+/col4 {0.667 0 0 srgb} bind def
+/col5 {0.667 0 0.667 srgb} bind def
+/col6 {0.667 0.667 0 srgb} bind def
+/col7 {0.667 0.667 0.667 srgb} bind def
+/col8 {0.333 0.333 0.333 srgb} bind def
+/col9 {0 0 1 srgb} bind def
+/col10 {0 1 0 srgb} bind def
+/col11 {0 1 1 srgb} bind def
+/col12 {1 0 0 srgb} bind def
+/col13 {1 0 1 srgb} bind def
+/col14 {1 1 0 srgb} bind def
+/col15 {1 1 1 srgb} bind def
+/col250 {0.8 0.8 0.8 srgb} bind def
+/col253 {0.9 0.9 0.9 srgb} bind def
+/col0f {0.5 0.5 0.5 srgb} bind def
+/col1f {0.5 0.5 1 srgb} bind def
+/col2f {0.5 1 0.5 srgb} bind def
+/col3f {0.5 1 1 srgb} bind def
+/col4f {1 0.5 0.5 srgb} bind def
+/col5f {1 0.5 1 srgb} bind def
+/col6f {1 1 0.5 srgb} bind def
+/col7f {0.9 0.9 0.9 srgb} bind def
+/col8f {0.7 0.7 0.7 srgb} bind def
+/col9f {0.5 0.5 1 srgb} bind def
+/col10f {0.5 1 0.5 srgb} bind def
+/col11f {0.5 1 1 srgb} bind def
+/col12f {1 0.5 0.5 srgb} bind def
+/col13f {1 0.5 1 srgb} bind def
+/col14f {1 1 0.5 srgb} bind def
+/col15f {0.9 0.9 0.9 srgb} bind def
+/col250f {0.1 0.1 0.1 srgb} bind def
+/col253f {0.2 0.2 0.2 srgb} bind def
+
+/fillBoxAroundText {
+    /str exch def 
+    /sly exch def
+    /sy0 exch def 
+    /sx0 exch def 
+
+    /slx str stringwidth pop def
+    /slxpb ( ) stringwidth pop def
+    newpath
+    sx0 slxpb 1.5 mul sub sy0 sly 0.4 mul sub moveto
+    slx slxpb 3.0 mul add 0 rlineto
+    0 sly sly 0.5 mul add rlineto
+    slx slxpb 3.0 mul add neg 0 rlineto
+    closepath
+    gsave  1 setgray  fill  grestore
+    0 setgray
+    stroke
+} bind def
+
+/myGrid_A4 {
+    /grid_wmm 10 def %step=10mm
+    /grid_step 72 25.4 div grid_wmm mul def
+    /grid_lxpage 72 25.4 div 210 mul def
+    /grid_lypage 72 25.4 div 297 mul def
+    gsave
+    0.8 0.3 0 setrgbcolor
+    0.1 setlinewidth
+    0 grid_step grid_lxpage {
+	0 moveto
+	0 grid_lypage rlineto
+	stroke
+    } for
+    0 grid_step grid_lypage {
+	/iiy exch def
+	0 iiy moveto
+	grid_lypage 0 rlineto
+	stroke
+    } for
+    grestore
+} bind def
+
+/drawText {
+      /colbck exch def % backgr color
+      /yc exch def      % 1:bottom, -1:top, 0:center
+      /xc exch def      % 1:left, -1:right, 0:center
+      /ly0tx exch def   % default font size
+      /txArray exch def
+%---  /ly0tx lyFontAxis def
+
+%      gsave
+        /ltxArray txArray length def
+        /lxMax 0 def
+        /lyMax ly0tx def
+        
+%       /Times-Roman findfont ly0tx scalefont setfont
+        /Helvetica findfont ly0tx scalefont setfont
+        /lyLast ly0tx def
+        txArray
+        { /txtArray exch def
+          txtArray aload pop
+          /dy exch def
+          /lytx exch def
+          /txt exch def
+          lytx 0 ne {
+%             /Times-Roman findfont lytx scalefont setfont
+              /Helvetica findfont lytx scalefont setfont
+              /lyLast lytx def
+          } if
+          txt stringwidth /lyt exch def /lxt exch def
+          /lxMax lxMax lxt add def
+          /yt ly0tx dy mul lyt add def
+          yt lyMax gt {  /lyMax yt def  } if
+        } forall
+
+        yc  0 eq { 0 lyMax 2 div neg rmoveto} if
+        yc -1 eq { 0 lyMax neg rmoveto} if
+        xc  0 eq { lxMax 2 div neg 0 rmoveto} if
+        xc -1 eq { lxMax neg 0 rmoveto} if
+
+        colbck 0 ge {
+            gsave
+                currentpoint /yt exch def /xt exch def
+                colbck zvsetcol
+                newpath
+                    xt 1 sub yt 1 sub moveto
+                    lxMax 2 add 0 rlineto
+                    0 lyMax 2 add rlineto
+                    lxMax 2 add neg 0 rlineto
+                closepath
+                %stroke
+                fill
+            grestore
+        } if
+
+%       currentfont ly0tx 8 div scalefont setfont
+%       /Times-Roman findfont ly0tx scalefont setfont
+        /Helvetica findfont ly0tx scalefont setfont
+
+        /yrel 0 def
+        txArray
+        { /txtArray exch def
+          txtArray aload pop
+          /dy exch def
+          /lytx exch def
+          /txt exch def
+          lytx 0 ne {
+%             /Times-Roman findfont lytx scalefont setfont
+              /Helvetica findfont lytx scalefont setfont
+          } if
+          0 ly0tx dy mul rmoveto
+          txt show
+          /yrel yrel ly0tx dy mul add def
+        } forall
+
+        0 yrel neg rmoveto
+
+%%      /Helvetica findfont titleps scalefont setfont
+%      grestore
+} bind def
+
+% /lytx 20 def /x0tx 100 def  /y0tx 100 def  /str (QWERTYqwerty) def 
+% /Times-BoldItalic findfont 20 scalefont setfont
+% x0tx y0tx lytx str fillBoxAroundText
+% 0.5 setgray x0tx y0tx moveto str show
+% 0 setgray x0tx 2 sub y0tx 2 add moveto str show
+
+%myGrid_A4 %___User: uncomment to display x-y grid by 10mm
+
+1 1 scale
+
+
+%%Page: 1 1
+
+save
+
+%%Orientation: Portrait
+
+
+% /lytx 20 def /x0tx 100 def  /y0tx 100 def  /str (QWERTYqwerty) def 
+% /Times-BoldItalic findfont 20 scalefont setfont
+% x0tx y0tx lytx str fillBoxAroundText
+% 0.5 setgray x0tx y0tx moveto str show
+% 0 setgray x0tx 2 sub y0tx 2 add moveto str show
+
+
+
+/Helvetica ff 10 scf sf
+1.0 slw
+
+
+%------new page: data------
+
+126.484 108.018 m
+col0
+/Helvetica ff 1 scf sf
+325.868 466.713 m
+(LEVEL DENSITY) sw pop neg 2 div 0 rmoveto
+/Helvetica ff 1 scf sf
+(LEVEL DENSITY)
+sh
+/Helvetica ff 1 scf sf
+0 -0 rm
+/Helvetica ff 16 scf sf
+325.868 434.311 m
+() sw pop neg 2 div 0 rmoveto
+()
+sh
+/Helvetica ff 16 scf sf
+325.868 65.383 m
+(Excitation energy U \(MeV\)) sw pop neg 2 div 0 rmoveto
+/Helvetica ff 16 scf sf
+(Excitation energy U \(MeV\))
+sh
+/Helvetica ff 16 scf sf
+0 -0 rm
+76.884 268.891 m
+%--- Y-Axis label location in line below
+axy_left 0 rm  %---2018: move cursor left
+0 (Level density \(1/MeV\)) sw pop neg 2 div rmoveto
+gs
+90 rot
+/Helvetica ff 16 scf sf
+(Level density \(1/MeV\))
+sh
+/Helvetica ff 16 scf sf
+0 -0 rm
+gr
+
+%--- Grid-Y vvvvvvvvv
+
+gs
+col7
+s
+gr
+
+%--- Grid-Y ^^^^^^^^^
+
+
+%--- Grid-X vvvvvvvvv
+
+gs
+col7
+144.654 108.018 m
+144.654 412.141 l
+235.507 108.018 m
+235.507 412.141 l
+326.359 108.018 m
+326.359 412.141 l
+417.211 108.018 m
+417.211 412.141 l
+508.063 108.018 m
+508.063 412.141 l
+s
+gr
+
+%--- Grid-X ^^^^^^^^^
+
+s
+gs
+
+n 125.993 107.449 m 398.276 0 rl 0 305.829 rl -398.276 0 rl
+cp
+clip s
+
+%--- Points vvvvvvvvv
+
+1 slw
+lwpoint  setlinewidth %set line width for symbols
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+144.163 120.524 m .25 0 rl s
+144.654 157.473 m .25 0 rl s
+146.619 147.809 m .25 0 rl s
+147.11 147.809 m .25 0 rl s
+149.565 144.399 m .25 0 rl s
+150.548 144.399 m .25 0 rl s
+153.003 151.789 m .25 0 rl s
+153.494 152.926 m .25 0 rl s
+153.985 146.104 m .25 0 rl s
+154.967 148.946 m .25 0 rl s
+155.459 162.021 m .25 0 rl s
+155.459 161.452 m .25 0 rl s
+157.423 153.494 m .25 0 rl s
+157.423 154.062 m .25 0 rl s
+158.405 143.262 m .25 0 rl s
+160.369 140.42 m .25 0 rl s
+161.843 147.241 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.825 159.747 m .25 0 rl s
+162.825 159.179 m .25 0 rl s
+163.807 143.262 m .25 0 rl s
+165.28 156.905 m .25 0 rl s
+165.28 157.473 m .25 0 rl s
+166.263 148.946 m .25 0 rl s
+166.754 158.61 m .25 0 rl s
+166.754 158.042 m .25 0 rl s
+167.736 148.946 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.718 147.809 m .25 0 rl s
+169.209 177.938 m .25 0 rl s
+169.209 178.506 m .25 0 rl s
+169.7 158.042 m .25 0 rl s
+169.7 188.17 m .25 0 rl s
+169.7 189.875 m .25 0 rl s
+169.7 177.369 m .25 0 rl s
+170.191 158.042 m .25 0 rl s
+170.191 155.768 m .25 0 rl s
+171.173 146.104 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+172.156 159.179 m .25 0 rl s
+177.067 163.726 m .25 0 rl s
+181.486 168.842 m .25 0 rl s
+186.397 173.958 m .25 0 rl s
+190.817 178.506 m .25 0 rl s
+195.728 183.622 m .25 0 rl s
+200.148 188.738 m .25 0 rl s
+205.059 193.854 m .25 0 rl s
+209.479 198.402 m .25 0 rl s
+214.39 203.518 m .25 0 rl s
+218.809 208.634 m .25 0 rl s
+223.72 213.182 m .25 0 rl s
+228.14 218.298 m .25 0 rl s
+233.051 223.414 m .25 0 rl s
+237.962 227.962 m .25 0 rl s
+242.382 233.078 m .25 0 rl s
+246.802 238.194 m .25 0 rl s
+251.713 241.605 m .25 0 rl s
+256.624 245.015 m .25 0 rl s
+261.043 248.426 m .25 0 rl s
+265.463 251.837 m .25 0 rl s
+270.374 255.248 m .25 0 rl s
+275.285 258.658 m .25 0 rl s
+279.705 261.501 m .25 0 rl s
+284.616 264.911 m .25 0 rl s
+289.036 267.754 m .25 0 rl s
+293.947 270.596 m .25 0 rl s
+298.366 273.438 m .25 0 rl s
+303.277 276.28 m .25 0 rl s
+307.697 279.123 m .25 0 rl s
+312.608 281.965 m .25 0 rl s
+317.028 284.807 m .25 0 rl s
+321.939 287.65 m .25 0 rl s
+325.868 289.923 m .25 0 rl s
+331.27 292.766 m .25 0 rl s
+335.198 295.039 m .25 0 rl s
+340.6 297.882 m .25 0 rl s
+346.002 300.156 m .25 0 rl s
+349.44 302.429 m .25 0 rl s
+355.333 305.272 m .25 0 rl s
+358.771 307.545 m .25 0 rl s
+364.173 309.819 m .25 0 rl s
+367.61 312.093 m .25 0 rl s
+373.504 314.367 m .25 0 rl s
+378.906 316.641 m .25 0 rl s
+382.343 318.915 m .25 0 rl s
+387.745 320.62 m .25 0 rl s
+391.674 322.894 m .25 0 rl s
+397.076 325.168 m .25 0 rl s
+400.514 326.873 m .25 0 rl s
+405.916 329.147 m .25 0 rl s
+411.318 330.852 m .25 0 rl s
+415.246 333.126 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+144.163 120.524 m .25 0 rl s
+144.654 157.473 m .25 0 rl s
+146.619 147.809 m .25 0 rl s
+147.11 147.809 m .25 0 rl s
+149.565 144.399 m .25 0 rl s
+150.548 144.399 m .25 0 rl s
+153.003 151.789 m .25 0 rl s
+153.494 152.926 m .25 0 rl s
+153.985 146.104 m .25 0 rl s
+154.967 148.946 m .25 0 rl s
+155.459 162.021 m .25 0 rl s
+155.459 161.452 m .25 0 rl s
+157.423 153.494 m .25 0 rl s
+157.423 154.062 m .25 0 rl s
+158.405 143.262 m .25 0 rl s
+160.369 140.42 m .25 0 rl s
+161.843 147.241 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.825 159.747 m .25 0 rl s
+162.825 159.179 m .25 0 rl s
+163.807 143.262 m .25 0 rl s
+165.28 156.905 m .25 0 rl s
+165.28 157.473 m .25 0 rl s
+166.263 148.946 m .25 0 rl s
+166.754 158.61 m .25 0 rl s
+166.754 158.042 m .25 0 rl s
+167.736 148.946 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.718 147.809 m .25 0 rl s
+169.209 177.938 m .25 0 rl s
+169.209 178.506 m .25 0 rl s
+169.7 158.042 m .25 0 rl s
+169.7 188.17 m .25 0 rl s
+169.7 189.875 m .25 0 rl s
+169.7 177.369 m .25 0 rl s
+170.191 158.042 m .25 0 rl s
+170.191 155.768 m .25 0 rl s
+171.173 146.104 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+174.12 163.158 m .25 0 rl s
+179.522 170.548 m .25 0 rl s
+185.415 177.369 m .25 0 rl s
+191.308 184.191 m .25 0 rl s
+197.201 190.444 m .25 0 rl s
+203.094 196.697 m .25 0 rl s
+208.988 202.95 m .25 0 rl s
+214.881 209.203 m .25 0 rl s
+220.283 214.887 m .25 0 rl s
+226.176 220.572 m .25 0 rl s
+232.069 226.256 m .25 0 rl s
+237.962 231.372 m .25 0 rl s
+243.855 235.92 m .25 0 rl s
+249.748 240.468 m .25 0 rl s
+255.641 244.447 m .25 0 rl s
+261.534 248.995 m .25 0 rl s
+266.937 252.974 m .25 0 rl s
+272.83 256.953 m .25 0 rl s
+278.723 260.932 m .25 0 rl s
+284.616 264.911 m .25 0 rl s
+290.509 268.322 m .25 0 rl s
+296.402 272.301 m .25 0 rl s
+302.295 275.712 m .25 0 rl s
+307.697 279.123 m .25 0 rl s
+313.59 282.533 m .25 0 rl s
+319.483 285.944 m .25 0 rl s
+325.377 289.355 m .25 0 rl s
+331.27 292.766 m .25 0 rl s
+337.163 295.608 m .25 0 rl s
+342.565 299.019 m .25 0 rl s
+347.967 301.861 m .25 0 rl s
+355.333 304.703 m .25 0 rl s
+360.735 308.114 m .25 0 rl s
+366.137 310.956 m .25 0 rl s
+371.539 313.798 m .25 0 rl s
+376.941 316.641 m .25 0 rl s
+384.308 318.915 m .25 0 rl s
+389.71 321.757 m .25 0 rl s
+395.112 324.599 m .25 0 rl s
+400.514 326.873 m .25 0 rl s
+405.916 329.715 m .25 0 rl s
+413.282 331.989 m .25 0 rl s
+418.684 334.263 m .25 0 rl s
+424.086 336.537 m .25 0 rl s
+429.488 338.811 m .25 0 rl s
+434.89 341.084 m .25 0 rl s
+442.257 343.358 m .25 0 rl s
+447.659 345.632 m .25 0 rl s
+453.061 347.906 m .25 0 rl s
+458.463 350.18 m .25 0 rl s
+464.356 351.885 m .25 0 rl s
+471.231 354.159 m .25 0 rl s
+476.633 356.433 m .25 0 rl s
+482.526 358.138 m .25 0 rl s
+487.928 360.412 m .25 0 rl s
+493.33 362.117 m .25 0 rl s
+500.697 363.823 m .25 0 rl s
+506.099 366.096 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+144.163 120.524 m .25 0 rl s
+144.654 157.473 m .25 0 rl s
+146.619 147.809 m .25 0 rl s
+147.11 147.809 m .25 0 rl s
+149.565 144.399 m .25 0 rl s
+150.548 144.399 m .25 0 rl s
+153.003 151.789 m .25 0 rl s
+153.494 152.926 m .25 0 rl s
+153.985 146.104 m .25 0 rl s
+154.967 148.946 m .25 0 rl s
+155.459 162.021 m .25 0 rl s
+155.459 161.452 m .25 0 rl s
+157.423 153.494 m .25 0 rl s
+157.423 154.062 m .25 0 rl s
+158.405 143.262 m .25 0 rl s
+160.369 140.42 m .25 0 rl s
+161.843 147.241 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.334 177.938 m .25 0 rl s
+162.825 159.747 m .25 0 rl s
+162.825 159.179 m .25 0 rl s
+163.807 143.262 m .25 0 rl s
+165.28 156.905 m .25 0 rl s
+165.28 157.473 m .25 0 rl s
+166.263 148.946 m .25 0 rl s
+166.754 158.61 m .25 0 rl s
+166.754 158.042 m .25 0 rl s
+167.736 148.946 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.227 166 m .25 0 rl s
+168.718 147.809 m .25 0 rl s
+169.209 177.938 m .25 0 rl s
+169.209 178.506 m .25 0 rl s
+169.7 158.042 m .25 0 rl s
+169.7 188.17 m .25 0 rl s
+169.7 189.875 m .25 0 rl s
+169.7 177.369 m .25 0 rl s
+170.191 158.042 m .25 0 rl s
+170.191 155.768 m .25 0 rl s
+171.173 146.104 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+174.12 159.747 m .25 0 rl s
+179.522 164.863 m .25 0 rl s
+185.415 170.548 m .25 0 rl s
+191.308 175.664 m .25 0 rl s
+197.201 181.348 m .25 0 rl s
+203.094 186.464 m .25 0 rl s
+208.988 191.581 m .25 0 rl s
+214.881 197.265 m .25 0 rl s
+220.283 202.381 m .25 0 rl s
+226.176 208.066 m .25 0 rl s
+232.069 213.182 m .25 0 rl s
+237.962 218.298 m .25 0 rl s
+243.855 223.414 m .25 0 rl s
+249.748 227.962 m .25 0 rl s
+255.641 232.509 m .25 0 rl s
+261.534 237.057 m .25 0 rl s
+266.937 241.605 m .25 0 rl s
+272.83 246.152 m .25 0 rl s
+278.723 250.131 m .25 0 rl s
+284.616 254.111 m .25 0 rl s
+290.509 258.658 m .25 0 rl s
+296.402 262.637 m .25 0 rl s
+302.295 266.617 m .25 0 rl s
+307.697 270.027 m .25 0 rl s
+313.59 274.007 m .25 0 rl s
+319.483 277.417 m .25 0 rl s
+325.377 281.397 m .25 0 rl s
+331.27 284.807 m .25 0 rl s
+337.163 288.218 m .25 0 rl s
+342.565 292.197 m .25 0 rl s
+347.967 295.608 m .25 0 rl s
+355.333 299.019 m .25 0 rl s
+360.735 301.861 m .25 0 rl s
+366.137 305.272 m .25 0 rl s
+371.539 308.682 m .25 0 rl s
+376.941 312.093 m .25 0 rl s
+384.308 314.935 m .25 0 rl s
+389.71 318.346 m .25 0 rl s
+395.112 321.188 m .25 0 rl s
+400.514 324.599 m .25 0 rl s
+405.916 327.441 m .25 0 rl s
+413.282 330.284 m .25 0 rl s
+418.684 333.694 m .25 0 rl s
+424.086 336.537 m .25 0 rl s
+429.488 339.379 m .25 0 rl s
+434.89 342.221 m .25 0 rl s
+442.257 345.064 m .25 0 rl s
+447.659 347.906 m .25 0 rl s
+453.061 350.748 m .25 0 rl s
+458.463 353.59 m .25 0 rl s
+464.356 356.433 m .25 0 rl s
+471.231 358.706 m .25 0 rl s
+476.633 361.549 m .25 0 rl s
+482.526 364.391 m .25 0 rl s
+487.928 367.233 m .25 0 rl s
+493.33 369.507 m .25 0 rl s
+500.697 372.349 m .25 0 rl s
+506.099 374.623 m .25 0 rl s
+gr
+
+%--- FuncEnd ....
+
+
+%--- Points ^^^^^^^^^
+
+
+%--- Errors vvvvvvvvv
+
+0.8 slw
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+1.1 slw
+ [] 0 setdash 
+gr
+
+%--- FuncEnd ....
+
+
+%--- Errors ^^^^^^^^^
+
+
+%--- Curves vvvvvvvvv
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+1.1 slw
+ [] 0 setdash 
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+1.1 slw
+ [] 0 setdash 
+172.156 159.179 m
+172.156 159.179 l
+177.067 163.726 l
+181.486 168.842 l
+186.397 173.958 l
+190.817 178.506 l
+195.728 183.622 l
+200.148 188.738 l
+205.059 193.854 l
+209.479 198.402 l
+214.39 203.518 l
+218.809 208.634 l
+223.72 213.182 l
+228.14 218.298 l
+233.051 223.414 l
+237.962 227.962 l
+242.382 233.078 l
+246.802 238.194 l
+251.713 241.605 l
+256.624 245.015 l
+261.043 248.426 l
+265.463 251.837 l
+270.374 255.248 l
+275.285 258.658 l
+279.705 261.501 l
+284.616 264.911 l
+289.036 267.754 l
+293.947 270.596 l
+298.366 273.438 l
+303.277 276.28 l
+307.697 279.123 l
+312.608 281.965 l
+317.028 284.807 l
+321.939 287.65 l
+325.868 289.923 l
+331.27 292.766 l
+335.198 295.039 l
+340.6 297.882 l
+346.002 300.156 l
+349.44 302.429 l
+355.333 305.272 l
+358.771 307.545 l
+364.173 309.819 l
+367.61 312.093 l
+373.504 314.367 l
+378.906 316.641 l
+382.343 318.915 l
+387.745 320.62 l
+391.674 322.894 l
+397.076 325.168 l
+400.514 326.873 l
+405.916 329.147 l
+411.318 330.852 l
+415.246 333.126 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+1.1 slw
+ [] 0 setdash 
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+1.1 slw
+ [] 0 setdash 
+174.12 163.158 m
+174.12 163.158 l
+179.522 170.548 l
+185.415 177.369 l
+191.308 184.191 l
+197.201 190.444 l
+203.094 196.697 l
+208.988 202.95 l
+214.881 209.203 l
+220.283 214.887 l
+226.176 220.572 l
+232.069 226.256 l
+237.962 231.372 l
+243.855 235.92 l
+249.748 240.468 l
+255.641 244.447 l
+261.534 248.995 l
+266.937 252.974 l
+272.83 256.953 l
+278.723 260.932 l
+284.616 264.911 l
+290.509 268.322 l
+296.402 272.301 l
+302.295 275.712 l
+307.697 279.123 l
+313.59 282.533 l
+319.483 285.944 l
+325.377 289.355 l
+331.27 292.766 l
+337.163 295.608 l
+342.565 299.019 l
+347.967 301.861 l
+355.333 304.703 l
+360.735 308.114 l
+366.137 310.956 l
+371.539 313.798 l
+376.941 316.641 l
+384.308 318.915 l
+389.71 321.757 l
+395.112 324.599 l
+400.514 326.873 l
+405.916 329.715 l
+413.282 331.989 l
+418.684 334.263 l
+424.086 336.537 l
+429.488 338.811 l
+434.89 341.084 l
+442.257 343.358 l
+447.659 345.632 l
+453.061 347.906 l
+458.463 350.18 l
+464.356 351.885 l
+471.231 354.159 l
+476.633 356.433 l
+482.526 358.138 l
+487.928 360.412 l
+493.33 362.117 l
+500.697 363.823 l
+506.099 366.096 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+1.1 slw
+ [] 0 setdash 
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+1.1 slw
+ [] 0 setdash 
+174.12 159.747 m
+174.12 159.747 l
+179.522 164.863 l
+185.415 170.548 l
+191.308 175.664 l
+197.201 181.348 l
+203.094 186.464 l
+208.988 191.581 l
+214.881 197.265 l
+220.283 202.381 l
+226.176 208.066 l
+232.069 213.182 l
+237.962 218.298 l
+243.855 223.414 l
+249.748 227.962 l
+255.641 232.509 l
+261.534 237.057 l
+266.937 241.605 l
+272.83 246.152 l
+278.723 250.131 l
+284.616 254.111 l
+290.509 258.658 l
+296.402 262.637 l
+302.295 266.617 l
+307.697 270.027 l
+313.59 274.007 l
+319.483 277.417 l
+325.377 281.397 l
+331.27 284.807 l
+337.163 288.218 l
+342.565 292.197 l
+347.967 295.608 l
+355.333 299.019 l
+360.735 301.861 l
+366.137 305.272 l
+371.539 308.682 l
+376.941 312.093 l
+384.308 314.935 l
+389.71 318.346 l
+395.112 321.188 l
+400.514 324.599 l
+405.916 327.441 l
+413.282 330.284 l
+418.684 333.694 l
+424.086 336.537 l
+429.488 339.379 l
+434.89 342.221 l
+442.257 345.064 l
+447.659 347.906 l
+453.061 350.748 l
+458.463 353.59 l
+464.356 356.433 l
+471.231 358.706 l
+476.633 361.549 l
+482.526 364.391 l
+487.928 367.233 l
+493.33 369.507 l
+500.697 372.349 l
+506.099 374.623 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- Curves ^^^^^^^^^
+
+
+%--- Curves-cloud vvvvvvvvv
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+pipe0line %---set pipe-lines
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+pipe0line %---set pipe-lines
+172.156 159.179 m
+172.156 159.179 l
+177.067 163.726 l
+181.486 168.842 l
+186.397 173.958 l
+190.817 178.506 l
+195.728 183.622 l
+200.148 188.738 l
+205.059 193.854 l
+209.479 198.402 l
+214.39 203.518 l
+218.809 208.634 l
+223.72 213.182 l
+228.14 218.298 l
+233.051 223.414 l
+237.962 227.962 l
+242.382 233.078 l
+246.802 238.194 l
+251.713 241.605 l
+256.624 245.015 l
+261.043 248.426 l
+265.463 251.837 l
+270.374 255.248 l
+275.285 258.658 l
+279.705 261.501 l
+284.616 264.911 l
+289.036 267.754 l
+293.947 270.596 l
+298.366 273.438 l
+303.277 276.28 l
+307.697 279.123 l
+312.608 281.965 l
+317.028 284.807 l
+321.939 287.65 l
+325.868 289.923 l
+331.27 292.766 l
+335.198 295.039 l
+340.6 297.882 l
+346.002 300.156 l
+349.44 302.429 l
+355.333 305.272 l
+358.771 307.545 l
+364.173 309.819 l
+367.61 312.093 l
+373.504 314.367 l
+378.906 316.641 l
+382.343 318.915 l
+387.745 320.62 l
+391.674 322.894 l
+397.076 325.168 l
+400.514 326.873 l
+405.916 329.147 l
+411.318 330.852 l
+415.246 333.126 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+pipe0line %---set pipe-lines
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+pipe0line %---set pipe-lines
+174.12 163.158 m
+174.12 163.158 l
+179.522 170.548 l
+185.415 177.369 l
+191.308 184.191 l
+197.201 190.444 l
+203.094 196.697 l
+208.988 202.95 l
+214.881 209.203 l
+220.283 214.887 l
+226.176 220.572 l
+232.069 226.256 l
+237.962 231.372 l
+243.855 235.92 l
+249.748 240.468 l
+255.641 244.447 l
+261.534 248.995 l
+266.937 252.974 l
+272.83 256.953 l
+278.723 260.932 l
+284.616 264.911 l
+290.509 268.322 l
+296.402 272.301 l
+302.295 275.712 l
+307.697 279.123 l
+313.59 282.533 l
+319.483 285.944 l
+325.377 289.355 l
+331.27 292.766 l
+337.163 295.608 l
+342.565 299.019 l
+347.967 301.861 l
+355.333 304.703 l
+360.735 308.114 l
+366.137 310.956 l
+371.539 313.798 l
+376.941 316.641 l
+384.308 318.915 l
+389.71 321.757 l
+395.112 324.599 l
+400.514 326.873 l
+405.916 329.715 l
+413.282 331.989 l
+418.684 334.263 l
+424.086 336.537 l
+429.488 338.811 l
+434.89 341.084 l
+442.257 343.358 l
+447.659 345.632 l
+453.061 347.906 l
+458.463 350.18 l
+464.356 351.885 l
+471.231 354.159 l
+476.633 356.433 l
+482.526 358.138 l
+487.928 360.412 l
+493.33 362.117 l
+500.697 363.823 l
+506.099 366.096 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+pipe0line %---set pipe-lines
+144.163 120.524 m
+144.163 120.524 l
+144.654 157.473 l
+146.619 147.809 l
+147.11 147.809 l
+149.565 144.399 l
+150.548 144.399 l
+153.003 151.789 l
+153.494 152.926 l
+153.985 146.104 l
+154.967 148.946 l
+155.459 162.021 l
+155.459 161.452 l
+157.423 153.494 l
+157.423 154.062 l
+158.405 143.262 l
+160.369 140.42 l
+161.843 147.241 l
+162.334 177.938 l
+162.825 159.747 l
+162.825 159.179 l
+163.807 143.262 l
+165.28 156.905 l
+165.28 157.473 l
+166.263 148.946 l
+166.754 158.61 l
+166.754 158.042 l
+167.736 148.946 l
+168.227 166 l
+168.718 147.809 l
+169.209 177.938 l
+169.209 178.506 l
+169.7 158.042 l
+169.7 188.17 l
+169.7 189.875 l
+169.7 177.369 l
+170.191 158.042 l
+170.191 155.768 l
+171.173 146.104 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+pipe0line %---set pipe-lines
+174.12 159.747 m
+174.12 159.747 l
+179.522 164.863 l
+185.415 170.548 l
+191.308 175.664 l
+197.201 181.348 l
+203.094 186.464 l
+208.988 191.581 l
+214.881 197.265 l
+220.283 202.381 l
+226.176 208.066 l
+232.069 213.182 l
+237.962 218.298 l
+243.855 223.414 l
+249.748 227.962 l
+255.641 232.509 l
+261.534 237.057 l
+266.937 241.605 l
+272.83 246.152 l
+278.723 250.131 l
+284.616 254.111 l
+290.509 258.658 l
+296.402 262.637 l
+302.295 266.617 l
+307.697 270.027 l
+313.59 274.007 l
+319.483 277.417 l
+325.377 281.397 l
+331.27 284.807 l
+337.163 288.218 l
+342.565 292.197 l
+347.967 295.608 l
+355.333 299.019 l
+360.735 301.861 l
+366.137 305.272 l
+371.539 308.682 l
+376.941 312.093 l
+384.308 314.935 l
+389.71 318.346 l
+395.112 321.188 l
+400.514 324.599 l
+405.916 327.441 l
+413.282 330.284 l
+418.684 333.694 l
+424.086 336.537 l
+429.488 339.379 l
+434.89 342.221 l
+442.257 345.064 l
+447.659 347.906 l
+453.061 350.748 l
+458.463 353.59 l
+464.356 356.433 l
+471.231 358.706 l
+476.633 361.549 l
+482.526 364.391 l
+487.928 367.233 l
+493.33 369.507 l
+500.697 372.349 l
+506.099 374.623 l
+stroke
+gr
+
+%--- FuncEnd ....
+
+
+%--- Curves-cloud ^^^^^^^^^
+
+gr
+
+%--- Axes vvvvvvvvv
+
+col0
+1.5 slw
+ax_lw slw %2017-10-25
+2 setlinecap %2017-06-19
+126.484 107.449 m
+524.269 107.449 l
+144.654 107.449 m
+0 9.095 ax_lenmul1 mul rl
+144.654 105.744 m
+ 0 2 rmoveto 
+ 3.5 0 rmoveto 
+[
+[(0) 0 0]
+] 15 -1 -1 -1 drawText
+
+235.507 107.449 m
+0 9.095 ax_lenmul1 mul rl
+235.507 105.744 m
+ 0 2 rmoveto 
+ 3.5 0 rmoveto 
+[
+[(5) 0 0]
+] 15 -1 -1 -1 drawText
+
+326.359 107.449 m
+0 9.095 ax_lenmul1 mul rl
+326.359 105.744 m
+ 0 2 rmoveto 
+ 3.5 0 rmoveto 
+[
+[(10) 0 0]
+] 15 -1 -1 -1 drawText
+
+417.211 107.449 m
+0 9.095 ax_lenmul1 mul rl
+417.211 105.744 m
+ 0 2 rmoveto 
+ 3.5 0 rmoveto 
+[
+[(15) 0 0]
+] 15 -1 -1 -1 drawText
+
+508.063 107.449 m
+0 9.095 ax_lenmul1 mul rl
+508.063 105.744 m
+ 0 2 rmoveto 
+ 3.5 0 rmoveto 
+[
+[(20) 0 0]
+] 15 -1 -1 -1 drawText
+
+144.654 107.449 m
+0 5.116 ax_lenmul2 mul rl
+162.825 107.449 m
+0 5.116 ax_lenmul2 mul rl
+180.995 107.449 m
+0 5.116 ax_lenmul2 mul rl
+199.166 107.449 m
+0 5.116 ax_lenmul2 mul rl
+217.336 107.449 m
+0 5.116 ax_lenmul2 mul rl
+235.507 107.449 m
+0 5.116 ax_lenmul2 mul rl
+253.677 107.449 m
+0 5.116 ax_lenmul2 mul rl
+271.847 107.449 m
+0 5.116 ax_lenmul2 mul rl
+290.018 107.449 m
+0 5.116 ax_lenmul2 mul rl
+308.188 107.449 m
+0 5.116 ax_lenmul2 mul rl
+326.359 107.449 m
+0 5.116 ax_lenmul2 mul rl
+344.529 107.449 m
+0 5.116 ax_lenmul2 mul rl
+362.7 107.449 m
+0 5.116 ax_lenmul2 mul rl
+380.87 107.449 m
+0 5.116 ax_lenmul2 mul rl
+399.04 107.449 m
+0 5.116 ax_lenmul2 mul rl
+417.211 107.449 m
+0 5.116 ax_lenmul2 mul rl
+435.381 107.449 m
+0 5.116 ax_lenmul2 mul rl
+453.552 107.449 m
+0 5.116 ax_lenmul2 mul rl
+471.722 107.449 m
+0 5.116 ax_lenmul2 mul rl
+489.893 107.449 m
+0 5.116 ax_lenmul2 mul rl
+508.063 107.449 m
+0 5.116 ax_lenmul2 mul rl
+125.993 108.018 m
+125.993 413.278 l
+125.993 120.524 m
+7.85701 ax_lenmul1 mul 0 rl
+124.52 120.524 m
+ -3.75 2 rmoveto 
+[
+[(1) 0 0]
+] 15 -1 0 -1 drawText
+
+125.993 216.593 m
+7.85701 ax_lenmul1 mul 0 rl
+124.52 216.593 m
+ -3.75 2 rmoveto 
+[
+[() 0 0]
+[(10) 0 0]
+[(5) 11 0.25] [() 0 -0.4]
+] 15 -1 0 -1 drawText
+
+125.993 312.662 m
+7.85701 ax_lenmul1 mul 0 rl
+124.52 312.662 m
+ -3.75 2 rmoveto 
+[
+[() 0 0]
+[(10) 0 0]
+[(10) 11 0.25] [() 0 -0.4]
+] 15 -1 0 -1 drawText
+
+125.993 408.162 m
+7.85701 ax_lenmul1 mul 0 rl
+124.52 408.162 m
+ -3.75 2 rmoveto 
+[
+[() 0 0]
+[(10) 0 0]
+[(15) 11 0.25] [() 0 -0.4]
+] 15 -1 0 -1 drawText
+
+125.993 120.524 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 139.851 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 159.179 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 178.506 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 197.265 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 216.593 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 235.92 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 254.679 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 274.007 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 293.334 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 312.662 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 331.421 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 350.748 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 370.076 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 388.835 m
+4.42 ax_lenmul2 mul 0 rl
+125.993 408.162 m
+4.42 ax_lenmul2 mul 0 rl
+524.269 108.018 m
+524.269 413.278 l
+524.269 120.524 m
+-7.85699 ax_lenmul1 mul 0 rl
+524.269 216.593 m
+-7.85699 ax_lenmul1 mul 0 rl
+524.269 312.662 m
+-7.85699 ax_lenmul1 mul 0 rl
+524.269 408.162 m
+-7.85699 ax_lenmul1 mul 0 rl
+524.269 120.524 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 139.851 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 159.179 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 178.506 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 197.265 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 216.593 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 235.92 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 254.679 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 274.007 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 293.334 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 312.662 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 331.421 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 350.748 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 370.076 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 388.835 m
+-4.41998 ax_lenmul2 mul 0 rl
+524.269 408.162 m
+-4.41998 ax_lenmul2 mul 0 rl
+126.484 413.278 m
+524.269 413.278 l
+144.654 413.278 m
+0 -9.095 ax_lenmul1 mul rl
+235.507 413.278 m
+0 -9.095 ax_lenmul1 mul rl
+326.359 413.278 m
+0 -9.095 ax_lenmul1 mul rl
+417.211 413.278 m
+0 -9.095 ax_lenmul1 mul rl
+508.063 413.278 m
+0 -9.095 ax_lenmul1 mul rl
+144.654 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+162.825 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+180.995 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+199.166 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+217.336 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+235.507 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+253.677 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+271.847 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+290.018 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+308.188 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+326.359 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+344.529 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+362.7 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+380.87 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+399.04 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+417.211 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+435.381 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+453.552 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+471.722 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+489.893 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+508.063 413.278 m
+0 -5.11603 ax_lenmul2 mul rl
+0 setlinecap %2017-06-22
+
+%--- Axes ^^^^^^^^^
+
+s
+
+%--- BoxTitle vvvvvvvvv
+
+1 slw
+col0
+357.789 359.843 m
+/Helvetica ff 22 scf sf
+gsave
+col15
+(LEVEL DENSITY)
+false charpath stroke
+grestore
+(LEVEL DENSITY)
+sh
+/Helvetica ff 22 scf sf
+0 -0 rm
+col0
+
+%--- BoxTitle ^^^^^^^^^
+
+
+%--- Legends vvvvvvvvv
+
+/Helvetica ff 10 scf sf
+col15
+
+n 131.395 402.478 m 94.289 0 rl 0 1.705 rl -94.289 0 rl
+cp
+fill
+col15
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col1
+1.1 slw
+ [] 0 setdash 
+145.637 397.361 m
+161.352 397.361 l
+stroke
+col0
+165.28 395.088 m
+(Exp RHO(U)=DN/DU of Ta181)
+sh
+gr
+
+%--- FuncEnd ....
+
+col15
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (GCCM)
+
+gs
+col0
+col2
+1.1 slw
+ [] 0 setdash 
+145.637 387.698 m
+161.352 387.698 l
+stroke
+col0
+165.28 385.424 m
+(RHO(U)   at GS of Ta181 (GCCM))
+sh
+gr
+
+%--- FuncEnd ....
+
+col15
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col4
+1.1 slw
+ [] 0 setdash 
+145.637 378.034 m
+161.352 378.034 l
+stroke
+col0
+165.28 375.76 m
+(Exp RHO(U)=DN/DU of Ta181)
+sh
+gr
+
+%--- FuncEnd ....
+
+col15
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (EGSM)
+
+gs
+col0
+col8
+1.1 slw
+ [] 0 setdash 
+145.637 368.37 m
+161.352 368.37 l
+stroke
+col0
+165.28 366.096 m
+(RHO(U)   at GS of Ta181 (EGSM))
+sh
+gr
+
+%--- FuncEnd ....
+
+col15
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- Exp RHO(U)=DN/DU of Ta181
+
+gs
+col0
+col5
+1.1 slw
+ [] 0 setdash 
+145.637 358.706 m
+161.352 358.706 l
+stroke
+col0
+165.28 356.433 m
+(Exp RHO(U)=DN/DU of Ta181)
+sh
+gr
+
+%--- FuncEnd ....
+
+col15
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+lwpoint  setlinewidth %---2016-draw_legendFunc set line width for symbols
+gr
+
+%--- FuncEnd ....
+
+
+%--- FuncBegin ...........
+
+
+%--- RHO(U)   at GS of Ta181 (OGCM)
+
+gs
+col0
+col6
+1.1 slw
+ [] 0 setdash 
+145.637 349.043 m
+161.352 349.043 l
+stroke
+col0
+165.28 346.769 m
+(RHO(U)   at GS of Ta181 (OGCM))
+sh
+gr
+
+%--- FuncEnd ....
+
+
+%--- Legends ^^^^^^^^^
+
+1.1 slw
+ [] 0 setdash 
+col0
+gs
+
+n 125.993 107.449 m 398.276 0 rl 0 305.829 rl -398.276 0 rl
+cp
+col0
+s
+gr
+1.1 slw
+ [] 0 setdash 
+col0
+
+
+restore
+
+
+showpage
+%%EOF
