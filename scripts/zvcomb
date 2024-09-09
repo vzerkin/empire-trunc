@@ -42,9 +42,12 @@ $EMPIREDIR/util/c4zvd/zvview.exe ps01.tit/c $file
 # rm ps01.tit
 if [ -f zv00.ps ]; then
    mv zv00.ps $1-mrg.ps
+   mrgplot=$1-mrg.ps
 fi
 if [ -f zv00.eps ]; then
    mv zv00.eps $1-mrg.eps
+   mrgplot=$1-mrg.eps
+
 fi
 if [ -f ps01.zvd ]; then
    mv ps01.zvd $1-mrg.zvd
@@ -53,10 +56,17 @@ rename 'zvd.ps' ps $1-mrg*
 rename 'zvd.eps' eps $1-mrg*
 rename 'zvd.zvd' zvd $1-mrg*
 
-if [ -f $1-mrg.ps ]; then
-   ps2pdf -dEPSCrop $1-mrg.ps
-fi
-if [ -f $1-mrg.eps ]; then
+# convert eps to pdf
+if [ -x ps2pdf ]; then
    ps2pdf -dEPSCrop $1-mrg.eps
+   rm $1-mrg.eps
+else; then
+   echo " Unable to make conversion of eps to pdf since ps2pdf command is missing."
+   echo " On Mac you may use Homebrew to install ghostscript with a line command "
+   echo "  "
+   echo " brew install ghostscript"
+   echo "  "
+   echo " ghostscript package contains ps2pdf."
 fi
+
 exit
